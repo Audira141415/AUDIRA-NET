@@ -1,0 +1,234 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    // Check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             request.auth.token.role == 'admin';
+    }
+    
+    // Check if user is teknisi
+    function isTeknisi() {
+      return isAuthenticated() && 
+             request.auth.token.role == 'teknisi';
+    }
+    
+    // Check if user is customer
+    function isCustomer() {
+      return isAuthenticated() && 
+             request.auth.token.role == 'customer';
+    }
+    
+    // Check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && 
+             request.auth.uid == userId;
+    }
+    
+    // Check if user owns the document by customerId field
+    function isCustomerOwner(customerId) {
+      return isAuthenticated() && 
+             request.auth.uid == customerId;
+    }
+    
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    match /users/{userId} {
+      // Any authenticated user can read all users (for user lookup)
+      allow read: if isAuthenticated();
+      
+      // User can update their own profile, admin can update anyone
+      allow update: if isAdmin() || isOwner(userId);
+      
+      // Only admin can create/delete users
+      allow create, delete: if isAdmin();
+    }
+    
+    // ============================================
+    // CUSTOMERS COLLECTION
+    // ============================================
+    match /customers/{customerId} {
+      // Admin and teknisi can read all customers
+      // Customer can only read their own data
+      allow read: if isAdmin() || 
+                     isTeknisi() || 
+                     isCustomerOwner(customerId);
+      
+      // Only admin can create/update/delete customers
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // PACKAGES COLLECTION
+    // ============================================
+    match /packages/{packageId} {
+      // Anyone authenticated can read packages (for browsing)
+      allow read: if isAuthenticated();
+      
+      // Only admin can modify packages
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // INVOICES COLLECTION
+    // ============================================
+    match /invoices/{invoiceId} {
+      // Admin can read all, customer can read their own invoices
+      allow read: if isAdmin() || 
+                     (isCustomer() && resource.data.customerId == request.auth.uid);
+      
+      // Only admin can create/update invoices
+      allow create, update: if isAdmin();
+      
+      // No one can delete invoices (audit trail)
+      allow delete: if false;
+    }
+    
+    // ============================================
+    // PAYMENTS COLLECTION
+    // ============================================
+    match /payments/{paymentId} {
+      // Admin can read all, customer can read their own payments
+      allow read: if isAdmin() || 
+                     (isCustomer() && resource.data.customerId == request.auth.uid);
+      
+      // Customer can create payment (for self-payment), admin can create any
+      allow create: if isAuthenticated();
+      
+      // Only admin can update payments (for confirmation)
+      allow update: if isAdmin();
+      
+      // No one can delete payments (audit trail)
+      allow delete: if false;
+    }
+    
+    // ============================================
+    // TICKETS COLLECTION
+    // ============================================
+    match /tickets/{ticketId} {
+      // Admin and teknisi can read all tickets
+      // Customer can read tickets they created
+      allow read: if isAdmin() || 
+                     isTeknisi() || 
+                     (isCustomer() && resource.data.customerId == request.auth.uid);
+      
+      // Customer can create tickets, admin/teknisi can update
+      allow create: if isCustomer();
+      allow update: if isAdmin() || isTeknisi();
+      
+      // Only admin can delete tickets
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // WORK ORDERS COLLECTION
+    // ============================================
+    match /workOrders/{orderId} {
+      // Admin and teknisi can read all work orders
+      // Customer can read work orders related to them
+      allow read: if isAdmin() || 
+                     isTeknisi() || 
+                     (isCustomer() && resource.data.customerId == request.auth.uid);
+      
+      // Admin can create, teknisi can update their assigned orders
+      allow create: if isAdmin();
+      allow update: if isAdmin() || 
+                       (isTeknisi() && resource.data.teknisiId == request.auth.uid);
+      
+      // Only admin can delete
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // NOTIFICATIONS COLLECTION
+    // ============================================
+    match /notifications/{notificationId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      // System/admin can create notifications
+      allow create: if isAdmin();
+      
+      // Users can mark their own notifications as read
+      allow update: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+      
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+    }
+    
+    // ============================================
+    // ATTENDANCE COLLECTION (HRM)
+    // ============================================
+    match /attendance/{attendanceId} {
+      // Admin can read all, teknisi can read their own
+      allow read: if isAdmin() || 
+                     (isTeknisi() && resource.data.userId == request.auth.uid);
+      
+      // Teknisi can create their own attendance
+      allow create: if isTeknisi();
+      
+      // Admin can update any, teknisi can update their own (within time limit)
+      allow update: if isAdmin() || 
+                       (isTeknisi() && resource.data.userId == request.auth.uid);
+      
+      // Only admin can delete
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // AUDIT LOGS COLLECTION
+    // ============================================
+    match /auditLogs/{logId} {
+      // Only admin can read audit logs
+      allow read: if isAdmin();
+      
+      // System can create audit logs, no one can modify
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+    
+    // ============================================
+    // SETTINGS COLLECTION
+    // ============================================
+    match /settings/{settingId} {
+      // Anyone authenticated can read settings
+      allow read: if isAuthenticated();
+      
+      // Only admin can modify settings
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // MIKROTIK ROUTERS COLLECTION
+    // ============================================
+    match /mikrotikRouters/{routerId} {
+      // Admin and teknisi can read routers
+      allow read: if isAdmin() || isTeknisi();
+      
+      // Only admin can modify routers
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // DEFAULT DENY ALL
+    // ============================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

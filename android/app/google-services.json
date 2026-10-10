@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "875401690592",
+    "project_id": "audiranet-d4f68",
+    "storage_bucket": "audiranet-d4f68.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875401690592:android:cf74111d82af595d2f7f85",
+        "android_client_info": {
+          "package_name": "com.example.AudiraNET_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8BgNCahvyLZUVZ5c8_kn6wrH0IJkOMv8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
