@@ -60,6 +60,8 @@ class _TeknisiHomePageState extends State<TeknisiHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -71,8 +73,13 @@ class _TeknisiHomePageState extends State<TeknisiHomePage> {
         }
       },
       child: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
         body: _pages[_selectedIndex],
         bottomNavigationBar: NavigationBar(
+          backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+          indicatorColor: isDark
+              ? const Color(0xFF00F0FF).withValues(alpha: 0.2)
+              : AppTheme.primaryCyan.withValues(alpha: 0.2),
           selectedIndex: _selectedIndex,
           onDestinationSelected: (index) {
             setState(() => _selectedIndex = index);
@@ -206,11 +213,15 @@ class _TeknisiDashboardPageState extends State<TeknisiDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppTheme.surfaceGray,
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppTheme.primaryCyan),
+          ? Center(
+              child: CircularProgressIndicator(
+                color: isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan,
+              ),
             )
           : CustomScrollView(
               slivers: [
@@ -218,7 +229,9 @@ class _TeknisiDashboardPageState extends State<TeknisiDashboardPage> {
                 SliverAppBar(
                   expandedHeight: 200,
                   pinned: true,
+                  backgroundColor: isDark ? const Color(0xFF080D1E) : AppTheme.deepCyan,
                   actions: [
+                    const ThemeToggleIconButton(),
                     IconButton(
                       icon: const Icon(Icons.notifications),
                       onPressed: () {
@@ -285,10 +298,12 @@ class _TeknisiDashboardPageState extends State<TeknisiDashboardPage> {
                 ),
 
                 // Content
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                       // Modern Greeting Card
                       Container(
                         margin: const EdgeInsets.symmetric(
@@ -428,12 +443,12 @@ class _TeknisiDashboardPageState extends State<TeknisiDashboardPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Statistik Hari Ini',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w700,
-                                color: AppTheme.textPrimary,
+                                color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                                 letterSpacing: 0.5,
                               ),
                             ),
@@ -591,11 +606,12 @@ class _TeknisiDashboardPageState extends State<TeknisiDashboardPage> {
                       const SizedBox(height: 32),
 
                       // Quick Actions
-                      const Text(
+                      Text(
                         'Aksi Cepat',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
+                          color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -765,9 +781,10 @@ class _TeknisiDashboardPageState extends State<TeknisiDashboardPage> {
                       ),
 
                       const SizedBox(height: 32),
-                    ]),
+                    ],
                   ),
                 ),
+              ),
               ],
             ),
     );
@@ -1118,18 +1135,40 @@ class _TeknisiTiketPageState extends State<TeknisiTiketPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        title: const Text('Tiket Support'),
-        backgroundColor: AppTheme.primaryCyan,
+        title: Text(
+          'Tiket Support',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+        ),
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : AppTheme.lightTextPrimary,
+        elevation: 0,
+        actions: const [ThemeToggleIconButton()],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                color: isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan,
+              ),
+            )
           : RefreshIndicator(
               onRefresh: _loadTickets,
               child: _tickets.isEmpty
-                  ? const Center(child: Text('Tidak ada tiket aktif'))
+                  ? Center(
+                      child: Text(
+                        'Tidak ada tiket aktif',
+                        style: TextStyle(
+                          color: isDark ? const Color(0xFF94A3B8) : Colors.grey[600],
+                        ),
+                      ),
+                    )
                   : ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: _tickets.length,
@@ -1208,12 +1247,23 @@ class _TeknisiInstallasiPageState extends State<TeknisiInstallasiPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        title: const Text('Jadwal Instalasi'),
-        backgroundColor: AppTheme.primaryCyan,
+        title: Text(
+          'Jadwal Instalasi',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+        ),
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : AppTheme.lightTextPrimary,
+        elevation: 0,
         actions: [
+          const ThemeToggleIconButton(),
           IconButton(
             icon: const Icon(Icons.calendar_today),
             onPressed: () async {
@@ -1344,59 +1394,71 @@ class _TeknisiInstallasiPageState extends State<TeknisiInstallasiPage> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   // Header Card
-                  Card(
-                    elevation: 0,
-                    color: Colors.blue.shade50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.build_circle,
-                              color: Colors.blue.shade700,
-                              size: 32,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Total Instalasi',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.blue.shade700,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${_installations.length} Jadwal',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF080D1E) : const Color(0xFFEFF6FF),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF00F0FF).withValues(alpha: 0.25)
+                            : const Color(0xFFBFDBFE),
+                        width: 1.2,
                       ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0xFF00F0FF).withValues(alpha: 0.15)
+                                : Colors.blue.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.build_circle,
+                            color: isDark ? const Color(0xFF00F0FF) : Colors.blue.shade700,
+                            size: 32,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Total Instalasi',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isDark ? const Color(0xFF94A3B8) : Colors.blue.shade700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${_installations.length} Jadwal',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : Colors.blue.shade900,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  const Text(
+                  Text(
                     'Jadwal Mendatang',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                    ),
                   ),
 
                   const SizedBox(height: 16),
@@ -1410,14 +1472,14 @@ class _TeknisiInstallasiPageState extends State<TeknisiInstallasiPage> {
                             Icon(
                               Icons.event_busy,
                               size: 64,
-                              color: Colors.grey.shade400,
+                              color: isDark ? const Color(0xFF475569) : Colors.grey.shade400,
                             ),
                             const SizedBox(height: 16),
                             Text(
                               'Tidak ada jadwal instalasi',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.grey.shade600,
+                                color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
                               ),
                             ),
                           ],
@@ -1519,13 +1581,19 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 200,
             pinned: true,
+            actions: const [
+              ThemeToggleIconButton(),
+              SizedBox(width: 8),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               title: const Text('Profil Teknisi'),
               background: Container(
@@ -1606,22 +1674,34 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
               ),
             ),
           ),
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 // Profile Info Card
                 Card(
+                  elevation: 0,
+                  color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: isDark ? const Color(0x3300F0FF) : const Color(0xFFCBD5E1),
+                      width: 1,
+                    ),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Informasi Profil',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -1630,19 +1710,19 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
                           label: 'Nama',
                           value: 'Teknisi Support',
                         ),
-                        const Divider(),
+                        Divider(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                         _ProfileItem(
                           icon: Icons.email,
                           label: 'Email',
                           value: 'teknisi@audiranet.com',
                         ),
-                        const Divider(),
+                        Divider(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                         _ProfileItem(
                           icon: Icons.phone,
                           label: 'Telepon',
                           value: '081234567899',
                         ),
-                        const Divider(),
+                        Divider(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                         _ProfileItem(
                           icon: Icons.badge,
                           label: 'Role',
@@ -1657,16 +1737,26 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
 
                 // Performance Card
                 Card(
+                  elevation: 0,
+                  color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: isDark ? const Color(0x3300F0FF) : const Color(0xFFCBD5E1),
+                      width: 1,
+                    ),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Performa Bulan Ini',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -1677,7 +1767,7 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
                                 icon: Icons.check_circle,
                                 label: 'Tiket Selesai',
                                 value: '45',
-                                color: Colors.green,
+                                color: isDark ? const Color(0xFF00FF9D) : Colors.green,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -1686,7 +1776,7 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
                                 icon: Icons.build,
                                 label: 'Instalasi',
                                 value: '12',
-                                color: Colors.blue,
+                                color: isDark ? const Color(0xFF00F0FF) : Colors.blue,
                               ),
                             ),
                           ],
@@ -1708,7 +1798,7 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
                                 icon: Icons.trending_up,
                                 label: 'Response Time',
                                 value: '15m',
-                                color: Colors.purple,
+                                color: isDark ? const Color(0xFFA855F7) : Colors.purple,
                               ),
                             ),
                           ],
@@ -1722,14 +1812,38 @@ class _TeknisiProfilPageState extends State<TeknisiProfilPage> {
 
                 // Share Performance Button
                 Card(
+                  elevation: 0,
+                  color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: isDark ? const Color(0x3300F0FF) : const Color(0xFFCBD5E1),
+                      width: 1,
+                    ),
+                  ),
                   child: ListTile(
                     leading: const Icon(
                       Icons.share,
                       color: AppTheme.primaryCyan,
                     ),
-                    title: const Text('Bagikan Laporan Performa'),
-                    subtitle: const Text('Bagikan performa bulan ini'),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    title: Text(
+                      'Bagikan Laporan Performa',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Bagikan performa bulan ini',
+                      style: TextStyle(
+                        color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
+                      ),
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios, 
+                      size: 16,
+                      color: isDark ? const Color(0xFF64748B) : Colors.grey.shade400,
+                    ),
                     onTap: () async {
                       await ShareHelper.shareText(
                         text:
@@ -1757,13 +1871,40 @@ Terima kasih atas kerja kerasnya!
 
                 // Settings Options
                 Card(
+                  elevation: 0,
+                  color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: isDark ? const Color(0x3300F0FF) : const Color(0xFFCBD5E1),
+                      width: 1,
+                    ),
+                  ),
                   child: Column(
                     children: [
                       ListTile(
-                        leading: const Icon(Icons.notifications),
-                        title: const Text('Notifikasi'),
-                        subtitle: const Text('Lihat pengumuman & pesan'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        leading: Icon(
+                          Icons.notifications,
+                          color: isDark ? const Color(0xFF38BDF8) : Colors.blueGrey,
+                        ),
+                        title: Text(
+                          'Notifikasi',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Lihat pengumuman & pesan',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios, 
+                          size: 16,
+                          color: isDark ? const Color(0xFF64748B) : Colors.grey.shade400,
+                        ),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -1773,12 +1914,30 @@ Terima kasih atas kerja kerasnya!
                           );
                         },
                       ),
-                      const Divider(height: 1),
+                      Divider(height: 1, color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                       ListTile(
-                        leading: const Icon(Icons.location_on),
-                        title: const Text('Lokasi'),
-                        subtitle: const Text('Aktifkan untuk tracking'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        leading: Icon(
+                          Icons.location_on,
+                          color: isDark ? const Color(0xFF38BDF8) : Colors.blueGrey,
+                        ),
+                        title: Text(
+                          'Lokasi',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Aktifkan untuk tracking',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios, 
+                          size: 16,
+                          color: isDark ? const Color(0xFF64748B) : Colors.grey.shade400,
+                        ),
                         onTap: () {
                           showDialog(
                             context: context,
@@ -1808,11 +1967,24 @@ Terima kasih atas kerja kerasnya!
                           );
                         },
                       ),
-                      const Divider(height: 1),
+                      Divider(height: 1, color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                       ListTile(
-                        leading: const Icon(Icons.help),
-                        title: const Text('Bantuan'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        leading: Icon(
+                          Icons.help,
+                          color: isDark ? const Color(0xFF38BDF8) : Colors.blueGrey,
+                        ),
+                        title: Text(
+                          'Bantuan',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios, 
+                          size: 16,
+                          color: isDark ? const Color(0xFF64748B) : Colors.grey.shade400,
+                        ),
                         onTap: () {
                           showModalBottomSheet(
                             context: context,
@@ -1884,15 +2056,30 @@ Terima kasih atas kerja kerasnya!
                           );
                         },
                       ),
-                      const Divider(height: 1),
+                      Divider(height: 1, color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                       ListTile(
                         leading: Icon(
                           Icons.refresh,
                           color: Colors.orange.shade700,
                         ),
-                        title: const Text('Reset Database (Testing)'),
-                        subtitle: const Text('Reload semua data demo'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        title: Text(
+                          'Reset Database (Testing)',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Reload semua data demo',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios, 
+                          size: 16,
+                          color: isDark ? const Color(0xFF64748B) : Colors.grey.shade400,
+                        ),
                         onTap: () async {
                           final confirm = await showDialog<bool>(
                             context: context,
@@ -1919,7 +2106,6 @@ Terima kasih atas kerja kerasnya!
                           );
 
                           if (confirm == true && context.mounted) {
-                            // Show loading
                             showDialog(
                               context: context,
                               barrierDismissible: false,
@@ -1958,51 +2144,7 @@ Terima kasih atas kerja kerasnya!
                           }
                         },
                       ),
-                      const Divider(height: 1),
-                      ListTile(
-                        leading: const Icon(Icons.info),
-                        title: const Text('Tentang'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Tentang Aplikasi'),
-                              content: const Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Audira Digital Network',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text('Versi 1.0.0'),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    'Aplikasi manajemen teknisi untuk menangani instalasi dan support pelanggan internet.',
-                                  ),
-                                  SizedBox(height: 16),
-                                  Text(
-                                    '© 2025 Audira Digital Network',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Tutup'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                      const Divider(height: 1),
+                      Divider(height: 1, color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                       Consumer<ThemeProvider>(
                         builder: (context, themeProvider, _) {
                           return ListTile(
@@ -2010,17 +2152,29 @@ Terima kasih atas kerja kerasnya!
                               themeProvider.isDarkMode
                                   ? Icons.dark_mode
                                   : Icons.light_mode,
+                              color: themeProvider.isDarkMode
+                                  ? const Color(0xFF00F0FF)
+                                  : const Color(0xFF0070F3),
                             ),
-                            title: const Text('Dark Mode'),
+                            title: Text(
+                              'Tema Tampilan',
+                              style: TextStyle(
+                                color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             subtitle: Text(
-                              themeProvider.isSystemMode
-                                  ? 'Mengikuti Sistem'
-                                  : themeProvider.isDarkMode
-                                  ? 'Aktif'
-                                  : 'Non-aktif',
+                              themeProvider.isDarkMode
+                                  ? 'Mode Gelap (OLED Midnight)'
+                                  : 'Mode Terang (Slate Canvas)',
+                              style: TextStyle(
+                                color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
+                              ),
                             ),
                             trailing: Switch(
                               value: themeProvider.isDarkMode,
+                              activeThumbColor: const Color(0xFF00F0FF),
+                              activeTrackColor: const Color(0x4400F0FF),
                               onChanged: (value) {
                                 themeProvider.toggleTheme();
                               },
@@ -2028,12 +2182,30 @@ Terima kasih atas kerja kerasnya!
                           );
                         },
                       ),
-                      const Divider(height: 1),
+                      Divider(height: 1, color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
                       ListTile(
-                        leading: const Icon(Icons.info_outline),
-                        title: const Text('Tentang Aplikasi'),
-                        subtitle: const Text('Versi, changelog, dan lainnya'),
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        leading: Icon(
+                          Icons.info_outline,
+                          color: isDark ? const Color(0xFF38BDF8) : Colors.blueGrey,
+                        ),
+                        title: Text(
+                          'Tentang Aplikasi',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'Versi, changelog, dan lainnya',
+                          style: TextStyle(
+                            color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios, 
+                          size: 16,
+                          color: isDark ? const Color(0xFF64748B) : Colors.grey.shade400,
+                        ),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -2094,7 +2266,8 @@ Terima kasih atas kerja kerasnya!
                 ),
 
                 const SizedBox(height: 32),
-              ]),
+                ],
+              ),
             ),
           ),
         ],
@@ -2156,9 +2329,18 @@ class _InstallationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      color: isDark ? const Color(0xFF080D1E) : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: isDark ? const Color(0x3300F0FF) : const Color(0xFFCBD5E1),
+          width: 1,
+        ),
+      ),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -2186,9 +2368,10 @@ class _InstallationCard extends StatelessWidget {
                       children: [
                         Text(
                           installation['customerName'],
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -2209,15 +2392,19 @@ class _InstallationCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: isDark ? const Color(0x2200F0FF) : Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isDark ? const Color(0x5500F0FF) : Colors.transparent,
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       installation['status'].toString().toUpperCase(),
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade700,
+                        color: isDark ? const Color(0xFF00F0FF) : Colors.blue.shade700,
                       ),
                     ),
                   ),
@@ -2229,25 +2416,31 @@ class _InstallationCard extends StatelessWidget {
                   Icon(
                     Icons.calendar_today,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: isDark ? const Color(0xFF38BDF8) : Colors.grey.shade600,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     DateFormat(
                       'dd MMM yyyy',
                     ).format(DateTime.parse(installation['scheduledDate'])),
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+                    style: TextStyle(
+                      fontSize: 14, 
+                      color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade700,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Icon(
                     Icons.access_time,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: isDark ? const Color(0xFF38BDF8) : Colors.grey.shade600,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     installation['scheduledTime'],
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+                    style: TextStyle(
+                      fontSize: 14, 
+                      color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade700,
+                    ),
                   ),
                 ],
               ),
@@ -2257,7 +2450,7 @@ class _InstallationCard extends StatelessWidget {
                   Icon(
                     Icons.location_on,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: isDark ? const Color(0xFF38BDF8) : Colors.grey.shade600,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -2265,7 +2458,7 @@ class _InstallationCard extends StatelessWidget {
                       installation['address'],
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -2276,11 +2469,18 @@ class _InstallationCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.phone, size: 16, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.phone, 
+                    size: 16, 
+                    color: isDark ? const Color(0xFF38BDF8) : Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     installation['phone'],
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 13, 
+                      color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
+                    ),
                   ),
                 ],
               ),
@@ -2293,7 +2493,10 @@ class _InstallationCard extends StatelessWidget {
                       icon: const Icon(Icons.phone, size: 18),
                       label: const Text('Hubungi'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.blue,
+                        foregroundColor: isDark ? const Color(0xFF38BDF8) : Colors.blue,
+                        side: BorderSide(
+                          color: isDark ? const Color(0x5500F0FF) : Colors.blue,
+                        ),
                       ),
                     ),
                   ),
@@ -2332,11 +2535,13 @@ class _ProfileItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 24, color: Colors.grey.shade600),
+          Icon(icon, size: 24, color: isDark ? const Color(0xFF38BDF8) : Colors.grey.shade600),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -2344,14 +2549,18 @@ class _ProfileItem extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  style: TextStyle(
+                    fontSize: 12, 
+                    color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
+                    color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                   ),
                 ),
               ],
@@ -2379,11 +2588,17 @@ class _PerformanceItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: isDark ? color.withValues(alpha: 0.15) : color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? color.withValues(alpha: 0.3) : color.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -2400,7 +2615,11 @@ class _PerformanceItem extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+            style: TextStyle(
+              fontSize: 12, 
+              color: isDark ? const Color(0xFFCBD5E1) : Colors.grey.shade700,
+              fontWeight: FontWeight.w500,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -2470,15 +2689,25 @@ class _TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF080D1E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF00F0FF).withValues(alpha: 0.2)
+              : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? const Color(0xFF00F0FF).withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -2505,7 +2734,7 @@ class _TicketCard extends StatelessWidget {
                   ticket['ticketId'],
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: isDark ? const Color(0xFF64748B) : Colors.grey[600],
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -2532,12 +2761,19 @@ class _TicketCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               ticket['subject'],
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               ticket['description'],
-              style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark ? const Color(0xFF94A3B8) : Colors.grey[700],
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -2548,7 +2784,10 @@ class _TicketCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Customer: ${ticket['customerName'] ?? 'N/A'}',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? const Color(0xFF64748B) : Colors.grey[600],
+                    ),
                   ),
                 ),
                 Row(
@@ -2572,10 +2811,10 @@ class _TicketCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Icon(
+                    Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: Colors.grey,
+                      color: isDark ? const Color(0xFF64748B) : Colors.grey,
                     ),
                   ],
                 ),
@@ -2607,15 +2846,22 @@ class _ModernStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
+        border: Border.all(
+          color: isDark
+              ? color.withValues(alpha: 0.35)
+              : color.withValues(alpha: 0.2),
+          width: 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.08),
+            color: color.withValues(alpha: isDark ? 0.08 : 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -2629,7 +2875,7 @@ class _ModernStatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withValues(alpha: isDark ? 0.18 : 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, size: 24, color: color),
@@ -2638,7 +2884,7 @@ class _ModernStatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withValues(alpha: isDark ? 0.18 : 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -2656,20 +2902,20 @@ class _ModernStatCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
+              color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
               letterSpacing: 0.2,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: AppTheme.textSecondary,
+              color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
               letterSpacing: 0.2,
             ),
           ),
@@ -2695,21 +2941,32 @@ class _QuickActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Material(
-      color: Colors.white,
+      color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
       borderRadius: BorderRadius.circular(12),
-      elevation: 2,
+      elevation: isDark ? 0 : 2,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark
+                  ? const Color(0xFF1E293B)
+                  : const Color(0xFFE2E8F0),
+              width: 1,
+            ),
+          ),
           child: Column(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withValues(alpha: isDark ? 0.18 : 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 28),
@@ -2717,9 +2974,10 @@ class _QuickActionButton extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
+                  color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),

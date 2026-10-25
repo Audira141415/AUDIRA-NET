@@ -12,6 +12,7 @@ import '../screens/admin/admin_tiket_page_new.dart';
 import '../screens/customer/loyalty_rewards_page.dart';
 import '../screens/teknisi/jadwal_teknisi_page.dart';
 import '../screens/teknisi/inventory_management_page.dart';
+import '../screens/teknisi/teknisi_home.dart';
 import '../screens/backend_integration_test.dart';
 
 /// Arguments class for Payment page
@@ -121,6 +122,9 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const AdminTiketPageNew());
 
       // Teknisi routes
+      case Routes.teknisiHome:
+        return MaterialPageRoute(builder: (_) => const TeknisiHomePage());
+
       case Routes.checkinHistory:
         return MaterialPageRoute(builder: (_) => const CheckInHistoryPage());
 

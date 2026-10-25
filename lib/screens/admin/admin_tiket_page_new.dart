@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/firebase_service.dart';
 import '../../utils/excel_exporter.dart';
+import '../../utils/app_theme.dart';
+import '../../utils/theme_provider.dart';
 import '../teknisi/teknisi_home.dart'; // Import untuk TicketDetailPage
 
 class AdminTiketPageNew extends StatefulWidget {
@@ -672,12 +674,28 @@ class _AdminTiketPageNewState extends State<AdminTiketPageNew>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        title: const Text('Manajemen Tiket'),
+        title: Text(
+          'Manajemen Tiket',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+        ),
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : AppTheme.lightTextPrimary,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.download),
+            icon: Icon(
+              Icons.download,
+              color: isDark ? const Color(0xFF00F0FF) : AppTheme.lightTextPrimary,
+            ),
             tooltip: 'Export ke Excel',
             onPressed: () async {
               try {
@@ -766,9 +784,15 @@ class _AdminTiketPageNewState extends State<AdminTiketPageNew>
               }
             },
           ),
+          const ThemeToggleIconButton(),
+          const SizedBox(width: 8),
         ],
         bottom: TabBar(
           controller: _tabController,
+          indicatorColor: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+          indicatorWeight: 3,
+          labelColor: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+          unselectedLabelColor: isDark ? Colors.white54 : Colors.grey.shade600,
           tabs: const [
             Tab(icon: Icon(Icons.inbox), text: 'Terbuka'),
             Tab(icon: Icon(Icons.hourglass_empty), text: 'Proses'),
@@ -777,7 +801,11 @@ class _AdminTiketPageNewState extends State<AdminTiketPageNew>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+              ),
+            )
           : TabBarView(
               controller: _tabController,
               children: [
@@ -789,48 +817,92 @@ class _AdminTiketPageNewState extends State<AdminTiketPageNew>
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showCreateTicketDialog,
         icon: const Icon(Icons.add),
-        label: const Text('Buat Tiket'),
-        backgroundColor: Colors.blue,
+        label: const Text('Buat Tiket', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+        foregroundColor: isDark ? const Color(0xFF030712) : Colors.white,
       ),
     );
   }
 
   Widget _buildTicketList(String status) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final tickets = _filteredTickets;
 
     if (tickets.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              status == 'open'
-                  ? Icons.inbox_outlined
-                  : status == 'in_progress'
-                  ? Icons.hourglass_empty_outlined
-                  : Icons.check_circle_outline,
-              size: 80,
-              color: Colors.grey.shade300,
+        child: Container(
+          margin: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF080D1E) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isDark
+                  ? const Color(0xFF00F0FF).withValues(alpha: 0.2)
+                  : const Color(0xFFE2E8F0),
             ),
-            const SizedBox(height: 16),
-            Text(
-              status == 'open'
-                  ? 'Tidak ada tiket terbuka'
-                  : status == 'in_progress'
-                  ? 'Tidak ada tiket dalam proses'
-                  : 'Tidak ada tiket selesai',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.4)
+                    : Colors.black.withValues(alpha: 0.04),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF00F0FF).withValues(alpha: 0.1)
+                      : Colors.blue.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  status == 'open'
+                      ? Icons.inbox_outlined
+                      : status == 'in_progress'
+                      ? Icons.hourglass_empty_outlined
+                      : Icons.check_circle_outline,
+                  size: 48,
+                  color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                status == 'open'
+                    ? 'Tidak ada tiket terbuka'
+                    : status == 'in_progress'
+                    ? 'Tidak ada tiket dalam proses'
+                    : 'Tidak ada tiket selesai',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Tiket keluhan dan laporan gangguan jaringan akan tampil di sini',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? Colors.white54 : Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return RefreshIndicator(
+      color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+      backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
       onRefresh: _loadTickets,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -1122,13 +1194,30 @@ class _TicketCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final zone = ticket['zone'] as String?;
     final teknisiId = ticket['teknisiId'] as int?;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF080D1E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF00F0FF).withValues(alpha: 0.15)
+              : const Color(0xFFE2E8F0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -1154,13 +1243,20 @@ class _TicketCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
+                      color: isDark
+                          ? const Color(0xFF00F0FF).withValues(alpha: 0.12)
+                          : Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isDark
+                            ? const Color(0xFF00F0FF).withValues(alpha: 0.3)
+                            : Colors.blue.shade200,
+                      ),
                     ),
                     child: Text(
                       ticket['ticketId'] ?? '',
                       style: TextStyle(
-                        color: Colors.blue.shade700,
+                        color: isDark ? const Color(0xFF00F0FF) : Colors.blue.shade700,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -1175,7 +1271,7 @@ class _TicketCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: _getPriorityColor(
                         ticket['priority'] ?? '',
-                      ).withValues(alpha: 0.1),
+                      ).withValues(alpha: isDark ? 0.2 : 0.1),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: _getPriorityColor(ticket['priority'] ?? ''),
@@ -1210,10 +1306,14 @@ class _TicketCard extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.purple.shade50,
+                        color: isDark
+                            ? Colors.purple.shade900.withValues(alpha: 0.3)
+                            : Colors.purple.shade50,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.purple.shade300,
+                          color: isDark
+                              ? Colors.purple.shade400.withValues(alpha: 0.4)
+                              : Colors.purple.shade300,
                           width: 1,
                         ),
                       ),
@@ -1223,13 +1323,13 @@ class _TicketCard extends StatelessWidget {
                           Icon(
                             Icons.location_on,
                             size: 14,
-                            color: Colors.purple.shade700,
+                            color: isDark ? Colors.purple.shade200 : Colors.purple.shade700,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             zone,
                             style: TextStyle(
-                              color: Colors.purple.shade700,
+                              color: isDark ? Colors.purple.shade200 : Colors.purple.shade700,
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                             ),
@@ -1245,9 +1345,10 @@ class _TicketCard extends StatelessWidget {
               // Subject
               Text(
                 ticket['subject'] ?? '',
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
+                  color: isDark ? Colors.white : AppTheme.lightTextPrimary,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -1257,7 +1358,10 @@ class _TicketCard extends StatelessWidget {
               // Description
               Text(
                 ticket['description'] ?? '',
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : Colors.grey.shade700,
+                  fontSize: 14,
+                ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -1269,14 +1373,14 @@ class _TicketCard extends StatelessWidget {
                   Icon(
                     Icons.person_outline,
                     size: 16,
-                    color: Colors.grey.shade600,
+                    color: isDark ? Colors.white38 : Colors.grey.shade600,
                   ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       ticket['customerName'] ?? 'Unknown',
                       style: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: isDark ? Colors.white60 : Colors.grey.shade600,
                         fontSize: 12,
                       ),
                     ),
@@ -1290,7 +1394,8 @@ class _TicketCard extends StatelessWidget {
                         style: TextStyle(fontSize: 12),
                       ),
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: isDark ? const Color(0xFF00F0FF) : Colors.blue,
+                        foregroundColor: isDark ? const Color(0xFF030712) : Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 8,
@@ -1306,8 +1411,15 @@ class _TicketCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
+                        color: isDark
+                            ? const Color(0xFF00FF9D).withValues(alpha: 0.15)
+                            : Colors.green.shade50,
                         borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF00FF9D).withValues(alpha: 0.3)
+                              : Colors.green.shade200,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -1315,13 +1427,13 @@ class _TicketCard extends StatelessWidget {
                           Icon(
                             Icons.engineering,
                             size: 12,
-                            color: Colors.green.shade700,
+                            color: isDark ? const Color(0xFF00FF9D) : Colors.green.shade700,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             'Assigned',
                             style: TextStyle(
-                              color: Colors.green.shade700,
+                              color: isDark ? const Color(0xFF00FF9D) : Colors.green.shade700,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),

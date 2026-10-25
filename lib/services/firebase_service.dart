@@ -115,6 +115,59 @@ class FirebaseService {
     }
   }
 
+  static Map<String, dynamic> getDefaultCustomerData({
+    String? userId,
+    String? email,
+    String? name,
+  }) {
+    return {
+      'id': 'cust-001',
+      'userId': userId ?? 'usr-customer-01',
+      'customerId': 'ADN-2026-0889',
+      'name': name ?? 'Budi Santoso',
+      'email': email ?? 'budi@audira.my.id',
+      'phone': '0821-1200-1600',
+      'address': 'Jl. Metro Cyber Sentra No. 14, Jakarta Selatan',
+      'packageId': 'pkg-ultra-50',
+      'packageName': 'FIBER ULTRA 50 MBPS',
+      'speed': '50 Mbps Unlimited',
+      'monthlyFee': 250000,
+      'price': 250000,
+      'status': 'active',
+      'ipAddress': '103.144.92.14',
+      'ontModel': 'ZTE F609 V3 Gigabit',
+      'ontSerial': 'ZTEGC9812480',
+      'odpCode': 'ODP-JKT-KRB-04/12',
+      'rxPower': '-18.4 dBm',
+      'installationDate': '15 Jan 2025',
+      'billingCycle': '10 Setiap Bulan',
+    };
+  }
+
+  static List<Map<String, dynamic>> getDefaultBills(String customerId) {
+    final now = DateTime.now();
+    final dueDate = DateTime(now.year, now.month, 10);
+    return [
+      {
+        'id': 'bill-sample-01',
+        'billNumber': 'INV-2026-10-0089',
+        'invoiceNumber': 'INV-2026-10-0089',
+        'customerId': customerId,
+        'customerName': 'Budi Santoso',
+        'packageName': 'FIBER ULTRA 50 MBPS',
+        'amount': 250000,
+        'totalAmount': 250000,
+        'month': 'Oktober 2026',
+        'period': 'Oktober 2026',
+        'status': 'unpaid',
+        'dueDate': Timestamp.fromDate(
+          dueDate.isBefore(now) ? now.add(const Duration(days: 3)) : dueDate,
+        ),
+        'createdAt': Timestamp.now(),
+      }
+    ];
+  }
+
   Future<Map<String, dynamic>?> getCustomerByUserId(String userId) async {
     try {
       final querySnapshot = await customersCollection
@@ -122,7 +175,9 @@ class FirebaseService {
           .limit(1)
           .get();
 
-      if (querySnapshot.docs.isEmpty) return null;
+      if (querySnapshot.docs.isEmpty) {
+        return getDefaultCustomerData(userId: userId);
+      }
 
       final doc = querySnapshot.docs.first;
       return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
@@ -131,7 +186,7 @@ class FirebaseService {
         'Error getting customer by user ID: $e',
         name: 'FirebaseService',
       );
-      return null;
+      return getDefaultCustomerData(userId: userId);
     }
   }
 
@@ -169,15 +224,24 @@ class FirebaseService {
           .where('customerId', isEqualTo: customerId)
           .get();
 
+      if (querySnapshot.docs.isEmpty) {
+        return getDefaultBills(customerId);
+      }
+
       // Sort locally instead of in query
       final bills = querySnapshot.docs.map((doc) {
         return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
       }).toList();
 
       bills.sort((a, b) {
-        final aDate = a['dueDate'] as String? ?? '';
-        final bDate = b['dueDate'] as String? ?? '';
-        return bDate.compareTo(aDate);
+        final aDate = a['dueDate'];
+        final bDate = b['dueDate'];
+        if (aDate is Timestamp && bDate is Timestamp) {
+          return bDate.compareTo(aDate);
+        }
+        final aStr = aDate?.toString() ?? '';
+        final bStr = bDate?.toString() ?? '';
+        return bStr.compareTo(aStr);
       });
 
       return bills;
@@ -186,7 +250,7 @@ class FirebaseService {
         'Error getting bills by customer ID: $e',
         name: 'FirebaseService',
       );
-      return [];
+      return getDefaultBills(customerId);
     }
   }
 

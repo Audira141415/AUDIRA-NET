@@ -6,6 +6,9 @@ import '../../services/auth_service.dart';
 import 'dart:async';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import '../../utils/app_theme.dart';
+import '../../widgets/cyber_widgets.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class SpeedTestPage extends StatefulWidget {
   const SpeedTestPage({super.key});
@@ -205,230 +208,260 @@ class _SpeedTestPageState extends State<SpeedTestPage>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? AppTheme.neonCyan : AppTheme.signalBlue;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(LucideIcons.arrowLeft, size: 18, color: isDark ? Colors.white : const Color(0xFF0F172A)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Speed Test'),
-        backgroundColor: Colors.blue.shade700,
-        foregroundColor: Colors.white,
+        title: Text(
+          'DIAGNOSTIK // SPEEDTEST',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            letterSpacing: 2.0,
+            color: primaryAccent,
+          ),
+        ),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
         elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.2) : const Color(0xFFE2E8F0),
+            height: 1,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             // Connection Type Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _connectionType == 'WiFi'
-                        ? Icons.wifi
-                        : _connectionType == 'Mobile Data'
-                        ? Icons.signal_cellular_alt
-                        : Icons.network_check,
-                    color: Colors.blue.shade700,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Connection: $_connectionType',
-                    style: TextStyle(
-                      color: Colors.blue.shade900,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Speed Meter Widget
-            Container(
-              height: 250,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.blue.shade700, Colors.blue.shade900],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CyberBadge(
+                  label: 'INTERFACE: ${_connectionType.toUpperCase()}',
+                  color: _connectionType != 'No Connection'
+                      ? AppTheme.neonCyan
+                      : AppTheme.neonCrimson,
+                  icon: _connectionType == 'WiFi'
+                      ? LucideIcons.wifi
+                      : LucideIcons.signal,
                 ),
-                borderRadius: BorderRadius.circular(20),
+                const CyberBadge(
+                  label: 'TELEMETRY: ICMP/HTTP',
+                  color: AppTheme.textMuted,
+                  icon: LucideIcons.shield,
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // Speed Meter Widget (Cyberpunk Telemetry Radar)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+              decoration: BoxDecoration(
+                color: isDark ? AppTheme.cyberObsidian : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _testInProgress
+                      ? primaryAccent
+                      : (isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+                  width: 1.5,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.withValues(alpha: 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    color: _testInProgress
+                        ? primaryAccent.withValues(alpha: 0.25)
+                        : (isDark ? Colors.black.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.04)),
+                    blurRadius: 20,
+                    spreadRadius: _testInProgress ? 2 : 0,
                   ),
                 ],
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (_testInProgress)
-                    AnimatedBuilder(
-                      animation: _animation,
-                      builder: (context, child) {
-                        return Transform.rotate(
-                          angle: _animation.value * 2 * 3.14159,
-                          child: Icon(
-                            Icons.speed,
-                            size: 80,
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                        );
-                      },
-                    )
-                  else
-                    Icon(
-                      Icons.speed,
-                      size: 80,
-                      color: Colors.white.withValues(alpha: 0.9),
-                    ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _testStatus,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (!_testInProgress && _downloadSpeed > 0)
-                    Column(
-                      children: [
-                        const SizedBox(height: 8),
-                        Text(
-                          'Download: ${_downloadSpeed.toStringAsFixed(2)} Mbps',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 16,
+                  // Gauge / Animated Radar Icon
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 130,
+                        height: 130,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: primaryAccent.withValues(alpha: 0.15),
+                            width: 8,
                           ),
                         ),
+                      ),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF1F5F9),
+                          border: Border.all(
+                            color: _testInProgress
+                                ? primaryAccent
+                                : (isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+                            width: 2,
+                          ),
+                        ),
+                        child: Center(
+                          child: _testInProgress
+                              ? AnimatedBuilder(
+                                  animation: _animation,
+                                  builder: (context, child) {
+                                    return Transform.rotate(
+                                      angle: _animation.value * 2 * 3.14159,
+                                      child: Icon(
+                                        LucideIcons.radio,
+                                        size: 46,
+                                        color: primaryAccent,
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Icon(
+                                  LucideIcons.gauge,
+                                  size: 46,
+                                  color: primaryAccent,
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Status line
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (_testInProgress) ...[
+                        CyberPulseDot(color: primaryAccent),
+                        const SizedBox(width: 8),
                       ],
+                      Text(
+                        _testStatus.toUpperCase(),
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Realtime Download Readout
+                  Text(
+                    _testInProgress && _downloadSpeed > 0
+                        ? '${_downloadSpeed.toStringAsFixed(2)} MBPS'
+                        : (!_testInProgress && _downloadSpeed > 0)
+                            ? '${_downloadSpeed.toStringAsFixed(2)} MBPS'
+                            : 'STANDBY // READY',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      color: _downloadSpeed > 0
+                          ? AppTheme.neonGreen
+                          : AppTheme.textMuted,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
                     ),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Results Cards
+            // Results Cards (CyberStatTiles)
             Row(
               children: [
                 Expanded(
                   child: _SpeedCard(
-                    icon: Icons.download_rounded,
-                    title: 'Download',
+                    icon: LucideIcons.download,
+                    title: 'DOWNLOAD',
                     speed: _downloadSpeed,
                     unit: 'Mbps',
-                    color: Colors.green,
+                    color: AppTheme.neonGreen,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _SpeedCard(
-                    icon: Icons.upload_rounded,
-                    title: 'Upload',
+                    icon: LucideIcons.upload,
+                    title: 'UPLOAD',
                     speed: _uploadSpeed,
                     unit: 'Mbps',
-                    color: Colors.orange,
+                    color: AppTheme.neonCyan,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             _SpeedCard(
-              icon: Icons.network_ping,
-              title: 'Latency (Ping)',
+              icon: LucideIcons.activity,
+              title: 'LATENCY (PING)',
               speed: _latency,
               unit: 'ms',
-              color: Colors.purple,
+              color: AppTheme.neonAmber,
+              isFullWidth: true,
             ),
             const SizedBox(height: 24),
 
             // Start Test Button
-            SizedBox(
-              width: double.infinity,
-              height: 60,
-              child: ElevatedButton.icon(
-                onPressed: _testInProgress ? null : _runRealSpeedTest,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade700,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: Colors.grey,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 4,
-                ),
-                icon: _testInProgress
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                    : const Icon(Icons.play_arrow, size: 28),
-                label: Text(
-                  _testInProgress ? 'Testing...' : 'Start Speed Test',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+            CyberActionButton(
+              label: _testInProgress
+                  ? 'DIAGNOSTIC BERJALAN...'
+                  : 'JALANKAN SPEED TEST',
+              icon: _testInProgress ? null : LucideIcons.zap,
+              color: _testInProgress ? AppTheme.muted : AppTheme.neonCyan,
+              onPressed: _testInProgress ? null : () => _runRealSpeedTest(),
+              fullWidth: true,
             ),
             const SizedBox(height: 24),
 
             // Test History Section
             if (_testHistory.isNotEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+              CyberCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.history, color: Colors.blue.shade700),
+                        Icon(LucideIcons.history, color: primaryAccent, size: 20),
                         const SizedBox(width: 8),
-                        const Text(
-                          'Riwayat Test (5 Terakhir)',
+                        Text(
+                          'LOG DIAGNOSTIK // 5 TERAKHIR',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontFamily: 'monospace',
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
+                            letterSpacing: 1.5,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                         ),
                       ],
                     ),
-                    const Divider(height: 24),
+                    const SizedBox(height: 12),
+                    Divider(color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0), height: 1),
+                    const SizedBox(height: 12),
                     ..._testHistory.map((test) {
                       final timestamp =
                           test['timestamp'] != null && test['timestamp'] != ''
@@ -447,56 +480,53 @@ class _SpeedTestPageState extends State<SpeedTestPage>
                                       'dd MMM yyyy, HH:mm',
                                     ).format(timestamp),
                                     style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey[600],
+                                      fontFamily: 'monospace',
+                                      fontSize: 11,
+                                      color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 6),
                                   Row(
                                     children: [
-                                      Icon(
-                                        Icons.download,
-                                        size: 14,
-                                        color: Colors.green,
+                                      const Icon(
+                                        LucideIcons.arrowDown,
+                                        size: 13,
+                                        color: AppTheme.neonGreen,
                                       ),
-                                      const SizedBox(width: 4),
+                                      const SizedBox(width: 3),
                                       Text(
-                                        '${(test['downloadSpeed'] ?? 0).toStringAsFixed(1)} Mbps',
-                                        style: const TextStyle(fontSize: 13),
+                                        '${(test['downloadSpeed'] ?? 0).toStringAsFixed(1)}M',
+                                        style: TextStyle(
+                                          fontFamily: 'monospace',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
                                       ),
                                       const SizedBox(width: 12),
-                                      Icon(
-                                        Icons.upload,
-                                        size: 14,
-                                        color: Colors.orange,
+                                      const Icon(
+                                        LucideIcons.arrowUp,
+                                        size: 13,
+                                        color: AppTheme.neonCyan,
                                       ),
-                                      const SizedBox(width: 4),
+                                      const SizedBox(width: 3),
                                       Text(
-                                        '${(test['uploadSpeed'] ?? 0).toStringAsFixed(1)} Mbps',
-                                        style: const TextStyle(fontSize: 13),
+                                        '${(test['uploadSpeed'] ?? 0).toStringAsFixed(1)}M',
+                                        style: TextStyle(
+                                          fontFamily: 'monospace',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '${(test['latency'] ?? 0).toStringAsFixed(0)} ms',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.blue.shade700,
-                                ),
-                              ),
+                            CyberBadge(
+                              label: '${(test['latency'] ?? 0).toStringAsFixed(0)}ms',
+                              color: AppTheme.neonAmber,
                             ),
                           ],
                         ),
@@ -505,44 +535,40 @@ class _SpeedTestPageState extends State<SpeedTestPage>
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
             ],
 
             // Info Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
+            CyberCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.blue.shade700),
-                      const SizedBox(width: 8),
+                    children: const [
+                      Icon(LucideIcons.info, color: AppTheme.neonCyan, size: 18),
+                      SizedBox(width: 8),
                       Text(
-                        'Informasi',
+                        'PROTOKOL PENGUJIAN JARINGAN',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontFamily: 'monospace',
+                          fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade900,
+                          letterSpacing: 1.2,
+                          color: AppTheme.neonCyan,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    '• Test menggunakan server real untuk akurasi maksimal\n'
-                    '• Pastikan koneksi internet stabil\n'
-                    '• Test membutuhkan waktu ±15-20 detik\n'
-                    '• Hasil dapat bervariasi tergantung traffic jaringan\n'
-                    '• Riwayat test tersimpan otomatis',
+                  const SizedBox(height: 10),
+                  const Text(
+                    '• Server direct connection ke edge backbone AUDIRA\n'
+                    '• Hasil menampilkan throughput aktual & round-trip latency\n'
+                    '• Evaluasi selesai dalam kurun waktu 15 - 20 detik\n'
+                    '• Riwayat tersimpan otomatis dalam audit telemetri akun',
                     style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[700],
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      color: AppTheme.textMuted,
                       height: 1.6,
                     ),
                   ),
@@ -562,6 +588,7 @@ class _SpeedCard extends StatelessWidget {
   final double speed;
   final String unit;
   final Color color;
+  final bool isFullWidth;
 
   const _SpeedCard({
     required this.icon,
@@ -569,40 +596,112 @@ class _SpeedCard extends StatelessWidget {
     required this.speed,
     required this.unit,
     required this.color,
+    this.isFullWidth = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final activeColor = !isDark && color == AppTheme.neonAmber ? const Color(0xFFD97706) : color;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: isDark ? AppTheme.cyberObsidian : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: activeColor.withValues(alpha: isDark ? 0.3 : 0.35),
+          width: 1,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 40),
-          const SizedBox(height: 12),
-          Text(title, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-          const SizedBox(height: 8),
-          Text(
-            speed > 0 ? speed.toStringAsFixed(2) : '--',
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+      child: isFullWidth
+          ? Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 11,
+                          letterSpacing: 1.2,
+                          color: AppTheme.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        speed > 0 ? '${speed.toStringAsFixed(0)} $unit' : '-- $unit',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Icon(icon, color: color, size: 24),
+                    Text(
+                      unit.toUpperCase(),
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  speed > 0 ? speed.toStringAsFixed(1) : '--',
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    letterSpacing: 1.1,
+                    color: AppTheme.textMuted,
+                  ),
+                ),
+              ],
             ),
-          ),
-          Text(unit, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-        ],
-      ),
     );
   }
 }

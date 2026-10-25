@@ -1,7 +1,9 @@
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../utils/app_theme.dart';
+import '../utils/theme_provider.dart';
 
 /// About page dengan app info dan changelog
 class AboutPage extends StatefulWidget {
@@ -36,27 +38,58 @@ class _AboutPageState extends State<AboutPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (_loading) {
       return Scaffold(
+        backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
         appBar: AppBar(
+          backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+          elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: Icon(
+              LucideIcons.arrowLeft,
+              color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
-          title: const Text('Tentang Aplikasi'),
+          title: Text(
+            'Tentang Aplikasi',
+            style: TextStyle(
+              color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+            ),
+          ),
+          actions: const [
+            ThemeToggleIconButton(),
+            SizedBox(width: 8),
+          ],
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            LucideIcons.arrowLeft,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Tentang Aplikasi'),
+        title: Text(
+          'Tentang Aplikasi',
+          style: TextStyle(
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+        ),
+        actions: const [
+          ThemeToggleIconButton(),
+          SizedBox(width: 8),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -72,17 +105,18 @@ class _AboutPageState extends State<AboutPage> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.router,
+                    LucideIcons.router,
                     size: 80,
                     color: AppTheme.primaryCyan,
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'AudiraNet',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -90,7 +124,7 @@ class _AboutPageState extends State<AboutPage> {
                   'Sistem Manajemen Internet',
                   style: TextStyle(
                     fontSize: 16,
-                    color: theme.textTheme.bodyMedium?.color,
+                    color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -106,7 +140,7 @@ class _AboutPageState extends State<AboutPage> {
                     ),
                     child: Text(
                       'Versi ${_packageInfo!.version} (${_packageInfo!.buildNumber})',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: AppTheme.primaryCyan,
                         fontWeight: FontWeight.w600,
@@ -123,19 +157,19 @@ class _AboutPageState extends State<AboutPage> {
             title: 'Informasi Aplikasi',
             items: [
               _InfoItem(
-                icon: Icons.info_outline,
+                icon: LucideIcons.info,
                 title: 'Tentang',
                 subtitle:
                     'AudiraNet adalah aplikasi untuk mengelola pelanggan internet, tagihan, dan pembayaran.',
               ),
               _InfoItem(
-                icon: Icons.business,
+                icon: LucideIcons.building,
                 title: 'Dikembangkan oleh',
                 subtitle: 'AudiraNet Team',
               ),
               if (_packageInfo != null)
                 _InfoItem(
-                  icon: Icons.code,
+                  icon: LucideIcons.code,
                   title: 'Package Name',
                   subtitle: _packageInfo!.packageName,
                 ),
@@ -148,19 +182,19 @@ class _AboutPageState extends State<AboutPage> {
             title: 'Link',
             items: [
               _InfoItem(
-                icon: Icons.web,
+                icon: LucideIcons.globe,
                 title: 'Website',
                 subtitle: 'www.audiranet.com',
                 onTap: () => _launchUrl('https://www.audiranet.com'),
               ),
               _InfoItem(
-                icon: Icons.email_outlined,
+                icon: LucideIcons.mail,
                 title: 'Email Support',
                 subtitle: 'support@audiranet.com',
                 onTap: () => _launchUrl('mailto:support@audiranet.com'),
               ),
               _InfoItem(
-                icon: Icons.phone_outlined,
+                icon: LucideIcons.phone,
                 title: 'Telepon',
                 subtitle: '+62 123 4567 8900',
                 onTap: () => _launchUrl('tel:+6212345678900'),
@@ -174,7 +208,7 @@ class _AboutPageState extends State<AboutPage> {
             title: 'Legal',
             items: [
               _InfoItem(
-                icon: Icons.description_outlined,
+                icon: LucideIcons.fileText,
                 title: 'Syarat & Ketentuan',
                 onTap: () => Navigator.push(
                   context,
@@ -184,7 +218,7 @@ class _AboutPageState extends State<AboutPage> {
                 ),
               ),
               _InfoItem(
-                icon: Icons.privacy_tip_outlined,
+                icon: LucideIcons.shieldAlert,
                 title: 'Kebijakan Privasi',
                 onTap: () => Navigator.push(
                   context,
@@ -194,14 +228,14 @@ class _AboutPageState extends State<AboutPage> {
                 ),
               ),
               _InfoItem(
-                icon: Icons.gavel_outlined,
+                icon: LucideIcons.scale,
                 title: 'Lisensi',
                 onTap: () => showLicensePage(
                   context: context,
                   applicationName: 'AudiraNet',
                   applicationVersion: _packageInfo?.version ?? '1.0.0',
-                  applicationIcon: Icon(
-                    Icons.router,
+                  applicationIcon: const Icon(
+                    LucideIcons.router,
                     size: 48,
                     color: AppTheme.primaryCyan,
                   ),
@@ -220,7 +254,7 @@ class _AboutPageState extends State<AboutPage> {
               '© 2024 AudiraNet. All rights reserved.',
               style: TextStyle(
                 fontSize: 12,
-                color: theme.textTheme.bodySmall?.color,
+                color: isDark ? const Color(0xFF64748B) : AppTheme.lightTextMuted,
               ),
             ),
           ),
@@ -248,7 +282,7 @@ class _InfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,17 +291,20 @@ class _InfoSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: theme.cardColor,
+            color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.dividerColor),
+            border: Border.all(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+            ),
           ),
           child: ListView.separated(
             shrinkWrap: true,
@@ -275,7 +312,7 @@ class _InfoSection extends StatelessWidget {
             itemCount: items.length,
             separatorBuilder: (context, index) => Divider(
               height: 1,
-              color: theme.dividerColor,
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
             ),
             itemBuilder: (context, index) => items[index],
           ),
@@ -300,7 +337,7 @@ class _InfoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: Colors.transparent,
@@ -318,9 +355,10 @@ class _InfoItem extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
                       ),
                     ),
                     if (subtitle != null) ...[
@@ -329,7 +367,7 @@ class _InfoItem extends StatelessWidget {
                         subtitle!,
                         style: TextStyle(
                           fontSize: 14,
-                          color: theme.textTheme.bodyMedium?.color,
+                          color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
                         ),
                       ),
                     ],
@@ -338,8 +376,8 @@ class _InfoItem extends StatelessWidget {
               ),
               if (onTap != null)
                 Icon(
-                  Icons.chevron_right,
-                  color: theme.textTheme.bodySmall?.color,
+                  LucideIcons.chevronRight,
+                  color: isDark ? const Color(0xFF64748B) : Colors.grey.shade400,
                 ),
             ],
           ),
@@ -354,7 +392,7 @@ class ChangelogSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -363,21 +401,24 @@ class ChangelogSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Text(
             'Changelog',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: theme.cardColor,
+            color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.dividerColor),
+            border: Border.all(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+            ),
           ),
           child: Column(
             children: [
-              _ChangelogItem(
+              const _ChangelogItem(
                 version: '1.0.0',
                 date: '15 Jan 2024',
                 changes: [
@@ -387,12 +428,15 @@ class ChangelogSection extends StatelessWidget {
                   'Dashboard statistik',
                 ],
               ),
-              Divider(height: 1, color: theme.dividerColor),
-              _ChangelogItem(
+              Divider(
+                height: 1, 
+                color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+              ),
+              const _ChangelogItem(
                 version: '1.1.0',
                 date: '1 Feb 2024',
                 changes: [
-                  'Dark mode',
+                  'Dark mode & Light mode toggle',
                   'Export PDF',
                   'Charts & grafik',
                   'Search & filter',
@@ -420,7 +464,7 @@ class _ChangelogItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -440,7 +484,7 @@ class _ChangelogItem extends StatelessWidget {
                 ),
                 child: Text(
                   'v$version',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primaryCyan,
@@ -452,7 +496,7 @@ class _ChangelogItem extends StatelessWidget {
                 date,
                 style: TextStyle(
                   fontSize: 14,
-                  color: theme.textTheme.bodySmall?.color,
+                  color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
                 ),
               ),
             ],
@@ -468,7 +512,7 @@ class _ChangelogItem extends StatelessWidget {
                     margin: const EdgeInsets.only(top: 8),
                     width: 6,
                     height: 6,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryCyan,
                       shape: BoxShape.circle,
                     ),
@@ -477,7 +521,10 @@ class _ChangelogItem extends StatelessWidget {
                   Expanded(
                     child: Text(
                       change,
-                      style: const TextStyle(fontSize: 14),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+                      ),
                     ),
                   ),
                 ],
@@ -495,23 +542,50 @@ class TermsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        title: const Text('Syarat & Ketentuan'),
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            LucideIcons.arrowLeft,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Syarat & Ketentuan',
+          style: TextStyle(
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+        ),
+        actions: const [
+          ThemeToggleIconButton(),
+          SizedBox(width: 8),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
+        children: [
           Text(
             'Syarat & Ketentuan Penggunaan',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24, 
+              fontWeight: FontWeight.bold,
+              color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+            ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'Dengan menggunakan aplikasi AudiraNet, Anda menyetujui syarat dan ketentuan berikut...',
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(
+              fontSize: 16,
+              color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
+            ),
           ),
-          // Add more terms here
         ],
       ),
     );
@@ -523,23 +597,50 @@ class PrivacyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        title: const Text('Kebijakan Privasi'),
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            LucideIcons.arrowLeft,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Kebijakan Privasi',
+          style: TextStyle(
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+        ),
+        actions: const [
+          ThemeToggleIconButton(),
+          SizedBox(width: 8),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
+        children: [
           Text(
             'Kebijakan Privasi',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24, 
+              fontWeight: FontWeight.bold,
+              color: isDark ? const Color(0xFFF8FAFC) : AppTheme.lightTextPrimary,
+            ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             'Kami menghormati privasi Anda dan berkomitmen untuk melindungi data pribadi Anda...',
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(
+              fontSize: 16,
+              color: isDark ? const Color(0xFF94A3B8) : AppTheme.lightTextSecondary,
+            ),
           ),
-          // Add more privacy policy here
         ],
       ),
     );

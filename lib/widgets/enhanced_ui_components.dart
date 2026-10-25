@@ -87,7 +87,7 @@ class EnhancedLoadingIndicator extends StatelessWidget {
           width: 200,
           child: LinearProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-            backgroundColor: primaryColor.withOpacity(0.2),
+            backgroundColor: primaryColor.withValues(alpha: 0.2),
           ),
         );
       case LoadingType.dots:
@@ -282,7 +282,7 @@ class EnhancedEmptyState extends StatelessWidget {
               Text(
                 description!,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 3,
@@ -376,7 +376,7 @@ class EnhancedErrorState extends StatelessWidget {
               Text(
                 description!,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),

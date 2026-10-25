@@ -16,14 +16,26 @@ void main() async {
   // Inisialisasi Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // SEED: Isi data sample ISP users (hanya sekali pertama kali)
-  await seedISPUsers();
+  // SEED: Isi data sample ISP users (hanya jika berhasil / skip jika permission denied)
+  try {
+    await seedISPUsers();
+  } catch (e) {
+    print('⚠️ Seed ISP Users skipped: $e');
+  }
 
-  // SEED: Isi data sample Customers (hanya sekali pertama kali)
-  await seedCustomers();
+  // SEED: Isi data sample Customers (hanya jika berhasil / skip jika permission denied)
+  try {
+    await seedCustomers();
+  } catch (e) {
+    print('⚠️ Seed Customers skipped: $e');
+  }
 
   // TEST: Cek koneksi Firestore dan tampilkan semua users
-  await _testFirestoreConnection();
+  try {
+    await _testFirestoreConnection();
+  } catch (e) {
+    print('⚠️ Test Firestore Connection skipped: $e');
+  }
 
   // Database sekarang menggunakan Firestore
   // SQLite sudah tidak digunakan

@@ -1,3 +1,4 @@
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../utils/app_theme.dart';
@@ -18,7 +19,7 @@ class CopyableText extends StatelessWidget {
     this.displayText,
     this.style,
     this.successMessage,
-    this.icon = Icons.copy,
+    this.icon = LucideIcons.copy,
     this.showIcon = true,
     this.iconColor,
   });
@@ -30,7 +31,7 @@ class CopyableText extends StatelessWidget {
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -101,7 +102,7 @@ class CopyButton extends StatefulWidget {
     required this.text,
     this.label,
     this.successMessage,
-    this.icon = Icons.copy,
+    this.icon = LucideIcons.copy,
     this.color,
     this.outlined = false,
   });
@@ -148,7 +149,7 @@ class _CopyButtonState extends State<CopyButton>
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -183,7 +184,7 @@ class _CopyButtonState extends State<CopyButton>
       child: widget.outlined
           ? OutlinedButton.icon(
               onPressed: () => _handleCopy(context),
-              icon: Icon(_copied ? Icons.check : widget.icon, size: 18),
+              icon: Icon(_copied ? LucideIcons.check : widget.icon, size: 18),
               label: Text(widget.label ?? 'Salin'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: buttonColor,
@@ -196,7 +197,7 @@ class _CopyButtonState extends State<CopyButton>
             )
           : ElevatedButton.icon(
               onPressed: () => _handleCopy(context),
-              icon: Icon(_copied ? Icons.check : widget.icon, size: 18),
+              icon: Icon(_copied ? LucideIcons.check : widget.icon, size: 18),
               label: Text(widget.label ?? 'Salin'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: buttonColor,
@@ -243,7 +244,7 @@ class _CopyIconButtonState extends State<CopyIconButton> {
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -273,7 +274,7 @@ class _CopyIconButtonState extends State<CopyIconButton> {
   Widget build(BuildContext context) {
     return IconButton(
       icon: Icon(
-        _copied ? Icons.check : Icons.copy,
+        _copied ? LucideIcons.check : LucideIcons.copy,
         color: widget.color ?? AppTheme.primaryCyan,
       ),
       tooltip: widget.tooltip ?? 'Salin',
@@ -304,7 +305,7 @@ class CopyableCard extends StatelessWidget {
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -379,7 +380,7 @@ class CopyableCard extends StatelessWidget {
                 ),
               ),
               Icon(
-                Icons.copy,
+                LucideIcons.copy,
                 size: 20,
                 color: theme.textTheme.bodySmall?.color,
               ),
@@ -404,7 +405,7 @@ class CopyHelper {
         SnackBar(
           content: Row(
             children: [
-              Icon(Icons.check_circle, color: Colors.white, size: 20),
+              Icon(LucideIcons.checkCircle2, color: Colors.white, size: 20),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(

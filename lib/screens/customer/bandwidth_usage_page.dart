@@ -1,3 +1,4 @@
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -98,17 +99,36 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0B1120) : const Color(0xFFF8FAFC),
       appBar: AppBar(
+        backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+        foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            LucideIcons.arrowLeft,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Penggunaan Bandwidth'),
+        title: Text(
+          'Penggunaan Bandwidth',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showInfoDialog(),
+            icon: Icon(
+              LucideIcons.info,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+            ),
+            onPressed: () => _showInfoDialog(isDark),
           ),
         ],
       ),
@@ -120,11 +140,11 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildPeriodSelector(),
-                    _buildSummaryCards(),
-                    _buildChart(),
-                    _buildUsageDetails(),
-                    const SizedBox(height: 20),
+                    _buildPeriodSelector(isDark),
+                    _buildSummaryCards(isDark),
+                    _buildChart(isDark),
+                    _buildUsageDetails(isDark),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -132,23 +152,27 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
     );
   }
 
-  Widget _buildPeriodSelector() {
+  Widget _buildPeriodSelector(bool isDark) {
     return Container(
       margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+        ),
       ),
       child: Row(
         children: [
-          Expanded(child: _buildPeriodButton('7 Hari', 'week')),
-          Expanded(child: _buildPeriodButton('30 Hari', 'month')),
+          Expanded(child: _buildPeriodButton('7 Hari', 'week', isDark)),
+          Expanded(child: _buildPeriodButton('30 Hari', 'month', isDark)),
         ],
       ),
     );
   }
 
-  Widget _buildPeriodButton(String label, String period) {
+  Widget _buildPeriodButton(String label, String period, bool isDark) {
     final isSelected = _selectedPeriod == period;
     return GestureDetector(
       onTap: () {
@@ -158,28 +182,38 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).colorScheme.primary
+              ? const Color(0xFF0284C7)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF0284C7).withValues(alpha: 0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: isSelected
-                ? Theme.of(context).colorScheme.onPrimary
-                : Theme.of(context).colorScheme.onSurface,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ? Colors.white
+                : (isDark ? Colors.white70 : const Color(0xFF475569)),
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+            fontSize: 13,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSummaryCards() {
+  Widget _buildSummaryCards(bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -190,8 +224,9 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                 child: _buildSummaryCard(
                   'Total Penggunaan',
                   '${_totalUsage.toStringAsFixed(1)} GB',
-                  Icons.data_usage,
-                  Colors.blue,
+                  LucideIcons.activity,
+                  const Color(0xFF0284C7),
+                  isDark,
                 ),
               ),
               const SizedBox(width: 12),
@@ -199,8 +234,9 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                 child: _buildSummaryCard(
                   'Rata-rata Harian',
                   '${_averageDaily.toStringAsFixed(1)} GB',
-                  Icons.trending_up,
-                  Colors.green,
+                  LucideIcons.trendingUp,
+                  const Color(0xFF10B981),
+                  isDark,
                 ),
               ),
             ],
@@ -212,8 +248,9 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                 child: _buildSummaryCard(
                   'Puncak Penggunaan',
                   '${_peakUsage.toStringAsFixed(1)} GB',
-                  Icons.arrow_upward,
-                  Colors.orange,
+                  LucideIcons.arrowUp,
+                  const Color(0xFFF59E0B),
+                  isDark,
                 ),
               ),
               const SizedBox(width: 12),
@@ -221,8 +258,9 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                 child: _buildSummaryCard(
                   'Tanggal Puncak',
                   _peakDate,
-                  Icons.calendar_today,
-                  Colors.purple,
+                  LucideIcons.calendar,
+                  const Color(0xFF8B5CF6),
+                  isDark,
                 ),
               ),
             ],
@@ -237,13 +275,20 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
     String value,
     IconData icon,
     Color color,
+    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: isDark
+            ? color.withValues(alpha: 0.15)
+            : color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? color.withValues(alpha: 0.35)
+              : color.withValues(alpha: 0.25),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,9 +302,8 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                   title,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white70 : const Color(0xFF475569),
                   ),
                 ),
               ),
@@ -279,16 +323,21 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
     );
   }
 
-  Widget _buildChart() {
+  Widget _buildChart(bool isDark) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : const Color(0xFF64748B).withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -297,16 +346,20 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Grafik Penggunaan',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+            ),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              _buildLegend(Colors.blue, 'Download'),
+              _buildLegend(const Color(0xFF0284C7), 'Download', isDark),
               const SizedBox(width: 16),
-              _buildLegend(Colors.green, 'Upload'),
+              _buildLegend(const Color(0xFF10B981), 'Upload', isDark),
             ],
           ),
           const SizedBox(height: 20),
@@ -320,9 +373,9 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                   horizontalInterval: 5,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withValues(alpha: 0.2),
+                      color: isDark
+                          ? const Color(0xFF334155).withValues(alpha: 0.5)
+                          : const Color(0xFFE2E8F0),
                       strokeWidth: 1,
                     );
                   },
@@ -331,11 +384,17 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 40,
+                      reservedSize: 42,
                       getTitlesWidget: (value, meta) {
                         return Text(
                           '${value.toInt()} GB',
-                          style: const TextStyle(fontSize: 10),
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
+                          ),
                         );
                       },
                     ),
@@ -354,7 +413,13 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
                             DateFormat('d/M').format(date),
-                            style: const TextStyle(fontSize: 10),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
+                            ),
                           ),
                         );
                       },
@@ -375,12 +440,12 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                       return FlSpot(entry.key.toDouble(), entry.value.download);
                     }).toList(),
                     isCurved: true,
-                    color: Colors.blue,
+                    color: const Color(0xFF0284C7),
                     barWidth: 3,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: Colors.blue.withValues(alpha: 0.1),
+                      color: const Color(0xFF0284C7).withValues(alpha: 0.12),
                     ),
                   ),
                   // Upload line
@@ -389,12 +454,12 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                       return FlSpot(entry.key.toDouble(), entry.value.upload);
                     }).toList(),
                     isCurved: true,
-                    color: Colors.green,
+                    color: const Color(0xFF10B981),
                     barWidth: 3,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: Colors.green.withValues(alpha: 0.1),
+                      color: const Color(0xFF10B981).withValues(alpha: 0.12),
                     ),
                   ),
                 ],
@@ -423,32 +488,44 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
     );
   }
 
-  Widget _buildLegend(Color color, String label) {
+  Widget _buildLegend(Color color, String label, bool isDark) {
     return Row(
       children: [
         Container(
           width: 16,
-          height: 3,
+          height: 4,
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 12)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white70 : const Color(0xFF475569),
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildUsageDetails() {
+  Widget _buildUsageDetails(bool isDark) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : const Color(0xFF64748B).withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -457,19 +534,29 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Text(
               'Detail Penggunaan',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
             ),
           ),
-          const Divider(height: 1),
+          Divider(
+            height: 1,
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          ),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _bandwidthData.take(10).length, // Show last 10 days
-            separatorBuilder: (context, index) => const Divider(height: 1),
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            ),
             itemBuilder: (context, index) {
               final data = _bandwidthData[_bandwidthData.length - 1 - index];
               final total = data.download + data.upload;
@@ -479,32 +566,46 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+                    color: const Color(0xFF0284C7).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF0284C7).withValues(alpha: 0.25),
+                    ),
                   ),
                   child: Center(
                     child: Text(
                       DateFormat('d').format(data.date),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        color: Color(0xFF0284C7),
                       ),
                     ),
                   ),
                 ),
                 title: Text(
                   DateFormat('EEEE, d MMMM yyyy').format(data.date),
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
                 ),
                 subtitle: Text(
-                  '↓ ${data.download.toStringAsFixed(2)} GB  ↑ ${data.upload.toStringAsFixed(2)} GB',
+                  '↓ ${data.download.toStringAsFixed(2)} GB   ↑ ${data.upload.toStringAsFixed(2)} GB',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF64748B),
+                  ),
                 ),
                 trailing: Text(
                   '${total.toStringAsFixed(2)} GB',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 15,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               );
@@ -515,42 +616,107 @@ class _BandwidthUsagePageState extends State<BandwidthUsagePage> {
     );
   }
 
-  void _showInfoDialog() {
+  void _showInfoDialog(bool isDark) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Tentang Bandwidth Usage'),
-        content: const SingleChildScrollView(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          ),
+        ),
+        title: Text(
+          'Tentang Bandwidth Usage',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
+        ),
+        content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Informasi Penggunaan Data',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
               ),
-              SizedBox(height: 8),
-              Text('• Data diperbarui setiap 1 jam'),
-              Text('• Penggunaan dihitung dari perangkat rumah Anda'),
-              Text('• Download: Data yang Anda terima'),
-              Text('• Upload: Data yang Anda kirim'),
-              SizedBox(height: 12),
+              const SizedBox(height: 8),
+              Text(
+                '• Data diperbarui setiap 1 jam',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                ),
+              ),
+              Text(
+                '• Penggunaan dihitung dari perangkat rumah Anda',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                ),
+              ),
+              Text(
+                '• Download: Data yang Anda terima',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                ),
+              ),
+              Text(
+                '• Upload: Data yang Anda kirim',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                ),
+              ),
+              const SizedBox(height: 12),
               Text(
                 'Tips Menghemat Kuota',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
               ),
-              SizedBox(height: 8),
-              Text('• Gunakan WiFi untuk download besar'),
-              Text('• Matikan auto-update aplikasi'),
-              Text('• Kurangi kualitas streaming video'),
-              Text('• Gunakan mode hemat data di browser'),
+              const SizedBox(height: 8),
+              Text(
+                '• Gunakan WiFi untuk download besar',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                ),
+              ),
+              Text(
+                '• Matikan auto-update aplikasi',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                ),
+              ),
+              Text(
+                '• Kurangi kualitas streaming video',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                ),
+              ),
+              Text(
+                '• Gunakan mode hemat data di browser',
+                style: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF475569),
+                ),
+              ),
             ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup'),
+            child: const Text(
+              'Tutup',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0284C7),
+              ),
+            ),
           ),
         ],
       ),

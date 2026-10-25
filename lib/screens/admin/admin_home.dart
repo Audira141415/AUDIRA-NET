@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:hugeicons/hugeicons.dart';
 import '../../utils/logger.dart';
+import '../../utils/theme_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'dart:async';
 import 'dart:math';
@@ -53,6 +56,8 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -65,72 +70,94 @@ class _AdminHomePageState extends State<AdminHomePage> {
         }
       },
       child: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
         body: _pages[_selectedIndex],
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 16,
-                offset: const Offset(0, -2),
+            color: isDark ? const Color(0xFF080D1E) : Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: isDark
+                    ? const Color(0xFF00F0FF).withValues(alpha: 0.25)
+                    : const Color(0xFFE2E8F0),
+                width: 1.2,
               ),
-            ],
+            ),
+            boxShadow: isDark
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF00F0FF).withValues(alpha: 0.08),
+                      blurRadius: 16,
+                      offset: const Offset(0, -3),
+                    ),
+                    const BoxShadow(
+                      color: Color(0xFF030712),
+                      blurRadius: 24,
+                      offset: Offset(0, -1),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 12,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
           ),
           child: SafeArea(
             child: SizedBox(
-              height: 65,
+              height: 68,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                 children: [
                   _CompactNavItem(
-                    icon: Icons.dashboard_outlined,
-                    selectedIcon: Icons.dashboard,
+                    icon: HugeIcons.strokeRoundedDashboardSquare02,
                     label: 'Dashboard',
                     isSelected: _selectedIndex == 0,
+                    activeColor: const Color(0xFF00F0FF),
                     onTap: () => setState(() => _selectedIndex = 0),
                   ),
                   _CompactNavItem(
-                    icon: Icons.people_outline,
-                    selectedIcon: Icons.people,
+                    icon: HugeIcons.strokeRoundedUserGroup,
                     label: 'Pelanggan',
                     isSelected: _selectedIndex == 1,
+                    activeColor: const Color(0xFF00FF9D),
                     onTap: () => setState(() => _selectedIndex = 1),
                   ),
                   _CompactNavItem(
-                    icon: Icons.receipt_long_outlined,
-                    selectedIcon: Icons.receipt_long,
+                    icon: HugeIcons.strokeRoundedInvoice02,
                     label: 'Transaksi',
                     isSelected: _selectedIndex == 2,
+                    activeColor: const Color(0xFFFFB800),
                     onTap: () => setState(() => _selectedIndex = 2),
                   ),
                   _CompactNavItem(
-                    icon: Icons.support_agent_outlined,
-                    selectedIcon: Icons.support_agent,
+                    icon: HugeIcons.strokeRoundedCustomerService,
                     label: 'Tiket',
                     isSelected: _selectedIndex == 3,
+                    activeColor: const Color(0xFFFF4869),
                     onTap: () => setState(() => _selectedIndex = 3),
                   ),
                   _CompactNavItem(
-                    icon: Icons.build_circle_outlined,
-                    selectedIcon: Icons.build_circle,
+                    icon: HugeIcons.strokeRoundedWrench01,
                     label: 'Instalasi',
                     isSelected: _selectedIndex == 4,
+                    activeColor: const Color(0xFF38BDF8),
                     onTap: () => setState(() => _selectedIndex = 4),
                   ),
                   _CompactNavItem(
-                    icon: Icons.engineering_outlined,
-                    selectedIcon: Icons.engineering,
+                    icon: HugeIcons.strokeRoundedCpu,
                     label: 'Teknisi',
                     isSelected: _selectedIndex == 5,
+                    activeColor: const Color(0xFFA855F7),
                     onTap: () => setState(() => _selectedIndex = 5),
                   ),
                   _CompactNavItem(
-                    icon: Icons.person_outline,
-                    selectedIcon: Icons.person,
+                    icon: HugeIcons.strokeRoundedUser,
                     label: 'Profil',
                     isSelected: _selectedIndex == 6,
+                    activeColor: const Color(0xFF00F0FF),
                     onTap: () => setState(() => _selectedIndex = 6),
                   ),
                 ],
@@ -384,18 +411,24 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       body: RefreshIndicator(
         onRefresh: _loadAllData,
         child: CustomScrollView(
           slivers: [
             // Modern App Bar dengan gradient
             SliverAppBar(
-              expandedHeight: 200,
+              backgroundColor: isDark ? const Color(0xFF030712) : Colors.white,
+              expandedHeight: 180,
               floating: false,
               pinned: true,
               actions: [
+                Consumer<ThemeProvider>(
+                  builder: (context, tp, _) => ThemeToggleIconButton(themeProvider: tp),
+                ),
                 IconButton(
                   icon: const Icon(Icons.mail),
                   onPressed: () {
@@ -431,36 +464,46 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                         ? Icons.wifi
                         : Icons.wifi_off,
                     color: _ispStats['networkStatus'] == 'online'
-                        ? Colors.green
+                        ? const Color(0xFF00FF9D)
                         : Colors.red,
                   ),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Status Jaringan'),
+                        backgroundColor: const Color(0xFF080D1E),
+                        title: const Text('Status Jaringan', style: TextStyle(color: Colors.white)),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Status: ${_ispStats['networkStatus'] == 'online' ? 'Online ✓' : 'Offline ✗'}',
+                              style: const TextStyle(color: Color(0xFF00FF9D)),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Bandwidth: ${_currentBandwidth.toStringAsFixed(0)} Mbps',
+                              style: const TextStyle(color: Color(0xFF94A3B8)),
                             ),
                             Text(
                               'Upload: ${_currentUpload.toStringAsFixed(0)} Mbps',
+                              style: const TextStyle(color: Color(0xFF94A3B8)),
                             ),
-                            Text('Latency: $_currentLatency ms'),
-                            Text('Uptime: ${_ispStats['uptime']}%'),
+                            Text(
+                              'Latency: $_currentLatency ms',
+                              style: const TextStyle(color: Color(0xFF94A3B8)),
+                            ),
+                            Text(
+                              'Uptime: ${_ispStats['uptime']}%',
+                              style: const TextStyle(color: Color(0xFF94A3B8)),
+                            ),
                           ],
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('OK'),
+                            child: const Text('OK', style: TextStyle(color: Color(0xFF00F0FF))),
                           ),
                         ],
                       ),
@@ -469,18 +512,30 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                 ),
               ],
               flexibleSpace: FlexibleSpaceBar(
-                title: const Text(
-                  'Dashboard Admin',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        offset: Offset(0, 2),
-                        blurRadius: 4,
+                title: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'AUDIRA NOC',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
+                        fontSize: 16,
+                        color: Color(0xFF00F0FF),
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      '// CORE',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 13,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ],
                 ),
                 background: Container(
                   decoration: const BoxDecoration(
@@ -488,9 +543,9 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        AppTheme.brightCyan,
-                        AppTheme.primaryCyan,
-                        AppTheme.signalBlue,
+                        Color(0xFF0A1128),
+                        Color(0xFF060D20),
+                        Color(0xFF030712),
                       ],
                     ),
                   ),
@@ -514,7 +569,7 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                             shape: BoxShape.circle,
                             gradient: RadialGradient(
                               colors: [
-                                Colors.white.withValues(alpha: 0.1),
+                                const Color(0xFF00F0FF).withValues(alpha: 0.15),
                                 Colors.transparent,
                               ],
                             ),
@@ -562,11 +617,12 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'Aktivitas Terkini',
+                          'Aktivitas Terkini // LOGS',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            fontFamily: 'monospace',
+                            color: Colors.white,
                           ),
                         ),
                         PopupMenuButton<String>(
@@ -678,17 +734,17 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.teal.shade50, Colors.cyan.shade50],
-        ),
+        color: const Color(0xFF080D1E),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF00F0FF).withValues(alpha: 0.35),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.teal.withValues(alpha: 0.1),
+            color: const Color(0xFF00F0FF).withValues(alpha: 0.08),
             blurRadius: 20,
-            offset: const Offset(0, 10),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -700,12 +756,15 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.teal.shade100,
+                  color: const Color(0xFF00F0FF).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF00F0FF).withValues(alpha: 0.3),
+                  ),
                 ),
-                child: Icon(
-                  Icons.router,
-                  color: Colors.teal.shade700,
+                child: const HugeIcon(
+                  icon: HugeIcons.strokeRoundedRouter01,
+                  color: Color(0xFF00F0FF),
                   size: 24,
                 ),
               ),
@@ -715,16 +774,21 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Status Jaringan',
+                      'Status Jaringan // NOC CORE',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        fontFamily: 'monospace',
+                        color: Colors.white,
                       ),
                     ),
                     Text(
-                      'Real-time network monitoring',
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
+                      'Real-time ISP telemetry monitoring',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF94A3B8),
+                        fontFamily: 'monospace',
+                      ),
                     ),
                   ],
                 ),
@@ -735,23 +799,38 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFF00FF9D).withValues(alpha: 0.5),
+                  ),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.check_circle,
-                      size: 16,
-                      color: Colors.green.shade700,
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF00FF9D),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0xFF00FF9D),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Online',
+                    const SizedBox(width: 6),
+                    const Text(
+                      'ONLINE',
                       style: TextStyle(
-                        color: Colors.green.shade700,
+                        color: Color(0xFF00FF9D),
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ],
@@ -765,18 +844,20 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
               Expanded(
                 child: _NetworkMetricCard(
                   icon: Icons.speed,
-                  label: 'Bandwidth',
+                  label: 'BANDWIDTH',
                   value: '${_currentBandwidth.toStringAsFixed(0)} Mbps',
-                  color: _currentBandwidth > 900 ? Colors.red : Colors.blue,
+                  color: _currentBandwidth > 900
+                      ? const Color(0xFFFF4869)
+                      : const Color(0xFF00F0FF),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _NetworkMetricCard(
                   icon: Icons.cloud_upload,
-                  label: 'Upload',
+                  label: 'UPLOAD',
                   value: '${_currentUpload.toStringAsFixed(0)} Mbps',
-                  color: Colors.orange,
+                  color: const Color(0xFFFFB800),
                 ),
               ),
             ],
@@ -787,18 +868,20 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
               Expanded(
                 child: _NetworkMetricCard(
                   icon: Icons.wifi_tethering,
-                  label: 'Latency',
+                  label: 'LATENCY',
                   value: '$_currentLatency ms',
-                  color: _currentLatency < 15 ? Colors.green : Colors.orange,
+                  color: _currentLatency < 15
+                      ? const Color(0xFF00FF9D)
+                      : const Color(0xFFFFB800),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _NetworkMetricCard(
                   icon: Icons.trending_up,
-                  label: 'Uptime',
+                  label: 'UPTIME',
                   value: '${_ispStats['uptime'] ?? 99.8}%',
-                  color: Colors.purple,
+                  color: const Color(0xFFA855F7),
                 ),
               ),
             ],
@@ -814,11 +897,12 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Aksi Cepat',
+          'Aksi Cepat // NOC TOOLS',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            fontFamily: 'monospace',
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 12),
@@ -1086,15 +1170,15 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.purple.shade50, Colors.pink.shade50],
-        ),
+        color: const Color(0xFF080D1E),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFFFB800).withValues(alpha: 0.35),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.purple.withValues(alpha: 0.1),
+            color: const Color(0xFFFFB800).withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1110,17 +1194,22 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Pendapatan Bulan Ini',
+                    'Pendapatan Bulan Ini // BILLING',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      fontFamily: 'monospace',
+                      color: Colors.white,
                     ),
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'November 2024',
-                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                    'Billing Cycle Realtime',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'monospace',
+                      color: Color(0xFF94A3B8),
+                    ),
                   ),
                 ],
               ),
@@ -1130,23 +1219,27 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
+                  color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFF00FF9D).withValues(alpha: 0.5),
+                  ),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
                     Icon(
                       Icons.arrow_upward,
                       size: 14,
-                      color: Colors.green.shade700,
+                      color: Color(0xFF00FF9D),
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     Text(
                       '+18.5%',
                       style: TextStyle(
-                        color: Colors.green.shade700,
+                        color: Color(0xFF00FF9D),
                         fontWeight: FontWeight.bold,
-                        fontSize: 12,
+                        fontSize: 11,
+                        fontFamily: 'monospace',
                       ),
                     ),
                   ],
@@ -1156,14 +1249,16 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
           ),
           const SizedBox(height: 20),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
             children: [
               const Text(
                 'Rp ',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black54,
+                  fontFamily: 'monospace',
+                  color: Color(0xFFFFB800),
                 ),
               ),
               Text(
@@ -1172,9 +1267,10 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                   (Match m) => '${m[1]}.',
                 ),
                 style: const TextStyle(
-                  fontSize: 32,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  fontFamily: 'monospace',
+                  color: Color(0xFF00FF9D),
                 ),
               ),
             ],
@@ -1184,19 +1280,19 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
             children: [
               Expanded(
                 child: _RevenueMetricCard(
-                  label: 'Pembayaran Diterima',
+                  label: 'DITERIMA',
                   value: (_ispStats['receivedPayments'] ?? 0).toString(),
                   icon: Icons.check_circle,
-                  color: Colors.green,
+                  color: const Color(0xFF00FF9D),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _RevenueMetricCard(
-                  label: 'Pembayaran Tertunda',
+                  label: 'PENDING',
                   value: (_ispStats['pendingPayments'] ?? 0).toString(),
                   icon: Icons.pending,
-                  color: Colors.orange,
+                  color: const Color(0xFFFFB800),
                 ),
               ),
             ],
@@ -1862,15 +1958,15 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
     return Container(
       height: 180,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.indigo.shade50, Colors.blue.shade50],
-        ),
+        color: const Color(0xFF080D1E),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF00F0FF).withValues(alpha: 0.35),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.indigo.withValues(alpha: 0.1),
+            color: const Color(0xFF00F0FF).withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -1884,23 +1980,32 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Aktivitas Jaringan',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Aktivitas Jaringan // TRAFFIC',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'monospace',
+                          color: Colors.white,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      '7 hari terakhir',
-                      style: TextStyle(fontSize: 12, color: Colors.black54),
-                    ),
-                  ],
+                      SizedBox(height: 4),
+                      Text(
+                        '7 hari terakhir (Gbps)',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFF94A3B8),
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -1908,23 +2013,27 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.2),
+                    color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF00FF9D).withValues(alpha: 0.5),
+                    ),
                   ),
-                  child: Row(
+                  child: const Row(
                     children: [
                       Icon(
                         Icons.trending_up,
                         size: 16,
-                        color: Colors.green.shade700,
+                        color: Color(0xFF00FF9D),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                       Text(
-                        '98.5% Uptime',
+                        '99.8% SLA',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green.shade700,
+                          fontFamily: 'monospace',
+                          color: Color(0xFF00FF9D),
                         ),
                       ),
                     ],
@@ -1965,17 +2074,17 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
               child: Container(
                 width: 32,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
-                    colors: [Colors.indigo.shade600, Colors.blue.shade400],
+                    colors: [Color(0xFF0070F3), Color(0xFF00F0FF)],
                   ),
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primaryCyan.withValues(alpha: 0.3),
+                      color: const Color(0xFF00F0FF).withValues(alpha: 0.35),
                       blurRadius: 8,
-                      offset: const Offset(0, 4),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -1987,7 +2096,8 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
             label,
             style: const TextStyle(
               fontSize: 10,
-              color: Colors.black54,
+              fontFamily: 'monospace',
+              color: Color(0xFF94A3B8),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1997,7 +2107,7 @@ class _AdminBerandaPageState extends State<AdminBerandaPage> {
   }
 }
 
-// Glass Morphism Stat Card
+// Cyber Obsidian Stat Card
 class _GlassStatCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -2017,117 +2127,108 @@ class _GlassStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeColor = gradient.colors.first;
     return Container(
       decoration: BoxDecoration(
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFF080D1E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: themeColor.withValues(alpha: 0.35),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: gradient.colors.first.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: themeColor.withValues(alpha: 0.1),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          // Glass effect overlay
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withValues(alpha: 0.2),
-                  Colors.white.withValues(alpha: 0.05),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(icon, color: Colors.white, size: 20),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: themeColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: themeColor.withValues(alpha: 0.3),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: trendUp
-                            ? Colors.green.withValues(alpha: 0.3)
-                            : Colors.red.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            trendUp ? Icons.arrow_upward : Icons.arrow_downward,
-                            size: 10,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            trend,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
+                  child: Icon(icon, color: themeColor, size: 18),
                 ),
-                const SizedBox(height: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      value,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 2),
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: (trendUp ? const Color(0xFF00FF9D) : const Color(0xFFFF4869))
+                        .withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: (trendUp ? const Color(0xFF00FF9D) : const Color(0xFFFF4869))
+                          .withValues(alpha: 0.4),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontWeight: FontWeight.w500,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        trendUp ? Icons.arrow_upward : Icons.arrow_downward,
+                        size: 9,
+                        color: trendUp ? const Color(0xFF00FF9D) : const Color(0xFFFF4869),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 2),
+                      Text(
+                        trend,
+                        style: TextStyle(
+                          color: trendUp ? const Color(0xFF00FF9D) : const Color(0xFFFF4869),
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
+                    color: themeColor,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                    color: Color(0xFF94A3B8),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -2158,11 +2259,12 @@ class _ModernActivityTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF080D1E),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: color.withValues(alpha: 0.06),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -2203,13 +2305,13 @@ class _ModernActivityTile extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
-                          color: Colors.black87,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        style: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2222,13 +2324,13 @@ class _ModernActivityTile extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.chevron_right,
-                      color: Colors.grey[400],
+                      color: Colors.white.withValues(alpha: 0.3),
                       size: 20,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       time,
-                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                      style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Color(0xFF64748B)),
                     ),
                   ],
                 ),
@@ -2284,17 +2386,24 @@ class _NetworkMetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF050B18),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.08),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
             ),
             child: Icon(icon, color: color, size: 20),
           ),
@@ -2305,12 +2414,19 @@ class _NetworkMetricCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontFamily: 'monospace',
+                    letterSpacing: 0.5,
+                    color: Color(0xFF94A3B8),
+                  ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
+                    fontFamily: 'monospace',
                     fontWeight: FontWeight.bold,
                     color: color,
                   ),
@@ -2402,9 +2518,15 @@ class _RevenueMetricCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF050B18),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.08),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2419,6 +2541,7 @@ class _RevenueMetricCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
                     color: color,
                   ),
                 ),
@@ -2426,7 +2549,15 @@ class _RevenueMetricCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontFamily: 'monospace',
+              letterSpacing: 0.5,
+              color: Color(0xFF94A3B8),
+            ),
+          ),
         ],
       ),
     );
@@ -2456,12 +2587,12 @@ class _AlertCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF080D1E),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: color.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -2480,8 +2611,9 @@ class _AlertCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
+                    color: color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: color.withValues(alpha: 0.3)),
                   ),
                   child: Stack(
                     children: [
@@ -2518,18 +2650,18 @@ class _AlertCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
+                Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.3), size: 20),
               ],
             ),
           ),
@@ -3049,12 +3181,25 @@ class _AdminInstallasiPageState extends State<AdminInstallasiPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        title: const Text('Kelola Instalasi'),
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
+        title: Text(
+          'Kelola Instalasi',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+        ),
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : AppTheme.lightTextPrimary,
+        elevation: 0,
         actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, tp, _) => ThemeToggleIconButton(themeProvider: tp),
+          ),
           PopupMenuButton<String>(
             initialValue: _filterStatus,
             onSelected: (value) {
@@ -3080,28 +3225,45 @@ class _AdminInstallasiPageState extends State<AdminInstallasiPage> {
               onRefresh: _loadInstallations,
               child: _installations.isEmpty
                   ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.build_circle,
-                            size: 80,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Belum ada instalasi',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey.shade600,
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF080D1E) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                              width: 1.2,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Tap tombol + untuk menambah',
-                            style: TextStyle(color: Colors.grey.shade500),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.build_circle_outlined,
+                                size: 64,
+                                color: isDark ? const Color(0xFF00F0FF) : Colors.indigo,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Belum Ada Jadwal Instalasi',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tap tombol + untuk menjadwalkan instalasi baru',
+                                style: TextStyle(
+                                  color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     )
                   : ListView.builder(
@@ -3109,8 +3271,16 @@ class _AdminInstallasiPageState extends State<AdminInstallasiPage> {
                       itemCount: _installations.length,
                       itemBuilder: (context, index) {
                         final installation = _installations[index];
-                        return Card(
+                        return Container(
                           margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF080D1E) : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                              width: 1.2,
+                            ),
+                          ),
                           child: ListTile(
                             contentPadding: const EdgeInsets.all(16),
                             leading: CircleAvatar(
@@ -3131,8 +3301,9 @@ class _AdminInstallasiPageState extends State<AdminInstallasiPage> {
                             ),
                             title: Text(
                               installation['customerName'],
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : AppTheme.lightTextPrimary,
                               ),
                             ),
                             subtitle: Column(
@@ -3141,19 +3312,22 @@ class _AdminInstallasiPageState extends State<AdminInstallasiPage> {
                                 const SizedBox(height: 4),
                                 Text(
                                   '${installation['packageName']} - ${installation['speed']} Mbps',
+                                  style: TextStyle(
+                                    color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade700,
+                                  ),
                                 ),
                                 Text(
                                   '${installation['scheduledDate']} ${installation['scheduledTime']}',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey.shade600,
+                                    color: isDark ? const Color(0xFF64748B) : Colors.grey.shade600,
                                   ),
                                 ),
                                 Text(
                                   installation['phone'],
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.grey.shade600,
+                                    color: isDark ? const Color(0xFF64748B) : Colors.grey.shade600,
                                   ),
                                 ),
                               ],
@@ -3395,25 +3569,42 @@ class _AdminProfilPageState extends State<AdminProfilPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       body: CustomScrollView(
         slivers: [
           // Header dengan gradient
           SliverAppBar(
             expandedHeight: 200,
             pinned: true,
-            backgroundColor: AppTheme.primaryCyan,
+            backgroundColor: isDark ? const Color(0xFF080D1E) : AppTheme.primaryCyan,
+            actions: [
+              Consumer<ThemeProvider>(
+                builder: (context, tp, _) => ThemeToggleIconButton(themeProvider: tp),
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppTheme.primaryCyan,
-                      AppTheme.primaryCyan.withValues(alpha: 0.7),
-                    ],
-                  ),
+                  gradient: isDark
+                      ? const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF080D1E),
+                            Color(0xFF0F172A),
+                          ],
+                        )
+                      : LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppTheme.primaryCyan,
+                            AppTheme.primaryCyan.withValues(alpha: 0.7),
+                          ],
+                        ),
                 ),
                 child: SafeArea(
                   child: Column(
@@ -3423,22 +3614,27 @@ class _AdminProfilPageState extends State<AdminProfilPage> {
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2.5),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF00F0FF) : Colors.white,
+                            width: 2.5,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 8,
+                              color: isDark
+                                  ? const Color(0xFF00F0FF).withValues(alpha: 0.3)
+                                  : Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 10,
                               spreadRadius: 1,
                             ),
                           ],
                         ),
-                        child: const CircleAvatar(
+                        child: CircleAvatar(
                           radius: 40,
-                          backgroundColor: Colors.white,
+                          backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
                           child: Icon(
                             Icons.admin_panel_settings,
                             size: 44,
-                            color: AppTheme.primaryCyan,
+                            color: isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan,
                           ),
                         ),
                       ),
@@ -3458,15 +3654,20 @@ class _AdminProfilPageState extends State<AdminProfilPage> {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: isDark
+                              ? const Color(0x3300F0FF)
+                              : Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(10),
+                          border: isDark
+                              ? Border.all(color: const Color(0x6600F0FF))
+                              : null,
                         ),
-                        child: const Text(
+                        child: Text(
                           'Administrator',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: isDark ? const Color(0xFF00F0FF) : Colors.white,
                             fontSize: 11,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -3486,11 +3687,15 @@ class _AdminProfilPageState extends State<AdminProfilPage> {
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF080D1E) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      width: 1.2,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -3499,11 +3704,12 @@ class _AdminProfilPageState extends State<AdminProfilPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Statistik Sistem',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppTheme.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -3545,6 +3751,54 @@ class _AdminProfilPageState extends State<AdminProfilPage> {
                         ),
                     ],
                   ),
+                ),
+
+                // Tema & Tampilan Section
+                _ProfileSection(
+                  title: 'Tampilan & Tema',
+                  children: [
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, _) {
+                        return ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: (isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              isDark ? Icons.dark_mode : Icons.light_mode,
+                              color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                              size: 24,
+                            ),
+                          ),
+                          title: Text(
+                            'Mode Tampilan',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                            ),
+                          ),
+                          subtitle: Text(
+                            isDark
+                                ? 'Tema Aktif: Dark Cyber Midnight'
+                                : 'Tema Aktif: Clean High-Contrast Light',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark ? const Color(0xFF94A3B8) : Colors.grey[600],
+                            ),
+                          ),
+                          trailing: Switch(
+                            value: isDark,
+                            activeThumbColor: const Color(0xFF00F0FF),
+                            onChanged: (value) => themeProvider.toggleTheme(context),
+                          ),
+                          onTap: () => themeProvider.toggleTheme(context),
+                        );
+                      },
+                    ),
+                  ],
                 ),
 
                 // Info Akun
@@ -3741,14 +3995,20 @@ class _ProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF080D1E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -3761,7 +4021,11 @@ class _ProfileSection extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
               title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+              ),
             ),
           ),
           ...children,
@@ -3785,22 +4049,36 @@ class _InfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppTheme.primaryCyan.withValues(alpha: 0.1),
+          color: (isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan)
+              .withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: AppTheme.primaryCyan, size: 24),
+        child: Icon(
+          icon,
+          color: isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan,
+          size: 24,
+        ),
       ),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+        ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+        style: TextStyle(
+          fontSize: 13,
+          color: isDark ? const Color(0xFF94A3B8) : Colors.grey[600],
+        ),
       ),
     );
   }
@@ -3824,24 +4102,42 @@ class _ActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppTheme.primaryCyan.withValues(alpha: 0.1),
+          color: (isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan)
+              .withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: AppTheme.primaryCyan, size: 24),
+        child: Icon(
+          icon,
+          color: isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan,
+          size: 24,
+        ),
       ),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+        ),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+        style: TextStyle(
+          fontSize: 13,
+          color: isDark ? const Color(0xFF94A3B8) : Colors.grey[600],
+        ),
       ),
-      trailing: trailing ?? Icon(Icons.chevron_right, color: Colors.grey[400]),
+      trailing: trailing ??
+          Icon(
+            Icons.chevron_right,
+            color: isDark ? const Color(0xFF64748B) : Colors.grey[400],
+          ),
       onTap: onTap,
     );
   }
@@ -3863,12 +4159,17 @@ class _StatItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withValues(alpha: isDark ? 0.15 : 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.4 : 0.25),
+          width: 1,
+        ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -3881,14 +4182,17 @@ class _StatItemCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: isDark ? Colors.white : color,
             ),
           ),
           const SizedBox(height: 2),
           Flexible(
             child: Text(
               label,
-              style: TextStyle(fontSize: 11, color: Colors.grey[700]),
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? const Color(0xFF94A3B8) : Colors.grey[700],
+              ),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -3967,19 +4271,32 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        title: const Text('Transaksi & Monitoring'),
-        backgroundColor: Colors.indigo.shade700,
-        foregroundColor: Colors.white,
+        title: Text(
+          'Transaksi & Monitoring',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
+        ),
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : AppTheme.lightTextPrimary,
         elevation: 0,
+        actions: const [
+          ThemeToggleIconButton(),
+          SizedBox(width: 8),
+        ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white,
+          indicatorColor: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
           indicatorWeight: 3,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
+          labelColor: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+          unselectedLabelColor: isDark ? Colors.white54 : Colors.grey.shade600,
           tabs: const [
             Tab(icon: Icon(Icons.receipt_long), text: 'Pembayaran'),
             Tab(icon: Icon(Icons.network_check), text: 'Speed Test'),
@@ -3991,28 +4308,75 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage>
         children: [
           // Tab Pembayaran
           _isLoadingPayments
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                  child: CircularProgressIndicator(
+                    color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                  ),
+                )
               : RefreshIndicator(
+                  color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                  backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
                   onRefresh: _loadPayments,
                   child: _payments.isEmpty
                       ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.receipt_long,
-                                size: 64,
-                                color: Colors.grey[400],
+                          child: Container(
+                            margin: const EdgeInsets.all(24),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF080D1E) : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF00F0FF).withValues(alpha: 0.2)
+                                    : const Color(0xFFE2E8F0),
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Belum ada pembayaran',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 16,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: isDark
+                                      ? Colors.black.withValues(alpha: 0.4)
+                                      : Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF00F0FF).withValues(alpha: 0.1)
+                                        : Colors.blue.shade50,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.receipt_long_rounded,
+                                    size: 48,
+                                    color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Belum ada pembayaran',
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Riwayat transaksi pelanggan akan dicatat di sini',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white54 : Colors.grey.shade600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         )
                       : ListView.builder(
@@ -4026,28 +4390,75 @@ class _AdminPaymentsPageState extends State<AdminPaymentsPage>
                 ),
           // Tab Speed Test
           _isLoadingSpeedTests
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                  child: CircularProgressIndicator(
+                    color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                  ),
+                )
               : RefreshIndicator(
+                  color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                  backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
                   onRefresh: _loadSpeedTests,
                   child: _speedTests.isEmpty
                       ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.network_check,
-                                size: 64,
-                                color: Colors.grey[400],
+                          child: Container(
+                            margin: const EdgeInsets.all(24),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF080D1E) : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isDark
+                                    ? const Color(0xFF00F0FF).withValues(alpha: 0.2)
+                                    : const Color(0xFFE2E8F0),
                               ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'Belum ada speed test',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 16,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: isDark
+                                      ? Colors.black.withValues(alpha: 0.4)
+                                      : Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 6),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF00F0FF).withValues(alpha: 0.1)
+                                        : Colors.blue.shade50,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.network_check_rounded,
+                                    size: 48,
+                                    color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Belum ada speed test',
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Hasil uji kecepatan jaringan pelanggan akan tampil di sini',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white54 : Colors.grey.shade600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         )
                       : ListView.builder(
@@ -4072,6 +4483,7 @@ class _PaymentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final amount = payment['amount'] as int;
     final paidAt = DateTime.parse(payment['paidAt']);
 
@@ -4080,11 +4492,29 @@ class _PaymentCard extends StatelessWidget {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Row(
+            backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: isDark
+                    ? const Color(0xFF00F0FF).withValues(alpha: 0.25)
+                    : const Color(0xFFE2E8F0),
+              ),
+            ),
+            title: Row(
               children: [
-                Icon(Icons.receipt_long, color: Colors.green),
-                SizedBox(width: 8),
-                Text('Detail Pembayaran'),
+                Icon(
+                  Icons.receipt_long,
+                  color: isDark ? const Color(0xFF00FF9D) : Colors.green,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Detail Pembayaran',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
             content: SingleChildScrollView(
@@ -4107,7 +4537,10 @@ class _PaymentCard extends StatelessWidget {
                     label: 'ID Pelanggan',
                     value: payment['customerId'] ?? '-',
                   ),
-                  const Divider(height: 24),
+                  Divider(
+                    height: 24,
+                    color: isDark ? Colors.white12 : Colors.grey.shade200,
+                  ),
                   _PaymentDetailRow(
                     icon: Icons.calendar_month,
                     label: 'Periode Tagihan',
@@ -4118,7 +4551,7 @@ class _PaymentCard extends StatelessWidget {
                     label: 'Jumlah',
                     value:
                         'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}',
-                    color: Colors.green,
+                    color: isDark ? const Color(0xFF00FF9D) : Colors.green,
                   ),
                   _PaymentDetailRow(
                     icon: Icons.payment,
@@ -4131,7 +4564,7 @@ class _PaymentCard extends StatelessWidget {
                     value:
                         payment['paymentStatus']?.toString().toUpperCase() ??
                         '-',
-                    color: Colors.green,
+                    color: isDark ? const Color(0xFF00FF9D) : Colors.green,
                   ),
                   _PaymentDetailRow(
                     icon: Icons.schedule,
@@ -4145,9 +4578,18 @@ class _PaymentCard extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Tutup'),
+                child: Text(
+                  'Tutup',
+                  style: TextStyle(
+                    color: isDark ? Colors.white70 : Colors.grey.shade700,
+                  ),
+                ),
               ),
               FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                  foregroundColor: isDark ? const Color(0xFF030712) : Colors.white,
+                ),
                 onPressed: () {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -4167,11 +4609,18 @@ class _PaymentCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF080D1E) : Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark
+                ? const Color(0xFF00F0FF).withValues(alpha: 0.15)
+                : const Color(0xFFE2E8F0),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -4189,15 +4638,19 @@ class _PaymentCard extends StatelessWidget {
                     children: [
                       Text(
                         payment['customerName'],
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppTheme.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         payment['customerId'],
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white60 : Colors.grey[600],
+                        ),
                       ),
                     ],
                   ),
@@ -4208,13 +4661,20 @@ class _PaymentCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
+                    color: isDark
+                        ? const Color(0xFF00FF9D).withValues(alpha: 0.15)
+                        : Colors.green.shade50,
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF00FF9D).withValues(alpha: 0.3)
+                          : Colors.green.shade200,
+                    ),
                   ),
                   child: Text(
                     payment['paymentStatus'].toUpperCase(),
                     style: TextStyle(
-                      color: Colors.green.shade700,
+                      color: isDark ? const Color(0xFF00FF9D) : Colors.green.shade700,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -4222,7 +4682,10 @@ class _PaymentCard extends StatelessWidget {
                 ),
               ],
             ),
-            const Divider(height: 24),
+            Divider(
+              height: 24,
+              color: isDark ? Colors.white12 : Colors.grey.shade200,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -4231,12 +4694,18 @@ class _PaymentCard extends StatelessWidget {
                   children: [
                     Text(
                       'Tagihan',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white60 : Colors.grey[600],
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       payment['billMonth'],
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                      ),
                     ),
                   ],
                 ),
@@ -4245,15 +4714,18 @@ class _PaymentCard extends StatelessWidget {
                   children: [
                     Text(
                       'Jumlah',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white60 : Colors.grey[600],
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]}.')}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: isDark ? const Color(0xFF00FF9D) : Colors.green.shade700,
                       ),
                     ),
                   ],
@@ -4263,18 +4735,32 @@ class _PaymentCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.payment, size: 16, color: Colors.grey[600]),
+                Icon(
+                  Icons.payment,
+                  size: 16,
+                  color: isDark ? const Color(0xFF00F0FF) : Colors.grey[600],
+                ),
                 const SizedBox(width: 8),
                 Text(
                   payment['paymentMethod'],
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white60 : Colors.grey[600],
+                  ),
                 ),
                 const SizedBox(width: 16),
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                Icon(
+                  Icons.access_time,
+                  size: 16,
+                  color: isDark ? Colors.white38 : Colors.grey[600],
+                ),
                 const SizedBox(width: 8),
                 Text(
                   '${paidAt.day}/${paidAt.month}/${paidAt.year} ${paidAt.hour}:${paidAt.minute.toString().padLeft(2, '0')}',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white60 : Colors.grey[600],
+                  ),
                 ),
               ],
             ),
@@ -4301,11 +4787,17 @@ class _PaymentDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: color ?? Colors.grey.shade600),
+          Icon(
+            icon,
+            size: 20,
+            color: color ?? (isDark ? const Color(0xFF00F0FF) : Colors.grey.shade600),
+          ),
           const SizedBox(width: 12),
           Expanded(
             flex: 2,
@@ -4313,7 +4805,7 @@ class _PaymentDetailRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
+                color: isDark ? Colors.white60 : Colors.grey.shade700,
               ),
             ),
           ),
@@ -4322,7 +4814,7 @@ class _PaymentDetailRow extends StatelessWidget {
             child: Text(
               value,
               style: TextStyle(
-                color: color ?? Colors.black87,
+                color: color ?? (isDark ? Colors.white : Colors.black87),
                 fontWeight: color != null ? FontWeight.bold : null,
               ),
             ),
@@ -4341,17 +4833,25 @@ class _SpeedTestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final testDate = DateTime.parse(test['testDate']);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF080D1E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF00F0FF).withValues(alpha: 0.15)
+              : const Color(0xFFE2E8F0),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -4369,15 +4869,19 @@ class _SpeedTestCard extends StatelessWidget {
                   children: [
                     Text(
                       test['name'],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppTheme.lightTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       test['customerId'],
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white60 : Colors.grey[600],
+                      ),
                     ),
                   ],
                 ),
@@ -4388,8 +4892,15 @@ class _SpeedTestCard extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: isDark
+                      ? const Color(0xFF00F0FF).withValues(alpha: 0.15)
+                      : Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xFF00F0FF).withValues(alpha: 0.3)
+                        : Colors.blue.shade200,
+                  ),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -4399,13 +4910,13 @@ class _SpeedTestCard extends StatelessWidget {
                           ? Icons.wifi
                           : Icons.signal_cellular_alt,
                       size: 14,
-                      color: Colors.blue.shade700,
+                      color: isDark ? const Color(0xFF00F0FF) : Colors.blue.shade700,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       test['connectionType'],
                       style: TextStyle(
-                        color: Colors.blue.shade700,
+                        color: isDark ? const Color(0xFF00F0FF) : Colors.blue.shade700,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -4415,7 +4926,10 @@ class _SpeedTestCard extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(height: 24),
+          Divider(
+            height: 24,
+            color: isDark ? Colors.white12 : Colors.grey.shade200,
+          ),
           Row(
             children: [
               Expanded(
@@ -4424,7 +4938,7 @@ class _SpeedTestCard extends StatelessWidget {
                   label: 'Download',
                   value: test['downloadSpeed'].toStringAsFixed(1),
                   unit: 'Mbps',
-                  color: Colors.green,
+                  color: isDark ? const Color(0xFF00FF9D) : Colors.green,
                 ),
               ),
               Expanded(
@@ -4442,7 +4956,7 @@ class _SpeedTestCard extends StatelessWidget {
                   label: 'Ping',
                   value: test['latency'].toStringAsFixed(1),
                   unit: 'ms',
-                  color: Colors.purple,
+                  color: isDark ? const Color(0xFF00F0FF) : Colors.purple,
                 ),
               ),
             ],
@@ -4450,11 +4964,18 @@ class _SpeedTestCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+              Icon(
+                Icons.access_time,
+                size: 16,
+                color: isDark ? Colors.white38 : Colors.grey[600],
+              ),
               const SizedBox(width: 8),
               Text(
                 '${testDate.day}/${testDate.month}/${testDate.year} ${testDate.hour}:${testDate.minute.toString().padLeft(2, '0')}',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white60 : Colors.grey[600],
+                ),
               ),
             ],
           ),
@@ -4481,11 +5002,19 @@ class _SpeedMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
         Icon(icon, color: color, size: 24),
         const SizedBox(height: 8),
-        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: isDark ? Colors.white60 : Colors.grey[600],
+          ),
+        ),
         const SizedBox(height: 4),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -4494,10 +5023,20 @@ class _SpeedMetric extends StatelessWidget {
           children: [
             Text(
               value,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+              ),
             ),
             const SizedBox(width: 2),
-            Text(unit, style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+            Text(
+              unit,
+              style: TextStyle(
+                fontSize: 10,
+                color: isDark ? Colors.white54 : Colors.grey[600],
+              ),
+            ),
           ],
         ),
       ],
@@ -4505,52 +5044,59 @@ class _SpeedMetric extends StatelessWidget {
   }
 }
 
-// Compact Navigation Item for horizontal scrolling
+// Compact Tactical Navigation Item for horizontal scrolling
 class _CompactNavItem extends StatelessWidget {
-  final IconData icon;
-  final IconData selectedIcon;
+  final List<List<dynamic>> icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
+  final Color activeColor;
 
   const _CompactNavItem({
     required this.icon,
-    required this.selectedIcon,
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.activeColor = const Color(0xFF00F0FF),
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 3),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: 75,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 78,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppTheme.primaryCyan.withValues(alpha: 0.1)
+                  ? activeColor.withValues(alpha: 0.12)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected
+                    ? activeColor.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.04),
+                width: 1,
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  isSelected ? selectedIcon : icon,
-                  size: 22,
+                HugeIcon(
+                  icon: icon,
+                  size: 20,
                   color: isSelected
-                      ? AppTheme.primaryCyan
-                      : Colors.grey.shade600,
+                      ? activeColor
+                      : const Color(0xFF64748B),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Flexible(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -4558,18 +5104,37 @@ class _CompactNavItem extends StatelessWidget {
                       label,
                       style: TextStyle(
                         fontSize: 10,
+                        fontFamily: 'monospace',
                         fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        letterSpacing: 0.2,
                         color: isSelected
-                            ? AppTheme.primaryCyan
-                            : Colors.grey.shade600,
+                            ? activeColor
+                            : const Color(0xFF94A3B8),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
+                if (isSelected) ...[
+                  const SizedBox(height: 2),
+                  Container(
+                    width: 16,
+                    height: 2,
+                    decoration: BoxDecoration(
+                      color: activeColor,
+                      borderRadius: BorderRadius.circular(2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: activeColor.withValues(alpha: 0.8),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

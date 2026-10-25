@@ -79,8 +79,9 @@ dependencies:
   # State Management
   provider: ^6.1.2
   
-  # HTTP
+  # HTTP & Realtime WebSocket
   http: ^1.2.0
+  socket_io_client: ^3.0.2
   
   # AI Chatbot
   google_generative_ai: ^0.4.6
@@ -90,6 +91,9 @@ dependencies:
   cloud_firestore: ^5.5.1
   firebase_auth: ^5.3.3
   firebase_storage: ^12.3.7
+  lucide_icons: ^0.257.0
+  hugeicons: ^1.2.0
+  flutter_svg: ^2.3.0
 
 dev_dependencies:
   flutter_test:

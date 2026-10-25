@@ -1,3 +1,4 @@
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import '../services/firebase_service.dart';
 import '../services/auth_service.dart';
@@ -90,7 +91,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -123,12 +124,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
           if (_unreadCount > 0)
             TextButton.icon(
               onPressed: _markAllAsRead,
-              icon: const Icon(Icons.done_all, size: 18),
+              icon: const Icon(LucideIcons.checkCheck, size: 18),
               label: const Text('Tandai Semua'),
               style: TextButton.styleFrom(foregroundColor: Colors.blue),
             ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(LucideIcons.refreshCw),
             onPressed: _loadNotifications,
           ),
         ],
@@ -141,7 +142,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.notifications_none,
+                    LucideIcons.bellOff,
                     size: 80,
                     color: Colors.grey.shade400,
                   ),
@@ -179,19 +180,19 @@ class _NotificationsPageState extends State<NotificationsPage> {
     switch (priority) {
       case 'urgent':
         priorityColor = Colors.red;
-        priorityIcon = Icons.error;
+        priorityIcon = LucideIcons.alertCircle;
         break;
       case 'high':
         priorityColor = Colors.orange;
-        priorityIcon = Icons.warning;
+        priorityIcon = LucideIcons.alertTriangle;
         break;
       case 'low':
         priorityColor = Colors.green;
-        priorityIcon = Icons.info;
+        priorityIcon = LucideIcons.info;
         break;
       default:
         priorityColor = Colors.blue;
-        priorityIcon = Icons.notifications;
+        priorityIcon = LucideIcons.bell;
     }
 
     return Card(

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../services/database_service.dart';
 import '../../widgets/enhanced_ui_components.dart';
 import '../../utils/excel_exporter.dart';
+import '../../utils/app_theme.dart';
+import '../../utils/theme_provider.dart';
 
 class AdminPelangganPageEnhanced extends StatefulWidget {
   const AdminPelangganPageEnhanced({super.key});
@@ -592,16 +595,31 @@ class _AdminPelangganPageEnhancedState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
+        title: Text(
+          'Daftar Pelanggan (${_filteredCustomers.length})',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
         ),
-        title: Text('Daftar Pelanggan (${_filteredCustomers.length})'),
-        backgroundColor: Colors.blue.shade700,
-        foregroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : AppTheme.lightTextPrimary,
+        elevation: 0,
         actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, tp, _) => ThemeToggleIconButton(themeProvider: tp),
+          ),
           IconButton(
             icon: const Icon(Icons.download),
             tooltip: 'Export ke Excel',
@@ -734,7 +752,19 @@ class _AdminPelangganPageEnhancedState
                   // Summary cards
                   Container(
                     padding: const EdgeInsets.all(16),
-                    color: Colors.blue.shade50,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF060913)
+                          : const Color(0xFFE2E8F0).withValues(alpha: 0.5),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFCBD5E1),
+                          width: 1,
+                        ),
+                      ),
+                    ),
                     child: Row(
                       children: [
                         Expanded(
@@ -742,7 +772,7 @@ class _AdminPelangganPageEnhancedState
                             icon: Icons.people,
                             label: 'Total',
                             value: _customers.length.toString(),
-                            color: Colors.blue,
+                            color: isDark ? const Color(0xFF00F0FF) : Colors.blue,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -756,7 +786,7 @@ class _AdminPelangganPageEnhancedState
                                 )
                                 .length
                                 .toString(),
-                            color: Colors.red,
+                            color: const Color(0xFFFF2A5F),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -770,7 +800,7 @@ class _AdminPelangganPageEnhancedState
                                 )
                                 .length
                                 .toString(),
-                            color: Colors.orange,
+                            color: const Color(0xFFFFB800),
                           ),
                         ),
                       ],
@@ -788,35 +818,80 @@ class _AdminPelangganPageEnhancedState
                         final openTickets =
                             customer['openTickets'] as int? ?? 0;
 
-                        return Card(
+                        return Container(
                           margin: const EdgeInsets.only(bottom: 12),
-                          elevation: 2,
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF080D1E) : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFE2E8F0),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                  alpha: isDark ? 0.2 : 0.04,
+                                ),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
                           child: ListTile(
                             leading: CircleAvatar(
-                              backgroundColor: Colors.blue.shade100,
+                              backgroundColor: isDark
+                                  ? const Color(0xFF0F2B48)
+                                  : Colors.blue.shade100,
                               child: Text(
                                 (customer['name'] as String? ?? 'U')[0]
                                     .toUpperCase(),
                                 style: TextStyle(
-                                  color: Colors.blue.shade700,
+                                  color: isDark
+                                      ? const Color(0xFF00F0FF)
+                                      : Colors.blue.shade700,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                             title: Text(
                               customer['name'] as String? ?? 'Unknown',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
+                                color: isDark
+                                    ? Colors.white
+                                    : AppTheme.lightTextPrimary,
                               ),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const SizedBox(height: 4),
-                                Text('📱 ${customer['phone'] ?? '-'}'),
-                                Text('📦 ${customer['packageName'] ?? '-'}'),
+                                Text(
+                                  '📱 ${customer['phone'] ?? '-'}',
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : Colors.grey.shade700,
+                                  ),
+                                ),
+                                Text(
+                                  '📦 ${customer['packageName'] ?? '-'}',
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? const Color(0xFF94A3B8)
+                                        : Colors.grey.shade700,
+                                  ),
+                                ),
                                 Text(
                                   '💰 Rp ${(customer['price'] ?? 0).toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (m) => '${m[1]},')}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? const Color(0xFF00FF9D)
+                                        : Colors.green.shade700,
+                                  ),
                                 ),
                                 if (unpaidBills > 0)
                                   Padding(
@@ -827,42 +902,67 @@ class _AdminPelangganPageEnhancedState
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.red.shade50,
+                                        color: isDark
+                                            ? const Color(0x33FF2A5F)
+                                            : Colors.red.shade50,
                                         borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? const Color(0x66FF2A5F)
+                                              : Colors.red.shade200,
+                                        ),
                                       ),
                                       child: Text(
                                         '⚠️ $unpaidBills tagihan belum bayar',
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Colors.red.shade700,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? const Color(0xFFFF2A5F)
+                                              : Colors.red.shade700,
                                         ),
                                       ),
                                     ),
                                   ),
                                 if (openTickets > 0)
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 2),
+                                    padding: const EdgeInsets.only(top: 4),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 8,
                                         vertical: 2,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.orange.shade50,
+                                        color: isDark
+                                            ? const Color(0x33FFB800)
+                                            : Colors.orange.shade50,
                                         borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? const Color(0x66FFB800)
+                                              : Colors.orange.shade200,
+                                        ),
                                       ),
                                       child: Text(
                                         '🎫 $openTickets tiket terbuka',
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: Colors.orange.shade700,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? const Color(0xFFFFB800)
+                                              : Colors.orange.shade700,
                                         ),
                                       ),
                                     ),
                                   ),
                               ],
                             ),
-                            trailing: const Icon(Icons.chevron_right),
+                            trailing: Icon(
+                              Icons.chevron_right,
+                              color: isDark
+                                  ? const Color(0xFF00F0FF)
+                                  : Colors.grey.shade400,
+                            ),
                             onTap: () => _showCustomerDetails(customer),
                           ),
                         );
@@ -876,7 +976,8 @@ class _AdminPelangganPageEnhancedState
         onPressed: _showAddCustomerForm,
         icon: const Icon(Icons.person_add),
         label: const Text('Tambah Pelanggan'),
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+        foregroundColor: isDark ? const Color(0xFF05070D) : Colors.white,
       ),
     );
   }
@@ -897,34 +998,50 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? color.withValues(alpha: 0.35)
+              : color.withValues(alpha: 0.25),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+            color: isDark
+                ? color.withValues(alpha: 0.12)
+                : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 4),
+          Icon(icon, color: color, size: 26),
+          const SizedBox(height: 6),
           Text(
             value,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: isDark ? Colors.white : color,
             ),
           ),
+          const SizedBox(height: 2),
           Text(
-            label,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            label.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+              color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade600,
+            ),
           ),
         ],
       ),
@@ -947,11 +1064,18 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: color ?? Colors.grey.shade600),
+          Icon(
+            icon,
+            size: 20,
+            color: color ??
+                (isDark ? const Color(0xFF00F0FF) : Colors.grey.shade600),
+          ),
           const SizedBox(width: 12),
           Expanded(
             flex: 2,
@@ -959,7 +1083,7 @@ class _DetailRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.grey.shade700,
+                color: isDark ? const Color(0xFF94A3B8) : Colors.grey.shade700,
               ),
             ),
           ),
@@ -968,7 +1092,7 @@ class _DetailRow extends StatelessWidget {
             child: Text(
               value,
               style: TextStyle(
-                color: color ?? Colors.black87,
+                color: color ?? (isDark ? Colors.white : Colors.black87),
                 fontWeight: color != null ? FontWeight.bold : null,
               ),
             ),

@@ -1,9 +1,12 @@
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import '../../services/package_upgrade_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/firebase_service.dart';
 import '../../models/package_upgrade_request.dart';
 import 'package:intl/intl.dart';
+import '../../utils/app_theme.dart';
+import '../../widgets/cyber_widgets.dart';
 
 class PackageUpgradePage extends StatefulWidget {
   const PackageUpgradePage({super.key});
@@ -26,6 +29,19 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
     _loadData();
   }
 
+  int _parseSpeed(dynamic val) {
+    if (val == null) return 0;
+    if (val is int) return val;
+    if (val is num) return val.toInt();
+    if (val is String) {
+      final match = RegExp(r'\d+').firstMatch(val);
+      if (match != null) {
+        return int.tryParse(match.group(0)!) ?? 0;
+      }
+    }
+    return 0;
+  }
+
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
@@ -38,12 +54,18 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
       );
 
       if (customer != null) {
+        final parsedSpeed = _parseSpeed(customer['speed']);
+        final fee = (customer['monthlyFee'] is num)
+            ? (customer['monthlyFee'] as num).toInt()
+            : int.tryParse(customer['monthlyFee']?.toString() ?? '0') ?? 0;
+
         setState(() {
           _customerData = customer;
           _currentPackage = {
             'name': customer['packageName'] ?? '',
-            'speed': customer['speed'] ?? 0,
-            'price': customer['monthlyFee'] ?? 0,
+            'speed': parsedSpeed,
+            'speedRaw': customer['speed']?.toString() ?? '$parsedSpeed Mbps',
+            'price': fee,
           };
         });
 
@@ -82,10 +104,14 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
       return;
     }
 
+    final int currentSpeed = (_currentPackage?['speed'] is int)
+        ? _currentPackage!['speed'] as int
+        : _parseSpeed(_currentPackage?['speed']);
+
     final selectedPackage = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) =>
-          _PackageSelectionDialog(currentSpeed: _currentPackage?['speed'] ?? 0),
+          _PackageSelectionDialog(currentSpeed: currentSpeed),
     );
 
     if (selectedPackage != null && mounted) {
@@ -96,10 +122,31 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
   Future<void> _showConfirmationDialog(Map<String, dynamic> newPackage) async {
     final reasonController = TextEditingController();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi Perubahan Paket'),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, width: 1.5),
+        ),
+        title: Row(
+          children: [
+            Icon(LucideIcons.arrowLeftRight, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, size: 22),
+            const SizedBox(width: 8),
+            Text(
+              'KONFIRMASI BANDWIDTH',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -113,33 +160,56 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
               TextField(
                 controller: reasonController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Alasan (opsional)',
-                  hintText: 'Mengapa Anda ingin mengubah paket?',
-                  border: OutlineInputBorder(),
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  fontSize: 13,
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Alasan Perubahan (Opsional)',
+                  labelStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF64748B)),
+                  hintText: 'Contoh: Kebutuhan bandwidth streaming / WFH',
+                  hintStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF94A3B8), fontSize: 12),
+                  filled: true,
+                  fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
-              Container(
+              CyberCard(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: const [
                     Text(
-                      'ℹ️ Informasi Penting:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      'INFORMASI KETENTUAN LAYANAN:',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        color: AppTheme.neonAmber,
+                        letterSpacing: 1.0,
+                      ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 6),
                     Text(
-                      '• Permintaan akan diproses oleh admin\n'
-                      '• Proses persetujuan 1-2 hari kerja\n'
-                      '• Perubahan berlaku bulan berikutnya\n'
-                      '• Tidak ada biaya instalasi ulang',
-                      style: TextStyle(fontSize: 13),
+                      '• Verifikasi profil bandwidth diproses oleh NOC AUDIRA\n'
+                      '• Estimasi aktivasi 1 - 2 jam kerja\n'
+                      '• Billing disesuaikan pro-rata pada siklus berikutnya\n'
+                      '• Tanpa biaya konfigurasi ulang ONT',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        color: AppTheme.textMuted,
+                        height: 1.5,
+                      ),
                     ),
                   ],
                 ),
@@ -150,11 +220,13 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
+            child: const Text('BATAL', style: TextStyle(color: AppTheme.textMuted, fontFamily: 'monospace')),
           ),
-          FilledButton(
+          CyberActionButton(
+            label: 'AJUKAN TIKET PERUBAHAN',
+            fullWidth: false,
+            primaryColor: AppTheme.neonCyan,
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Ajukan Permintaan'),
           ),
         ],
       ),
@@ -211,153 +283,187 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(LucideIcons.arrowLeft, size: 18, color: isDark ? Colors.white : const Color(0xFF0F172A)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Ubah Paket'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        title: Text(
+          'BANDWIDTH // UBAH PAKET',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            letterSpacing: 2.0,
+            color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+          ),
+        ),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.2) : const Color(0xFFE2E8F0),
+            height: 1,
+          ),
+        ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.neonCyan))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Current Package Card
-                  Card(
-                    elevation: 4,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.blue.shade700, Colors.blue.shade500],
+                  CyberCard(
+                    accentColor: AppTheme.neonCyan,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text(
+                              'PAKET AKTIF SAAT INI',
+                              style: TextStyle(
+                                fontFamily: 'monospace',
+                                color: AppTheme.textMuted,
+                                fontSize: 11,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                            CyberBadge(
+                              label: 'SUBSCRIPTION ACTIVE',
+                              color: AppTheme.neonGreen,
+                            ),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Paket Saat Ini',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 14,
+                        const SizedBox(height: 12),
+                        Text(
+                          _currentPackage?['name'] ?? 'N/A',
+                          style: TextStyle(
+                            fontFamily: 'monospace',
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'BANDWIDTH SPEED',
+                                  style: TextStyle(
+                                    fontFamily: 'monospace',
+                                    color: AppTheme.textMuted,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${_currentPackage?['speed'] ?? 0} Mbps',
+                                  style: const TextStyle(
+                                    fontFamily: 'monospace',
+                                    color: AppTheme.neonCyan,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            _currentPackage?['name'] ?? 'N/A',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                const Text(
+                                  'BIAYA BERLANGGANAN',
+                                  style: TextStyle(
+                                    fontFamily: 'monospace',
+                                    color: AppTheme.textMuted,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Rp ${NumberFormat('#,###', 'id_ID').format(_currentPackage?['price'] ?? 0)}',
+                                  style: const TextStyle(
+                                    fontFamily: 'monospace',
+                                    color: AppTheme.neonGreen,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Kecepatan',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${_currentPackage?['speed'] ?? 0} Mbps',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  const Text(
-                                    'Biaya Bulanan',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Rp ${NumberFormat('#,###', 'id_ID').format(_currentPackage?['price'] ?? 0)}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
                   // Change Package Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: FilledButton.icon(
-                      onPressed: _hasPendingRequest
-                          ? null
-                          : _showPackageSelection,
-                      icon: const Icon(Icons.sync_alt),
-                      label: Text(
-                        _hasPendingRequest
-                            ? 'Menunggu Persetujuan'
-                            : 'Ubah Paket',
-                      ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                      ),
-                    ),
+                  CyberActionButton(
+                    label: _hasPendingRequest
+                        ? 'MENUNGGU VERIFIKASI NOC'
+                        : 'UBAH PROFIL BANDWIDTH',
+                    icon: _hasPendingRequest ? LucideIcons.hourglass : LucideIcons.arrowLeftRight,
+                    color: _hasPendingRequest ? AppTheme.muted : AppTheme.neonCyan,
+                    onPressed: _hasPendingRequest ? null : () => _showPackageSelection(),
+                    fullWidth: true,
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
 
-                  // Request History
-                  const Text(
-                    'Riwayat Permintaan',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  // Request History Header
+                  Row(
+                    children: [
+                      const CyberPulseDot(color: AppTheme.neonAmber, size: 8),
+                      const SizedBox(width: 8),
+                      Text(
+                        'LOG RIWAYAT PERUBAHAN PAKET',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
 
                   _requestHistory.isEmpty
-                      ? Card(
+                      ? CyberCard(
                           child: Padding(
-                            padding: const EdgeInsets.all(32),
+                            padding: const EdgeInsets.all(28),
                             child: Center(
                               child: Column(
-                                children: [
+                                children: const [
                                   Icon(
-                                    Icons.history,
-                                    size: 48,
-                                    color: Colors.grey.shade400,
+                                    LucideIcons.history,
+                                    size: 40,
+                                    color: AppTheme.textMuted,
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: 10),
                                   Text(
-                                    'Belum ada riwayat permintaan',
+                                    'BELUM ADA RIWAYAT PERUBAHAN',
                                     style: TextStyle(
-                                      color: Colors.grey.shade600,
+                                      fontFamily: 'monospace',
+                                      fontSize: 12,
+                                      color: AppTheme.textMuted,
+                                      letterSpacing: 1.0,
                                     ),
                                   ),
                                 ],
@@ -371,7 +477,10 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
                           itemCount: _requestHistory.length,
                           itemBuilder: (context, index) {
                             final request = _requestHistory[index];
-                            return _RequestHistoryCard(request: request);
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _RequestHistoryCard(request: request),
+                            );
                           },
                         ),
                 ],
@@ -389,9 +498,15 @@ class _PackageSelectionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final packages = PackageUpgradeService.instance.availablePackages;
 
     return Dialog(
+      backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, width: 1.5),
+      ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
         child: Column(
@@ -399,21 +514,32 @@ class _PackageSelectionDialog extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.blue.shade700,
+                color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                border: Border(
+                  bottom: BorderSide(color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFE2E8F0)),
                 ),
               ),
-              child: const Text(
-                'Pilih Paket Baru',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                children: [
+                  Icon(LucideIcons.layers, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'KATALOG BANDWIDTH AUDIRA',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ),
             Flexible(
@@ -421,7 +547,7 @@ class _PackageSelectionDialog extends StatelessWidget {
                 shrinkWrap: true,
                 padding: const EdgeInsets.all(16),
                 itemCount: packages.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final package = packages[index];
                   final isCurrent = package['speed'] == currentSpeed;
@@ -437,10 +563,10 @@ class _PackageSelectionDialog extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Batal'),
+                child: const Text('BATAL', style: TextStyle(color: AppTheme.textMuted, fontFamily: 'monospace')),
               ),
             ),
           ],
@@ -464,90 +590,114 @@ class _PackageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: isCurrent ? Colors.grey.shade200 : Colors.white,
-      child: InkWell(
-        onTap: onTap,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isCurrent
+            ? (isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF1F5F9))
+            : (isDark ? AppTheme.cyberObsidian : Colors.white),
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      package['name'],
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  if (isCurrent)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade700,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'Paket Saat Ini',
+        border: Border.all(
+          color: isCurrent
+              ? (isDark ? AppTheme.textMuted : const Color(0xFFCBD5E1))
+              : (isDark ? AppTheme.neonCyan.withValues(alpha: 0.4) : const Color(0xFFCBD5E1)),
+          width: 1.2,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        package['name'],
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
+                          fontFamily: 'monospace',
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                package['description'],
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: (package['features'] as List<String>)
-                    .map(
-                      (feature) => Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '✓ $feature',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.blue.shade700,
+                    if (isCurrent)
+                      const CyberBadge(
+                        label: 'AKTIF',
+                        color: AppTheme.textMuted,
+                      )
+                    else
+                      CyberBadge(
+                        label: '${package['speed']} MBPS',
+                        color: AppTheme.neonCyan,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  package['description'],
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    color: AppTheme.textMuted,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: (package['features'] as List<String>)
+                      .map(
+                        (feature) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.neonCyan.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: AppTheme.neonCyan.withValues(alpha: 0.2)),
+                          ),
+                          child: Text(
+                            '✓ $feature',
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 10,
+                              color: AppTheme.neonCyan,
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                    .toList(),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Rp ${NumberFormat('#,###', 'id_ID').format(package['price'])}/bulan',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
+                      )
+                      .toList(),
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Text(
+                  'Rp ${NumberFormat('#,###', 'id_ID').format(package['price'])}/bulan',
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.neonGreen,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -567,13 +717,21 @@ class _ComparisonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final priceDiff = newPackage['price'] - currentPackage['price'];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentPrice = (currentPackage['price'] is num)
+        ? (currentPackage['price'] as num).toInt()
+        : int.tryParse(currentPackage['price']?.toString() ?? '0') ?? 0;
+    final newPrice = (newPackage['price'] is num)
+        ? (newPackage['price'] as num).toInt()
+        : int.tryParse(newPackage['price']?.toString() ?? '0') ?? 0;
+    final priceDiff = newPrice - currentPrice;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(8),
+        color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
       ),
       child: Column(
         children: [
@@ -583,70 +741,117 @@ class _ComparisonCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Saat Ini',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    Text(
+                      'SAAT INI',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 10,
+                        color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                      ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       currentPackage['name'],
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        fontSize: 13,
+                      ),
                     ),
-                    Text('${currentPackage['speed']} Mbps'),
                     Text(
-                      'Rp ${NumberFormat('#,###', 'id_ID').format(currentPackage['price'])}',
+                      '${currentPackage['speed']} Mbps',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        color: AppTheme.neonCyan,
+                        fontSize: 12,
+                      ),
+                    ),
+                    Text(
+                      'Rp ${NumberFormat('#,###', 'id_ID').format(currentPrice)}',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        color: AppTheme.neonGreen,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward, color: Colors.blue),
+              const Icon(LucideIcons.arrowRight, color: AppTheme.neonCyan, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
-                      'Paket Baru',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    Text(
+                      'PAKET BARU',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 10,
+                        color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                      ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       newPackage['name'],
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        fontSize: 13,
+                      ),
                       textAlign: TextAlign.right,
                     ),
-                    Text('${newPackage['speed']} Mbps'),
                     Text(
-                      'Rp ${NumberFormat('#,###', 'id_ID').format(newPackage['price'])}',
+                      '${newPackage['speed']} Mbps',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        color: AppTheme.neonCyan,
+                        fontSize: 12,
+                      ),
+                    ),
+                    Text(
+                      'Rp ${NumberFormat('#,###', 'id_ID').format(newPrice)}',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        color: AppTheme.neonGreen,
+                        fontSize: 11,
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const Divider(height: 24),
+          const SizedBox(height: 14),
+          Divider(color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFCBD5E1), height: 1),
+          const SizedBox(height: 14),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: priceDiff > 0
-                  ? Colors.orange.shade50
-                  : Colors.green.shade50,
+              color: (priceDiff > 0 ? AppTheme.neonAmber : AppTheme.neonGreen).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: (priceDiff > 0 ? AppTheme.neonAmber : AppTheme.neonGreen).withValues(alpha: 0.4),
+              ),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  priceDiff > 0 ? Icons.arrow_upward : Icons.arrow_downward,
-                  color: priceDiff > 0 ? Colors.orange : Colors.green,
-                  size: 20,
+                  priceDiff > 0 ? LucideIcons.arrowUp : LucideIcons.arrowDown,
+                  color: priceDiff > 0 ? AppTheme.neonAmber : AppTheme.neonGreen,
+                  size: 16,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 6),
                 Text(
-                  'Selisih: ${priceDiff > 0 ? '+' : ''}Rp ${NumberFormat('#,###', 'id_ID').format(priceDiff.abs())}/bulan',
+                  'SELISIH: ${priceDiff > 0 ? '+' : ''}Rp ${NumberFormat('#,###', 'id_ID').format(priceDiff.abs())}/BULAN',
                   style: TextStyle(
+                    fontFamily: 'monospace',
                     fontWeight: FontWeight.bold,
-                    color: priceDiff > 0
-                        ? Colors.orange.shade900
-                        : Colors.green.shade900,
+                    fontSize: 11,
+                    color: priceDiff > 0 ? AppTheme.neonAmber : AppTheme.neonGreen,
                   ),
                 ),
               ],
@@ -667,152 +872,131 @@ class _RequestHistoryCard extends StatelessWidget {
   Color _getStatusColor() {
     switch (request.status) {
       case 'approved':
-        return Colors.green;
+        return AppTheme.neonGreen;
       case 'rejected':
-        return Colors.red;
+        return AppTheme.neonCrimson;
       default:
-        return Colors.orange;
-    }
-  }
-
-  IconData _getStatusIcon() {
-    switch (request.status) {
-      case 'approved':
-        return Icons.check_circle;
-      case 'rejected':
-        return Icons.cancel;
-      default:
-        return Icons.pending;
+        return AppTheme.neonAmber;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      request.isUpgrade
-                          ? Icons.arrow_upward
-                          : Icons.arrow_downward,
-                      color: request.isUpgrade ? Colors.green : Colors.blue,
-                      size: 20,
+    return CyberCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    request.isUpgrade
+                        ? LucideIcons.arrowUp
+                        : LucideIcons.arrowDown,
+                    color: request.isUpgrade ? AppTheme.neonGreen : AppTheme.neonCyan,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    request.isUpgrade ? 'UPGRADE REQUEST' : 'DOWNGRADE REQUEST',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF0F172A),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      request.isUpgrade ? 'Upgrade' : 'Downgrade',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
                   ),
-                  decoration: BoxDecoration(
-                    color: _getStatusColor().withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        _getStatusIcon(),
-                        size: 14,
-                        color: _getStatusColor(),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        request.status.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: _getStatusColor(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        request.currentPackage,
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      const Icon(Icons.arrow_downward, size: 16),
-                      Text(
-                        request.requestedPackage,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      DateFormat('dd MMM yyyy').format(request.requestedAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    if (request.processedAt != null)
-                      Text(
-                        'Diproses: ${DateFormat('dd MMM yyyy').format(request.processedAt!)}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-            if (request.adminNotes != null) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
+                ],
+              ),
+              CyberBadge(
+                label: request.status.toUpperCase(),
+                color: _getStatusColor(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.info_outline, size: 16),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        request.adminNotes!,
-                        style: const TextStyle(fontSize: 12),
+                    Text(
+                      request.currentPackage,
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        color: AppTheme.textMuted,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Icon(LucideIcons.arrowDown, size: 14, color: AppTheme.neonCyan),
+                    Text(
+                      request.requestedPackage,
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF0F172A),
+                        fontSize: 13,
                       ),
                     ),
                   ],
                 ),
               ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    DateFormat('dd MMM yyyy').format(request.requestedAt),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 11,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
+                  if (request.processedAt != null)
+                    Text(
+                      'PROSES: ${DateFormat('dd MMM yyyy').format(request.processedAt!)}',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 10,
+                        color: AppTheme.neonCyan,
+                      ),
+                    ),
+                ],
+              ),
             ],
+          ),
+          if (request.adminNotes != null) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark ? AppTheme.cyberSurfaceCard : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(LucideIcons.info, size: 14, color: AppTheme.neonAmber),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      request.adminNotes!,
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

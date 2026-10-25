@@ -1,3 +1,4 @@
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/loyalty_service.dart';
@@ -113,7 +114,7 @@ class _LoyaltyRewardsPageState extends State<LoyaltyRewardsPage>
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('🎁 Loyalty & Rewards'),
@@ -254,7 +255,7 @@ class _LoyaltyRewardsPageState extends State<LoyaltyRewardsPage>
                             const SnackBar(content: Text('Kode disalin!')),
                           );
                         },
-                        icon: const Icon(Icons.copy),
+                        icon: const Icon(LucideIcons.copy),
                       ),
                     ],
                   ),
@@ -288,7 +289,7 @@ class _LoyaltyRewardsPageState extends State<LoyaltyRewardsPage>
                       child: Row(
                         children: [
                           const Icon(
-                            Icons.check_circle,
+                            LucideIcons.checkCircle2,
                             color: Colors.green,
                             size: 20,
                           ),
@@ -341,10 +342,10 @@ class _LoyaltyRewardsPageState extends State<LoyaltyRewardsPage>
               backgroundColor: canAfford ? Colors.blue : Colors.grey.shade300,
               child: Icon(
                 reward['category'] == 'discount'
-                    ? Icons.discount
+                    ? LucideIcons.tag
                     : reward['category'] == 'upgrade'
-                    ? Icons.upgrade
-                    : Icons.card_giftcard,
+                    ? LucideIcons.arrowUpCircle
+                    : LucideIcons.gift,
                 color: Colors.white,
               ),
             ),
@@ -396,7 +397,7 @@ class _LoyaltyRewardsPageState extends State<LoyaltyRewardsPage>
                   ? Colors.green.withValues(alpha: 0.2)
                   : Colors.red.withValues(alpha: 0.2),
               child: Icon(
-                isEarn ? Icons.add : Icons.remove,
+                isEarn ? LucideIcons.plus : LucideIcons.minus,
                 color: isEarn ? Colors.green : Colors.red,
               ),
             ),

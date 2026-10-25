@@ -1,8 +1,11 @@
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/wifi_model.dart';
 import '../../services/wifi_service.dart';
 import '../../services/auth_service.dart';
+import '../../utils/app_theme.dart';
+import '../../widgets/cyber_widgets.dart';
 
 class WiFiManagementPage extends StatefulWidget {
   const WiFiManagementPage({super.key});
@@ -42,94 +45,171 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
         _wifiConfig = config;
         _isLoading = false;
       });
+    } else {
+      setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
       appBar: AppBar(
-        title: const Text('WiFi Management'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
-          tabs: const [
-            Tab(icon: Icon(Icons.wifi), text: 'Overview'),
-            Tab(icon: Icon(Icons.devices), text: 'Devices'),
-            Tab(icon: Icon(Icons.people), text: 'Guest'),
-            Tab(icon: Icon(Icons.child_care), text: 'Parental'),
-          ],
+        leading: IconButton(
+          icon: Icon(
+            LucideIcons.arrowLeft,
+            size: 18,
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'WI-FI // MANAJEMEN ONT',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            letterSpacing: 2.0,
+            color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+          ),
+        ),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(49),
+          child: Column(
+            children: [
+              TabBar(
+                controller: _tabController,
+                indicatorColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                indicatorWeight: 3,
+                labelColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                unselectedLabelColor: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                labelStyle: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                  letterSpacing: 0.8,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 11,
+                ),
+                tabs: const [
+                  Tab(icon: Icon(LucideIcons.wifi, size: 18), text: 'OVERVIEW'),
+                  Tab(icon: Icon(LucideIcons.smartphone, size: 18), text: 'DEVICES'),
+                  Tab(icon: Icon(LucideIcons.users, size: 18), text: 'GUEST'),
+                  Tab(icon: Icon(LucideIcons.shield, size: 18), text: 'PARENTAL'),
+                ],
+              ),
+              Container(
+                color: isDark
+                    ? AppTheme.neonCyan.withValues(alpha: 0.2)
+                    : const Color(0xFFE2E8F0),
+                height: 1,
+              ),
+            ],
+          ),
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: AppTheme.neonCyan),
+            )
           : _wifiConfig == null
-          ? const Center(child: Text('Failed to load WiFi configuration'))
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildOverviewTab(),
-                _buildDevicesTab(),
-                _buildGuestNetworkTab(),
-                _buildParentalControlTab(),
-              ],
-            ),
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        LucideIcons.wifiOff,
+                        size: 48,
+                        color: isDark ? AppTheme.textMuted : const Color(0xFF94A3B8),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'GAGAL MEMUAT KONFIGURASI WI-FI',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      CyberActionButton(
+                        label: 'MUAT ULANG',
+                        icon: LucideIcons.refreshCw,
+                        fullWidth: false,
+                        primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                        onPressed: _loadWiFiConfig,
+                      ),
+                    ],
+                  ),
+                )
+              : TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildOverviewTab(isDark),
+                    _buildDevicesTab(isDark),
+                    _buildGuestNetworkTab(isDark),
+                    _buildParentalControlTab(isDark),
+                  ],
+                ),
     );
   }
 
   // ============ OVERVIEW TAB ============
-  Widget _buildOverviewTab() {
+  Widget _buildOverviewTab(bool isDark) {
     return RefreshIndicator(
+      color: AppTheme.neonCyan,
+      backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
       onRefresh: _loadWiFiConfig,
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _buildInfoCard(
-            title: 'Main Network',
-            icon: Icons.wifi,
-            color: Colors.deepPurple,
+            isDark: isDark,
+            title: 'JARINGAN UTAMA (PRIMARY WLAN)',
+            icon: LucideIcons.wifi,
+            color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
             children: [
-              _buildInfoRow('SSID', _wifiConfig!.ssid, Icons.network_wifi),
-              _buildPasswordRow('Password', _wifiConfig!.password),
-              _buildInfoRow('Security', _wifiConfig!.securityType, Icons.lock),
+              _buildInfoRow(isDark, 'SSID', _wifiConfig!.ssid, LucideIcons.wifi),
+              _buildPasswordRow(isDark, 'Password', _wifiConfig!.password),
+              _buildInfoRow(isDark, 'Security', _wifiConfig!.securityType, LucideIcons.lock),
               _buildInfoRow(
+                isDark,
                 'Band',
                 _wifiConfig!.band,
-                Icons.signal_cellular_alt,
+                LucideIcons.signal,
               ),
               _buildInfoRow(
+                isDark,
                 'Channel',
                 '${_wifiConfig!.channel}',
-                Icons.settings_input_antenna,
+                LucideIcons.radio,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
+                    child: CyberActionButton(
+                      label: 'UBAH SSID',
+                      icon: LucideIcons.fileEdit,
+                      primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
                       onPressed: _showChangeSSIDDialog,
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Change SSID'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: ElevatedButton.icon(
+                    child: CyberActionButton(
+                      label: 'UBAH SANDI',
+                      icon: LucideIcons.key,
+                      primaryColor: isDark ? AppTheme.neonAmber : const Color(0xFFD97706),
                       onPressed: _showChangePasswordDialog,
-                      icon: const Icon(Icons.vpn_key),
-                      label: const Text('Change Password'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                      ),
                     ),
                   ),
                 ],
@@ -138,19 +218,22 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
           ),
           const SizedBox(height: 16),
           _buildInfoCard(
-            title: 'Network Information',
-            icon: Icons.info_outline,
-            color: Colors.blue,
+            isDark: isDark,
+            title: 'INFORMASI TELEMETRI ONT',
+            icon: LucideIcons.info,
+            color: isDark ? AppTheme.neonGreen : const Color(0xFF059669),
             children: [
               _buildInfoRow(
-                'Hidden Network',
-                _wifiConfig!.isHidden ? 'Yes' : 'No',
-                Icons.visibility_off,
+                isDark,
+                'Hidden Network (SSID Broadcast)',
+                _wifiConfig!.isHidden ? 'Aktif (Disembunyikan)' : 'Tidak (Broadcasting)',
+                LucideIcons.eyeOff,
               ),
               _buildInfoRow(
-                'Last Modified',
+                isDark,
+                'Sinkronisasi Terakhir',
                 _formatDate(_wifiConfig!.lastModified),
-                Icons.access_time,
+                LucideIcons.clock,
               ),
             ],
           ),
@@ -160,56 +243,104 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
   }
 
   Widget _buildInfoCard({
+    required bool isDark,
     required String title,
     required IconData icon,
     required Color color,
     required List<Widget> children,
   }) {
-    return Card(
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 28),
-                const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.cyberObsidian : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? color.withValues(alpha: 0.35) : const Color(0xFFCBD5E1),
+          width: 1.2,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
                 ),
               ],
-            ),
-            const Divider(height: 24),
-            ...children,
-          ],
-        ),
+      ),
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: color.withValues(alpha: 0.3)),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.0,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Divider(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : const Color(0xFFE2E8F0),
+            height: 1,
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon) {
+  Widget _buildInfoRow(bool isDark, String label, String value, IconData icon) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 12),
+          Icon(
+            icon,
+            size: 18,
+            color: isDark ? AppTheme.neonCyan : const Color(0xFF64748B),
+          ),
+          const SizedBox(width: 10),
           Text(
-            '$label:',
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+            label,
+            style: TextStyle(
+              fontFamily: 'monospace',
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -218,45 +349,71 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
     );
   }
 
-  Widget _buildPasswordRow(String label, String password) {
+  Widget _buildPasswordRow(bool isDark, String label, String password) {
     bool obscured = true;
     return StatefulBuilder(
       builder: (context, setState) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 6),
           child: Row(
             children: [
-              const Icon(Icons.vpn_key, size: 20, color: Colors.grey),
-              const SizedBox(width: 12),
+              Icon(
+                LucideIcons.key,
+                size: 18,
+                color: isDark ? AppTheme.neonCyan : const Color(0xFF64748B),
+              ),
+              const SizedBox(width: 10),
               Text(
-                '$label:',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 15,
+                label,
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                  color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   obscured ? '••••••••' : password,
-                  style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: obscured ? 2.0 : 0.5,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
                   textAlign: TextAlign.right,
                 ),
               ),
+              const SizedBox(width: 6),
               IconButton(
-                icon: Icon(obscured ? Icons.visibility : Icons.visibility_off),
+                icon: Icon(
+                  obscured ? LucideIcons.eyeOff : LucideIcons.eye,
+                  color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                ),
                 onPressed: () => setState(() => obscured = !obscured),
-                iconSize: 20,
+                iconSize: 18,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(6),
               ),
               IconButton(
-                icon: const Icon(Icons.copy),
+                icon: Icon(
+                  LucideIcons.copy,
+                  color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                ),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: password));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Password copied!')),
+                    const SnackBar(
+                      content: Text('Password berhasil disalin!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 },
-                iconSize: 20,
+                iconSize: 18,
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(6),
               ),
             ],
           ),
@@ -266,30 +423,62 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
   }
 
   // ============ DEVICES TAB ============
-  Widget _buildDevicesTab() {
+  Widget _buildDevicesTab(bool isDark) {
     final user = _authService.currentUser;
-    if (user == null) return const Center(child: Text('Not logged in'));
+    if (user == null) {
+      return Center(
+        child: Text(
+          'SESI PENGGUNA BELUM AKTIF',
+          style: TextStyle(
+            fontFamily: 'monospace',
+            color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+          ),
+        ),
+      );
+    }
 
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
-          color: Colors.deepPurple[50],
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.cyberObsidian : const Color(0xFFF8FAFC),
+            border: Border(
+              bottom: BorderSide(
+                color: isDark
+                    ? AppTheme.neonCyan.withValues(alpha: 0.2)
+                    : const Color(0xFFE2E8F0),
+              ),
+            ),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Connected Devices',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  CyberPulseDot(
+                    color: isDark ? AppTheme.neonGreen : const Color(0xFF059669),
+                    size: 8,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'PERANGKAT TERHUBUNG',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton.icon(
+              CyberActionButton(
+                label: 'TAMBAH DEMO',
+                icon: LucideIcons.plus,
+                fullWidth: false,
+                primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
                 onPressed: _showAddDeviceDialog,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Demo'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                ),
               ),
             ],
           ),
@@ -299,7 +488,9 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
             stream: _wifiService.getConnectedDevices(user.id),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator(color: AppTheme.neonCyan),
+                );
               }
 
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -308,20 +499,35 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.devices_other,
-                        size: 64,
-                        color: Colors.grey[400],
+                        LucideIcons.laptop,
+                        size: 54,
+                        color: isDark ? AppTheme.textMuted : const Color(0xFF94A3B8),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 14),
                       Text(
-                        'No devices connected',
-                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        'TIDAK ADA PERANGKAT TERHUBUNG',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
                       ),
                       const SizedBox(height: 8),
-                      TextButton.icon(
+                      Text(
+                        'Semua perangkat yang tersambung ke WiFi akan muncul di sini',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      CyberActionButton(
+                        label: 'TAMBAH PERANGKAT CONTOH',
+                        icon: LucideIcons.plus,
+                        fullWidth: false,
+                        primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
                         onPressed: _showAddDeviceDialog,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add Demo Device'),
                       ),
                     ],
                   ),
@@ -333,7 +539,7 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   final device = snapshot.data![index];
-                  return _buildDeviceCard(device);
+                  return _buildDeviceCard(isDark, device);
                 },
               );
             },
@@ -343,72 +549,171 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
     );
   }
 
-  Widget _buildDeviceCard(ConnectedDevice device) {
+  Widget _buildDeviceCard(bool isDark, ConnectedDevice device) {
     IconData deviceIcon;
     Color deviceColor;
 
     switch (device.deviceType) {
       case 'phone':
-        deviceIcon = Icons.phone_android;
-        deviceColor = Colors.blue;
+        deviceIcon = LucideIcons.smartphone;
+        deviceColor = AppTheme.neonCyan;
         break;
       case 'laptop':
-        deviceIcon = Icons.laptop;
-        deviceColor = Colors.green;
+        deviceIcon = LucideIcons.laptop;
+        deviceColor = AppTheme.neonGreen;
         break;
       case 'tv':
-        deviceIcon = Icons.tv;
-        deviceColor = Colors.purple;
+        deviceIcon = LucideIcons.tv;
+        deviceColor = AppTheme.neonPurple;
         break;
       case 'iot':
-        deviceIcon = Icons.router;
-        deviceColor = Colors.orange;
+        deviceIcon = LucideIcons.router;
+        deviceColor = AppTheme.neonAmber;
         break;
       default:
-        deviceIcon = Icons.device_unknown;
-        deviceColor = Colors.grey;
+        deviceIcon = LucideIcons.helpCircle;
+        deviceColor = isDark ? AppTheme.textMuted : const Color(0xFF64748B);
     }
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 3,
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(12),
-        leading: CircleAvatar(
-          backgroundColor: deviceColor.withValues(alpha: 0.1),
-          child: Icon(deviceIcon, color: deviceColor),
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.cyberObsidian : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: device.isBlocked
+              ? AppTheme.neonCrimson.withValues(alpha: 0.5)
+              : (isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1)),
+          width: 1.2,
         ),
-        title: Text(
-          device.deviceName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: deviceColor.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+            border: Border.all(color: deviceColor.withValues(alpha: 0.4)),
+          ),
+          child: Icon(deviceIcon, color: deviceColor, size: 22),
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                device.deviceName,
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+            ),
+            if (device.isBlocked)
+              const CyberBadge(
+                label: 'BLOCKED',
+                color: AppTheme.neonCrimson,
+              ),
+          ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 4),
-            Text('IP: ${device.ipAddress}'),
-            Text('MAC: ${device.macAddress}'),
+            const SizedBox(height: 6),
+            Text(
+              'IP: ${device.ipAddress} • MAC: ${device.macAddress}',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 11,
+                color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+              ),
+            ),
+            const SizedBox(height: 6),
             Row(
               children: [
-                Icon(Icons.download, size: 14, color: Colors.green[700]),
-                Text(' ${device.downloadSpeed.toStringAsFixed(1)} Mbps'),
-                const SizedBox(width: 12),
-                Icon(Icons.upload, size: 14, color: Colors.blue[700]),
-                Text(' ${device.uploadSpeed.toStringAsFixed(1)} Mbps'),
+                Icon(
+                  LucideIcons.arrowDown,
+                  size: 13,
+                  color: isDark ? AppTheme.neonGreen : const Color(0xFF059669),
+                ),
+                Text(
+                  ' ${device.downloadSpeed.toStringAsFixed(1)} Mbps',
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppTheme.neonGreen : const Color(0xFF059669),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Icon(
+                  LucideIcons.arrowUp,
+                  size: 13,
+                  color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                ),
+                Text(
+                  ' ${device.uploadSpeed.toStringAsFixed(1)} Mbps',
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                  ),
+                ),
               ],
             ),
           ],
         ),
-        trailing: PopupMenuButton(
+        trailing: PopupMenuButton<String>(
+          color: isDark ? AppTheme.cyberObsidian : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(
+              color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1),
+            ),
+          ),
           itemBuilder: (context) => [
-            const PopupMenuItem(value: 'rename', child: Text('Rename')),
+            PopupMenuItem(
+              value: 'rename',
+              child: Text(
+                'Ganti Nama',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+            ),
             PopupMenuItem(
               value: 'block',
-              child: Text(device.isBlocked ? 'Unblock' : 'Block'),
+              child: Text(
+                device.isBlocked ? 'Buka Blokir' : 'Blokir Akses',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  color: device.isBlocked ? AppTheme.neonGreen : AppTheme.neonCrimson,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'parental',
-              child: Text('Parental Control'),
+              child: Text(
+                'Kontrol Orang Tua',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
             ),
           ],
           onSelected: (value) {
@@ -421,8 +726,9 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Set parental control for ${device.deviceName}',
+                    'Konfigurasi kontrol orang tua untuk ${device.deviceName}',
                   ),
+                  behavior: SnackBarBehavior.floating,
                 ),
               );
             }
@@ -433,13 +739,31 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
   }
 
   // ============ GUEST NETWORK TAB ============
-  Widget _buildGuestNetworkTab() {
+  Widget _buildGuestNetworkTab(bool isDark) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Card(
-          elevation: 4,
+        Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.cyberObsidian : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1),
+              width: 1.2,
+            ),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+          ),
           child: SwitchListTile(
+            activeTrackColor: isDark ? AppTheme.neonGreen.withValues(alpha: 0.4) : const Color(0xFF86EFAC),
+            activeThumbColor: isDark ? AppTheme.neonGreen : const Color(0xFF059669),
             value: _wifiConfig!.isGuestNetworkEnabled,
             onChanged: (value) async {
               await _wifiService.toggleGuestNetwork(
@@ -448,68 +772,104 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
               );
               _loadWiFiConfig();
             },
-            title: const Text(
-              'Guest Network',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            title: Text(
+              'GUEST NETWORK (WLAN ISOLASI TAMU)',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                letterSpacing: 1.0,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
             ),
             subtitle: Text(
               _wifiConfig!.isGuestNetworkEnabled
-                  ? 'Enabled - Guests can connect'
-                  : 'Disabled - Only main network available',
+                  ? 'Aktif — Tamu dapat mengakses internet secara terisolasi'
+                  : 'Nonaktif — Hanya jaringan utama yang tersedia',
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+              ),
             ),
-            secondary: Icon(
-              Icons.people,
-              color: _wifiConfig!.isGuestNetworkEnabled
-                  ? Colors.green
-                  : Colors.grey,
+            secondary: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: (_wifiConfig!.isGuestNetworkEnabled ? AppTheme.neonGreen : AppTheme.textMuted)
+                    .withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                LucideIcons.users,
+                color: _wifiConfig!.isGuestNetworkEnabled ? AppTheme.neonGreen : AppTheme.textMuted,
+                size: 22,
+              ),
             ),
           ),
         ),
         if (_wifiConfig!.isGuestNetworkEnabled) ...[
           const SizedBox(height: 16),
           _buildInfoCard(
-            title: 'Guest Network Details',
-            icon: Icons.wifi_tethering,
-            color: Colors.green,
+            isDark: isDark,
+            title: 'KREDENSIAL GUEST NETWORK',
+            icon: LucideIcons.rss,
+            color: isDark ? AppTheme.neonGreen : const Color(0xFF059669),
             children: [
               _buildInfoRow(
+                isDark,
                 'Guest SSID',
                 _wifiConfig!.guestSSID ?? 'N/A',
-                Icons.network_wifi,
+                LucideIcons.wifi,
               ),
               _buildPasswordRow(
+                isDark,
                 'Guest Password',
                 _wifiConfig!.guestPassword ?? 'N/A',
               ),
             ],
           ),
           const SizedBox(height: 16),
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.info, color: Colors.blue),
-                      SizedBox(width: 8),
-                      Text(
-                        'About Guest Network',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12),
-                  Text('• Guest network provides internet access for visitors'),
-                  Text('• Guests cannot access your main network devices'),
-                  Text('• Guest network has limited bandwidth'),
-                  Text('• Ideal for temporary visitors'),
-                ],
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.25) : const Color(0xFFCBD5E1),
               ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(LucideIcons.info, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      'TENTANG JARINGAN TAMU (ISOLASI VAP)',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        letterSpacing: 0.8,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '• Menyediakan akses internet terpisah untuk tamu & pengunjung\n'
+                  '• Tamu tidak dapat mengakses perangkat LAN pribadi (Printer, NAS, TV)\n'
+                  '• Bandwidth terkelola otomatis agar jaringan utama tetap cepat\n'
+                  '• Ideal untuk keamanan berkas dan privasi jaringan keluarga',
+                  style: TextStyle(
+                    fontFamily: 'monospace',
+                    fontSize: 11,
+                    height: 1.5,
+                    color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -518,69 +878,122 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
   }
 
   // ============ PARENTAL CONTROL TAB ============
-  Widget _buildParentalControlTab() {
+  Widget _buildParentalControlTab(bool isDark) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Card(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.child_care, color: Colors.purple, size: 28),
-                    SizedBox(width: 12),
-                    Text(
-                      'Parental Control',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.cyberObsidian : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppTheme.neonPurple.withValues(alpha: 0.35) : const Color(0xFFCBD5E1),
+              width: 1.2,
+            ),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
                     ),
                   ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.neonPurple.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.neonPurple.withValues(alpha: 0.4)),
+                    ),
+                    child: const Icon(LucideIcons.shield, color: AppTheme.neonPurple, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'KONTROL ORANG TUA // FILTER KELUARGA',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.0,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Kelola akses internet anak dan anggota keluarga:',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                 ),
-                SizedBox(height: 16),
-                Text('Manage internet access for your children:'),
-                SizedBox(height: 8),
-                Text('• Block specific websites or categories'),
-                Text('• Set time restrictions'),
-                Text('• Limit daily screen time'),
-                Text('• Monitor device usage'),
-              ],
-            ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '• Blokir situs web dewasa dan konten tidak aman\n'
+                '• Jadwalkan jam istirahat internet otomatis\n'
+                '• Batasi alokasi waktu online harian per perangkat\n'
+                '• Pantau status aktivitas bandwidth perangkat secara real-time',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 11,
+                  height: 1.6,
+                  color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 16),
-        Card(
-          elevation: 4,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Quick Setup',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Go to "Devices" tab to select a device and configure parental controls.',
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () => _tabController.animateTo(1),
-                  icon: const Icon(Icons.devices),
-                  label: const Text('Go to Devices'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 48),
-                  ),
-                ),
-              ],
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.cyberObsidian : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1),
+              width: 1.2,
             ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'PANDUAN KONFIGURASI CEPAT',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Buka tab "DEVICES" di atas, ketuk tombol opsi (⋮) pada perangkat yang ingin Anda atur, lalu pilih "Kontrol Orang Tua".',
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.4,
+                  color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                ),
+              ),
+              const SizedBox(height: 16),
+              CyberActionButton(
+                label: 'BUKA TAB DAFTAR PERANGKAT',
+                icon: LucideIcons.smartphone,
+                primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                onPressed: () => _tabController.animateTo(1),
+              ),
+            ],
           ),
         ),
       ],
@@ -591,23 +1004,64 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
 
   void _showChangeSSIDDialog() {
     final controller = TextEditingController(text: _wifiConfig!.ssid);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change SSID'),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+            width: 1.5,
+          ),
+        ),
+        title: Row(
+          children: [
+            Icon(LucideIcons.fileEdit, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, size: 22),
+            const SizedBox(width: 8),
+            Text(
+              'UBAH SSID WI-FI',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'New SSID',
-            border: OutlineInputBorder(),
+          style: TextStyle(
+            fontFamily: 'monospace',
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
+          decoration: InputDecoration(
+            labelText: 'Nama Jaringan Baru (SSID)',
+            labelStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF64748B)),
+            filled: true,
+            fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue),
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('BATAL', style: TextStyle(color: AppTheme.textMuted, fontFamily: 'monospace')),
           ),
-          ElevatedButton(
+          CyberActionButton(
+            label: 'SIMPAN',
+            fullWidth: false,
+            primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
             onPressed: () async {
               final success = await _wifiService.updateWiFiSSID(
                 customerId: _authService.currentUser!.id,
@@ -618,12 +1072,14 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
                 if (context.mounted) Navigator.pop(context);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('SSID updated successfully')),
+                    const SnackBar(
+                      content: Text('SSID berhasil diperbarui!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                 }
               }
             },
-            child: const Text('Update'),
           ),
         ],
       ),
@@ -632,29 +1088,71 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
 
   void _showChangePasswordDialog() {
     final controller = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change WiFi Password'),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isDark ? AppTheme.neonAmber : const Color(0xFFD97706),
+            width: 1.5,
+          ),
+        ),
+        title: Row(
+          children: [
+            Icon(LucideIcons.key, color: isDark ? AppTheme.neonAmber : const Color(0xFFD97706), size: 22),
+            const SizedBox(width: 8),
+            Text(
+              'UBAH SANDI WI-FI',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'New Password',
-            border: OutlineInputBorder(),
-          ),
           obscureText: true,
+          style: TextStyle(
+            fontFamily: 'monospace',
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
+          decoration: InputDecoration(
+            labelText: 'Kata Sandi Baru (Min. 8 Karakter)',
+            labelStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF64748B)),
+            filled: true,
+            fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: isDark ? AppTheme.neonAmber : const Color(0xFFD97706)),
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('BATAL', style: TextStyle(color: AppTheme.textMuted, fontFamily: 'monospace')),
           ),
-          ElevatedButton(
+          CyberActionButton(
+            label: 'SIMPAN',
+            fullWidth: false,
+            primaryColor: isDark ? AppTheme.neonAmber : const Color(0xFFD97706),
             onPressed: () async {
               if (controller.text.length < 8) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Password must be at least 8 characters'),
+                    content: Text('Sandi harus memiliki minimal 8 karakter!'),
+                    behavior: SnackBarBehavior.floating,
                   ),
                 );
                 return;
@@ -669,13 +1167,13 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Password updated successfully'),
+                      content: Text('Sandi Wi-Fi berhasil diperbarui!'),
+                      behavior: SnackBarBehavior.floating,
                     ),
                   );
                 }
               }
             },
-            child: const Text('Update'),
           ),
         ],
       ),
@@ -685,34 +1183,78 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
   void _showAddDeviceDialog() {
     final nameController = TextEditingController();
     String selectedType = 'phone';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Add Demo Device'),
+          backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+              width: 1.5,
+            ),
+          ),
+          title: Row(
+            children: [
+              Icon(LucideIcons.smartphone, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, size: 22),
+              const SizedBox(width: 8),
+              Text(
+                'TAMBAH PERANGKAT DEMO',
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+            ],
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Device Name',
-                  border: OutlineInputBorder(),
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Nama Perangkat',
+                  labelStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF64748B)),
+                  filled: true,
+                  fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: selectedType,
-                decoration: const InputDecoration(
-                  labelText: 'Device Type',
-                  border: OutlineInputBorder(),
+                dropdownColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+                decoration: InputDecoration(
+                  labelText: 'Tipe Perangkat',
+                  labelStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF64748B)),
+                  filled: true,
+                  fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+                  ),
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'phone', child: Text('Phone')),
-                  DropdownMenuItem(value: 'laptop', child: Text('Laptop')),
-                  DropdownMenuItem(value: 'tv', child: Text('TV')),
-                  DropdownMenuItem(value: 'iot', child: Text('IoT Device')),
+                  DropdownMenuItem(value: 'phone', child: Text('Smartphone')),
+                  DropdownMenuItem(value: 'laptop', child: Text('Laptop / PC')),
+                  DropdownMenuItem(value: 'tv', child: Text('Smart TV')),
+                  DropdownMenuItem(value: 'iot', child: Text('IoT / CCTV')),
                 ],
                 onChanged: (value) {
                   setState(() => selectedType = value!);
@@ -723,13 +1265,19 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const Text('BATAL', style: TextStyle(color: AppTheme.textMuted, fontFamily: 'monospace')),
             ),
-            ElevatedButton(
+            CyberActionButton(
+              label: 'TAMBAH',
+              fullWidth: false,
+              primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
               onPressed: () async {
                 if (nameController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter device name')),
+                    const SnackBar(
+                      content: Text('Masukkan nama perangkat terlebih dahulu!'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
                   return;
                 }
@@ -740,7 +1288,6 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
                 );
                 if (context.mounted) Navigator.pop(context);
               },
-              child: const Text('Add'),
             ),
           ],
         ),
@@ -750,23 +1297,60 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
 
   void _showRenameDeviceDialog(ConnectedDevice device) {
     final controller = TextEditingController(text: device.deviceName);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Rename Device'),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+            width: 1.5,
+          ),
+        ),
+        title: Row(
+          children: [
+            Icon(LucideIcons.edit3, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, size: 22),
+            const SizedBox(width: 8),
+            Text(
+              'GANTI NAMA PERANGKAT',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Device Name',
-            border: OutlineInputBorder(),
+          style: TextStyle(
+            fontFamily: 'monospace',
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
+          ),
+          decoration: InputDecoration(
+            labelText: 'Nama Perangkat Baru',
+            labelStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF64748B)),
+            filled: true,
+            fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('BATAL', style: TextStyle(color: AppTheme.textMuted, fontFamily: 'monospace')),
           ),
-          ElevatedButton(
+          CyberActionButton(
+            label: 'SIMPAN',
+            fullWidth: false,
+            primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
             onPressed: () async {
               await _wifiService.updateDeviceName(
                 deviceId: device.id,
@@ -774,7 +1358,6 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
               );
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('Update'),
           ),
         ],
       ),
@@ -791,15 +1374,16 @@ class _WiFiManagementPageState extends State<WiFiManagementPage>
         SnackBar(
           content: Text(
             device.isBlocked
-                ? '${device.deviceName} unblocked'
-                : '${device.deviceName} blocked',
+                ? '${device.deviceName} berhasil dibuka blokir'
+                : '${device.deviceName} berhasil diblokir dari jaringan',
           ),
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
   }
 
   String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 }

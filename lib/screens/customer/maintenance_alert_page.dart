@@ -1,3 +1,4 @@
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../services/firebase_service.dart';
@@ -59,7 +60,7 @@ class _MaintenanceAlertPageState extends State<MaintenanceAlertPage> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text('Jadwal Pemeliharaan'),
@@ -67,7 +68,7 @@ class _MaintenanceAlertPageState extends State<MaintenanceAlertPage> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.info_outline),
+            icon: const Icon(LucideIcons.info),
             onPressed: _showInfoDialog,
           ),
         ],
@@ -98,7 +99,7 @@ class _MaintenanceAlertPageState extends State<MaintenanceAlertPage> {
       padding: const EdgeInsets.all(32),
       children: [
         Icon(
-          Icons.check_circle_outline,
+          LucideIcons.checkCircle2,
           size: 80,
           color: Colors.green.shade300,
         ),
@@ -210,16 +211,16 @@ class _MaintenanceCard extends StatelessWidget {
 
     switch (maintenanceType) {
       case 'network':
-        typeIcon = Icons.router;
+        typeIcon = LucideIcons.router;
         break;
       case 'server':
-        typeIcon = Icons.dns;
+        typeIcon = LucideIcons.server;
         break;
       case 'emergency':
-        typeIcon = Icons.warning;
+        typeIcon = LucideIcons.alertTriangle;
         break;
       default:
-        typeIcon = Icons.build;
+        typeIcon = LucideIcons.wrench;
     }
 
     return Container(
@@ -315,7 +316,7 @@ class _MaintenanceCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.calendar_today,
+                      LucideIcons.calendar,
                       size: 16,
                       color: Colors.grey[600],
                     ),
@@ -329,7 +330,7 @@ class _MaintenanceCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                    Icon(LucideIcons.clock, size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 8),
                     Text(
                       '${maintenance['startTime']} - ${maintenance['endTime']} WIB',
@@ -340,7 +341,7 @@ class _MaintenanceCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                    Icon(LucideIcons.mapPin, size: 16, color: Colors.grey[600]),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -406,7 +407,7 @@ class _CountdownWidget extends StatelessWidget {
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle, color: Colors.green, size: 20),
+            Icon(LucideIcons.checkCircle2, color: Colors.green, size: 20),
             SizedBox(width: 8),
             Text(
               'Pemeliharaan Selesai',
@@ -511,7 +512,7 @@ class _MaintenanceDetailSheet extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(LucideIcons.x),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -530,25 +531,25 @@ class _MaintenanceDetailSheet extends StatelessWidget {
           const SizedBox(height: 16),
 
           _buildDetailRow(
-            Icons.calendar_today,
+            LucideIcons.calendar,
             'Tanggal',
             DateFormat('EEEE, d MMMM yyyy').format(scheduledDate),
           ),
           const SizedBox(height: 12),
           _buildDetailRow(
-            Icons.access_time,
+            LucideIcons.clock,
             'Waktu',
             '${maintenance['startTime']} - ${maintenance['endTime']} WIB',
           ),
           const SizedBox(height: 12),
           _buildDetailRow(
-            Icons.location_on,
+            LucideIcons.mapPin,
             'Area Terdampak',
             maintenance['affectedAreas'] ?? '-',
           ),
           const SizedBox(height: 12),
           _buildDetailRow(
-            Icons.info_outline,
+            LucideIcons.info,
             'Status',
             _getStatusLabel(maintenance['status'] ?? 'scheduled'),
           ),
@@ -568,7 +569,7 @@ class _MaintenanceDetailSheet extends StatelessWidget {
                   ),
                 );
               },
-              icon: const Icon(Icons.notifications_active),
+              icon: const Icon(LucideIcons.bellRing),
               label: const Text('Ingatkan Saya'),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),

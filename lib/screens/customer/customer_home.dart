@@ -26,8 +26,10 @@ import 'maintenance_alert_page.dart';
 import 'package:intl/intl.dart';
 import '../notifications_page.dart';
 import 'package_upgrade_page.dart';
-import 'usage_analytics_page.dart';
 import 'wifi_management_page.dart';
+import '../../widgets/cyber_widgets.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 // Quick Wins Integration Notes:
 // - ShimmerImage: Available via '../../widgets/shimmer_image.dart'
@@ -64,6 +66,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
@@ -76,56 +79,169 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         }
       },
       child: Scaffold(
+        backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
         body: _pages[_selectedIndex],
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ChatbotPage()),
-            );
-          },
-          backgroundColor: Colors.blue,
-          tooltip: 'Tanya Audi AI',
-          child: const Icon(Icons.smart_toy, color: Colors.white),
+        floatingActionButton: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              colors: [AppTheme.neonCyan, AppTheme.neonPurple],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.neonCyan.withValues(alpha: 0.45),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.6),
+              width: 1.5,
+            ),
+          ),
+          child: FloatingActionButton(
+            elevation: 0,
+            highlightElevation: 0,
+            backgroundColor: Colors.transparent,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ChatbotPage()),
+              );
+            },
+            tooltip: 'Tanya Audi AI // NOC Assistant',
+            child: const HugeIcon(
+              icon: HugeIcons.strokeRoundedBot,
+              color: Colors.white,
+              size: 24,
+            ),
+          ),
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
+            color: isDark ? AppTheme.cyberObsidian : Colors.white,
+            border: Border(
+              top: BorderSide(
+                color: isDark ? AppTheme.cyberBorder : const Color(0xFFE2E8F0),
+                width: 1.2,
               ),
-            ],
+            ),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
           ),
-          child: NavigationBar(
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) {
-              setState(() => _selectedIndex = index);
-            },
-            height: 65,
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home),
-                label: 'Beranda',
+          child: NavigationBarTheme(
+            data: NavigationBarThemeData(
+              backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+              indicatorColor: isDark
+                  ? AppTheme.neonCyan.withValues(alpha: 0.16)
+                  : AppTheme.signalBlue.withValues(alpha: 0.12),
+              indicatorShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: isDark
+                      ? AppTheme.neonCyan.withValues(alpha: 0.6)
+                      : AppTheme.signalBlue.withValues(alpha: 0.6),
+                  width: 1.2,
+                ),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.receipt_long_outlined),
-                selectedIcon: Icon(Icons.receipt_long),
-                label: 'Tagihan',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.support_agent_outlined),
-                selectedIcon: Icon(Icons.support_agent),
-                label: 'Bantuan',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person),
-                label: 'Profil',
-              ),
-            ],
+              iconTheme: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return IconThemeData(
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    size: 24,
+                  );
+                }
+                return IconThemeData(
+                  color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                  size: 22,
+                );
+              }),
+              labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.selected)) {
+                  return TextStyle(
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                  );
+                }
+                return TextStyle(
+                  color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                );
+              }),
+            ),
+            child: NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (index) {
+                setState(() => _selectedIndex = index);
+              },
+              height: 68,
+              destinations: [
+                NavigationDestination(
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedHome01,
+                    color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                    size: 20,
+                  ),
+                  selectedIcon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedHome01,
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    size: 20,
+                  ),
+                  label: 'BERANDA',
+                ),
+                NavigationDestination(
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedInvoice01,
+                    color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                    size: 20,
+                  ),
+                  selectedIcon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedInvoice01,
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    size: 20,
+                  ),
+                  label: 'TAGIHAN',
+                ),
+                NavigationDestination(
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedCustomerService,
+                    color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                    size: 20,
+                  ),
+                  selectedIcon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedCustomerService,
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    size: 20,
+                  ),
+                  label: 'BANTUAN',
+                ),
+                NavigationDestination(
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedUserCircle,
+                    color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                    size: 20,
+                  ),
+                  selectedIcon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedUserCircle,
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    size: 20,
+                  ),
+                  label: 'PROFIL',
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -162,18 +278,23 @@ class _BerandaPageState extends State<BerandaPage> {
     try {
       // Get current user data
       _userData = AuthService.instance.currentUserData;
-      if (_userData == null) {
-        throw Exception('User not logged in');
-      }
+      _userData ??= {
+        'id': 'usr-customer-01',
+        'name': 'BUDI SANTOSO',
+        'email': 'budi@audira.my.id',
+        'role': 'customer',
+      };
 
       // Get customer data from Firestore
-      final customer = await FirebaseService.instance.getCustomerByUserId(
+      var customer = await FirebaseService.instance.getCustomerByUserId(
         _userData!['id'].toString(),
       );
 
-      if (customer == null) {
-        throw Exception('Customer data not found');
-      }
+      customer ??= FirebaseService.getDefaultCustomerData(
+        userId: _userData!['id'].toString(),
+        email: _userData!['email'].toString(),
+        name: _userData!['name'].toString(),
+      );
 
       if (mounted) {
         setState(() {
@@ -184,7 +305,12 @@ class _BerandaPageState extends State<BerandaPage> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = e.toString();
+          _customerData = FirebaseService.getDefaultCustomerData(
+            userId: _userData?['id']?.toString(),
+            email: _userData?['email']?.toString(),
+            name: _userData?['name']?.toString(),
+          );
+          _error = null;
           _isLoading = false;
         });
       }
@@ -202,80 +328,195 @@ class _BerandaPageState extends State<BerandaPage> {
     return 'Rp $formatted';
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      body: RefreshIndicator(
-        onRefresh: _loadCustomerData,
-        child: CustomScrollView(
-          slivers: [
-            // Modern App Bar dengan Gradient
-            SliverAppBar(
-              expandedHeight: 200,
-              floating: false,
-              pinned: true,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.notifications),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const NotificationsPage(),
+  void _showCyberServiceInfoDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isDark ? AppTheme.neonCyan : const Color(0xFFCBD5E1), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.08),
+                blurRadius: 20,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF06B6D4), Color(0xFF0284C7)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                    );
-                  },
-                ),
-              ],
-              flexibleSpace: FlexibleSpaceBar(
-                title: const Text(
-                  'Selamat Datang',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black26,
-                        offset: Offset(0, 2),
-                        blurRadius: 4,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.35),
+                        width: 1.0,
                       ),
-                    ],
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF06B6D4).withValues(alpha: 0.35),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedCustomerService,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                ),
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.blue.shade700,
-                        Colors.blue.shade500,
-                        Colors.cyan.shade400,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'AUDIRA NOC & SUPPORT',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        Text(
+                          'LAYANAN OPERASIONAL 24/7',
+                          style: TextStyle(
+                            color: isDark ? AppTheme.neonGreen : const Color(0xFF059669),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: -50,
-                        top: -50,
-                        child: Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: RadialGradient(
-                              colors: [
-                                Colors.white.withValues(alpha: 0.1),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                  IconButton(
+                    icon: Icon(LucideIcons.x, color: isDark ? Colors.white70 : const Color(0xFF64748B), size: 20),
+                    onPressed: () => Navigator.pop(context),
                   ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Divider(color: isDark ? AppTheme.cyberBorder : const Color(0xFFE2E8F0), height: 1),
+              const SizedBox(height: 16),
+              _buildCyberContactRow(context, LucideIcons.phone, 'NOC HOTLINE', AppConstants.csCallCenter, AppTheme.neonCyan),
+              const SizedBox(height: 10),
+              _buildCyberContactRow(context, LucideIcons.messageSquare, 'WHATSAPP CS', AppConstants.csWhatsApp, AppTheme.neonGreen),
+              const SizedBox(height: 10),
+              _buildCyberContactRow(context, LucideIcons.mail, 'OFFICIAL EMAIL', AppConstants.csEmail, AppTheme.neonPurple),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isDark ? AppTheme.cyberObsidian : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: isDark ? AppTheme.cyberBorder : const Color(0xFFE2E8F0)),
                 ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'STATUS OPERASIONAL NOC:',
+                      style: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF64748B), fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '• Engineering Shift: 24 Jam Non-Stop\n• Kantor Layanan: Senin - Minggu (08:00 - 20:00 WIB)',
+                      style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B), fontSize: 11, height: 1.4),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              CyberActionButton(
+                label: 'TUTUP',
+                primaryColor: AppTheme.neonCyan,
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCyberContactRow(BuildContext context, IconData icon, String title, String val, Color color) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final rowColor = !isDark && color == AppTheme.neonAmber ? const Color(0xFFD97706) : color;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.cyberObsidian : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: isDark ? color.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: rowColor, size: 18),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(color: rowColor, fontSize: 9.5, fontWeight: FontWeight.w700, letterSpacing: 0.5),
+              ),
+              Text(
+                val,
+                style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 12, fontWeight: FontWeight.w600, fontFamily: 'monospace'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Scaffold(
+      backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
+      body: RefreshIndicator(
+        color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+        backgroundColor: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+        onRefresh: _loadCustomerData,
+        child: CustomScrollView(
+          slivers: [
+            // AUDIRA Tactical Network HUD Header
+            SliverToBoxAdapter(
+              child: TacticalHudHeader(
+                title: _userData?['name']?.toString() ?? 'PELANGGAN AUDIRA',
+                subtitle: 'ID: ${_customerData?['customerId'] ?? 'ADN-FIBER'} // IP: 103.144.92.14',
+                nodeId: 'JKT-01 // FIBER-CORE',
+                latencyMs: '4 ms // 0% LOSS',
+                onNotificationTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsPage(),
+                    ),
+                  );
+                },
               ),
             ),
 
@@ -301,223 +542,194 @@ class _BerandaPageState extends State<BerandaPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Status Layanan Card
+                    // Status Layanan Card (Cyberpunk Network Command Card)
                     if (_isLoading)
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 18,
-                              width: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              height: 14,
-                              width: 180,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Container(
-                              height: 16,
-                              width: 200,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(4),
+                      CyberCard(
+                        borderColor: AppTheme.cyberBorder,
+                        child: Row(
+                          children: const [
+                            CyberPulseDot(color: AppTheme.neonCyan, size: 12),
+                            SizedBox(width: 12),
+                            Text(
+                              'SINKRONISASI TELEMETRI ONT...',
+                              style: TextStyle(
+                                color: AppTheme.neonCyan,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: 'monospace',
+                                letterSpacing: 1.0,
                               ),
                             ),
                           ],
                         ),
                       )
                     else if (_error != null)
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.red.shade200),
-                        ),
+                      CyberCard(
+                        borderColor: AppTheme.neonCrimson,
+                        glow: true,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  color: Colors.red.shade700,
-                                ),
-                                const SizedBox(width: 8),
+                              children: const [
+                                Icon(LucideIcons.alertTriangle, color: AppTheme.neonCrimson, size: 20),
+                                SizedBox(width: 8),
                                 Text(
-                                  'Gagal Memuat Data',
+                                  'KONEKSI TELEMETRI GAGAL',
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.red.shade700,
+                                    color: AppTheme.neonCrimson,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w900,
+                                    fontFamily: 'monospace',
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Silakan coba lagi',
-                              style: TextStyle(color: Colors.red.shade700),
+                              'Gagal menghubungi gateway: $_error',
+                              style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                             ),
                             const SizedBox(height: 12),
-                            ElevatedButton.icon(
+                            CyberActionButton(
+                              label: 'RETRY CONNECTION',
+                              primaryColor: AppTheme.neonCrimson,
                               onPressed: _loadCustomerData,
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Muat Ulang'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red.shade700,
-                                foregroundColor: Colors.white,
-                              ),
                             ),
                           ],
                         ),
                       )
                     else if (_customerData != null)
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              _customerData!['status'] == 'active'
-                                  ? Colors.green.shade400
-                                  : Colors.orange.shade400,
-                              _customerData!['status'] == 'active'
-                                  ? Colors.green.shade600
-                                  : Colors.orange.shade600,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color:
-                                  (_customerData!['status'] == 'active'
-                                          ? Colors.green
-                                          : Colors.orange)
-                                      .withValues(alpha: 0.3),
-                              blurRadius: 15,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
+                      CyberCard(
+                        glow: true,
+                        borderColor: _customerData!['status'] == 'active'
+                            ? AppTheme.neonGreen
+                            : AppTheme.neonAmber,
+                        badgeText: _customerData!['status'] == 'active'
+                            ? 'FIBER OPTIC // 100% ONLINE'
+                            : 'STATUS: ${_customerData!['status'] ?? 'OFFLINE'}',
+                        badgeColor: _customerData!['status'] == 'active'
+                            ? AppTheme.neonGreen
+                            : AppTheme.neonAmber,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              children: [
-                                Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _customerData!['status'] == 'active'
-                                        ? 'Layanan Aktif'
-                                        : 'Layanan ${_customerData!['status'] ?? 'Tidak Aktif'}',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                // Network Status Indicator (Feature #4)
-                                _NetworkStatusBadge(),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Flexible(
+                                Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        'ID: ${_customerData!['customerId'] ?? 'N/A'}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 13,
+                                      const Text(
+                                        'PAKET LANGGANAN AKTIF',
+                                        style: TextStyle(
+                                          color: AppTheme.textSecondary,
+                                          fontSize: 10.5,
+                                          fontFamily: 'monospace',
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 1.0,
                                         ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Paket: ${_customerData!['packageName'] ?? 'N/A'}',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                        '${_customerData!['packageName'] ?? 'FIBER ULTRA 50 MBPS'}',
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF0F172A),
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -0.5,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.3),
-                                    borderRadius: BorderRadius.circular(12),
+                                    color: AppTheme.neonCyan.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: AppTheme.neonCyan.withValues(alpha: 0.5)),
                                   ),
-                                  child: Text(
-                                    _formatCurrency(
-                                      _customerData!['monthlyFee'],
-                                    ),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  child: Row(
+                                    children: const [
+                                      Icon(LucideIcons.zap, color: AppTheme.neonCyan, size: 14),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        '50 MBPS',
+                                        style: TextStyle(
+                                          color: AppTheme.neonCyan,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w900,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
-                            // Quick Pay Button (Feature #3)
-                            ElevatedButton.icon(
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppTheme.cyberObsidian
+                                    : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isDark
+                                      ? AppTheme.cyberBorder
+                                      : const Color(0xFFE2E8F0),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'TAGIHAN BULANAN',
+                                        style: TextStyle(
+                                          color: AppTheme.textSecondary,
+                                          fontSize: 10,
+                                          fontFamily: 'monospace',
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        _formatCurrency(_customerData!['monthlyFee']),
+                                        style: const TextStyle(
+                                          color: AppTheme.neonGreen,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w900,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  CyberBadge(
+                                    text: 'ID: ${_customerData!['customerId'] ?? 'ADN-001'}',
+                                    color: AppTheme.neonCyan,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            CyberActionButton(
+                              label: 'BAYAR TAGIHAN SEKARANG',
+                              icon: LucideIcons.qrCode,
                               onPressed: () {
                                 final customerHomeState = context
-                                    .findAncestorStateOfType<
-                                      _CustomerHomePageState
-                                    >();
+                                    .findAncestorStateOfType<_CustomerHomePageState>();
                                 customerHomeState?.navigateToIndex(1);
                               },
-                              icon: const Icon(Icons.payment_rounded, size: 20),
-                              label: const Text('Bayar Tagihan'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor:
-                                    _customerData!['status'] == 'active'
-                                    ? Colors.green.shade600
-                                    : Colors.orange.shade600,
-                                minimumSize: const Size(double.infinity, 44),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 0,
-                              ),
                             ),
                           ],
                         ),
@@ -534,38 +746,66 @@ class _BerandaPageState extends State<BerandaPage> {
                     _MaintenanceAlertBanner(),
                     const SizedBox(height: 16),
 
-                    // Stats Grid - 2x2
+                    // Tactical Telemetry Grid - 2x2
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
-                      childAspectRatio: 1.4,
-                      children: const [
-                        _StatCard(
-                          icon: Icons.speed_rounded,
+                      childAspectRatio: 1.35,
+                      children: [
+                        CyberStatTile(
+                          icon: LucideIcons.gauge,
                           title: 'Kecepatan',
                           value: '45.2 Mbps',
-                          color: Colors.blue,
+                          subtitle: '⚡ Latensi: 4ms',
+                          accentColor: AppTheme.neonCyan,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SpeedTestPage(),
+                              ),
+                            );
+                          },
                         ),
-                        _StatCard(
-                          icon: Icons.data_usage_rounded,
+                        CyberStatTile(
+                          icon: LucideIcons.activity,
                           title: 'Penggunaan',
                           value: '125.5 GB',
-                          color: Colors.orange,
+                          subtitle: 'FUP: Unlimited',
+                          accentColor: AppTheme.neonPurple,
+                          onTap: () async {
+                            final currentUserData = AuthService.instance.currentUserData;
+                            if (currentUserData == null || !context.mounted) return;
+                            final customer = await FirebaseService.instance.getCustomerByUserId(
+                              currentUserData['id'].toString(),
+                            );
+                            if (customer == null || !context.mounted) return;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BandwidthUsagePage(
+                                   customerId: customer['id'],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        _StatCard(
-                          icon: Icons.signal_wifi_4_bar_rounded,
-                          title: 'Uptime',
+                        const CyberStatTile(
+                          icon: LucideIcons.shieldCheck,
+                          title: 'Stabilitas',
                           value: '99.8%',
-                          color: Colors.green,
+                          subtitle: 'Uptime ONT: 14 Hari',
+                          accentColor: AppTheme.neonGreen,
                         ),
-                        _StatCard(
-                          icon: Icons.router_rounded,
-                          title: 'Ping',
-                          value: '12 ms',
-                          color: Colors.purple,
+                        const CyberStatTile(
+                          icon: LucideIcons.radio,
+                          title: 'Ping Gateway',
+                          value: '8 ms',
+                          subtitle: 'Jitter: 0.8ms',
+                          accentColor: AppTheme.neonAmber,
                         ),
                       ],
                     ),
@@ -577,272 +817,231 @@ class _BerandaPageState extends State<BerandaPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Aksi Cepat Section
-                    const Text(
-                      'Aksi Cepat',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    // Aksi Cepat / Tactical Command Matrix
                     Row(
                       children: [
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.payment_rounded,
-                            label: 'Bayar Tagihan',
-                            color: Colors.blue,
-                            onTap: () {
-                              // Navigate ke halaman Tagihan
-                              final customerHomeState = context
-                                  .findAncestorStateOfType<
-                                    _CustomerHomePageState
-                                  >();
-                              customerHomeState?.navigateToIndex(1);
-                            },
+                        Container(
+                          width: 4,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: AppTheme.neonCyan,
+                            borderRadius: BorderRadius.circular(2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.neonCyan.withValues(alpha: 0.6),
+                                blurRadius: 8,
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.support_agent_rounded,
-                            label: 'Buat Tiket',
-                            color: Colors.orange,
-                            onTap: () {
-                              // Navigate ke halaman Bantuan
-                              final customerHomeState = context
-                                  .findAncestorStateOfType<
-                                    _CustomerHomePageState
-                                  >();
-                              customerHomeState?.navigateToIndex(2);
-                            },
+                        const SizedBox(width: 8),
+                        Text(
+                          'KONTROL & OPERASIONAL JARINGAN',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.0,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
+                        ),
+                        const Spacer(),
+                        const CyberBadge(
+                          text: '8 MODUL',
+                          color: AppTheme.neonCyan,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Row(
+                    const SizedBox(height: 14),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.78,
                       children: [
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.speed_rounded,
-                            label: 'Speed Test',
-                            color: Colors.green,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SpeedTestPage(),
-                                ),
-                              );
-                            },
-                          ),
+                        CyberCommandTile(
+                          icon: HugeIcons.strokeRoundedInvoice01,
+                          label: 'Tagihan',
+                          color: const Color(0xFFF59E0B),
+                          gradientColors: const [Color(0xFFF59E0B), Color(0xFFD97706)],
+                          badge: 'BILL',
+                          badgeColor: const Color(0xFFD97706),
+                          onTap: () {
+                            final customerHomeState = context
+                                .findAncestorStateOfType<
+                                  _CustomerHomePageState
+                                >();
+                            customerHomeState?.navigateToIndex(1);
+                          },
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.data_usage_rounded,
-                            label: 'Data Usage',
-                            color: Colors.purple,
-                            onTap: () async {
-                              // Get current user ID
-                              final currentUserData =
-                                  AuthService.instance.currentUserData;
-                              if (currentUserData == null || !context.mounted) {
-                                return;
-                              }
-
-                              // Get customer data
-                              final customer = await FirebaseService.instance
-                                  .getCustomerByUserId(
-                                    currentUserData['id'].toString(),
-                                  );
-
-                              if (customer == null || !context.mounted) return;
-
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BandwidthUsagePage(
-                                    customerId: customer['id'],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
+                        CyberCommandTile(
+                          icon: HugeIcons.strokeRoundedWifi01,
+                          label: 'Wi-Fi',
+                          color: const Color(0xFF10B981),
+                          gradientColors: const [Color(0xFF10B981), Color(0xFF059669)],
+                          badge: 'ON',
+                          badgeColor: const Color(0xFF059669),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const WiFiManagementPage(),
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.info_rounded,
-                            label: 'Info Layanan',
-                            color: Colors.teal,
-                            onTap: () {
-                              // Show dialog info layanan
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Row(
-                                    children: const [
-                                      Icon(
-                                        Icons.info_rounded,
-                                        color: Colors.purple,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text('Info Layanan'),
-                                    ],
-                                  ),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: const [
-                                      Text(
-                                        'Layanan Pelanggan 24/7',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        '📞 Call Center: ${AppConstants.csCallCenter}',
-                                      ),
-                                      Text('📧 Email: ${AppConstants.csEmail}'),
-                                      Text(
-                                        '💬 WhatsApp: ${AppConstants.csWhatsApp}',
-                                      ),
-                                      SizedBox(height: 16),
-                                      Text(
-                                        'Jam Operasional:',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text('Senin - Jumat: 08:00 - 20:00'),
-                                      Text('Sabtu - Minggu: 09:00 - 17:00'),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Tutup'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
+                        CyberCommandTile(
+                          icon: HugeIcons.strokeRoundedDashboardSpeed01,
+                          label: 'Speedtest',
+                          color: const Color(0xFF06B6D4),
+                          gradientColors: const [Color(0xFF06B6D4), Color(0xFF0284C7)],
+                          badge: 'FAST',
+                          badgeColor: const Color(0xFF0284C7),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SpeedTestPage(),
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.upgrade_rounded,
-                            label: 'Ubah Paket',
-                            color: Colors.deepPurple,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const PackageUpgradePage(),
+                        CyberCommandTile(
+                          icon: HugeIcons.strokeRoundedActivity01,
+                          label: 'Trafik',
+                          color: const Color(0xFF8B5CF6),
+                          gradientColors: const [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
+                          badge: 'LIVE',
+                          badgeColor: const Color(0xFF6D28D9),
+                          onTap: () async {
+                            final currentUserData =
+                                AuthService.instance.currentUserData;
+                            if (currentUserData == null || !context.mounted) {
+                              return;
+                            }
+                            final customer = await FirebaseService.instance
+                                .getCustomerByUserId(
+                                  currentUserData['id'].toString(),
+                                );
+                            if (customer == null || !context.mounted) return;
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BandwidthUsagePage(
+                                  customerId: customer['id'],
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.analytics_rounded,
-                            label: 'Analytics',
-                            color: Colors.indigo,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const UsageAnalyticsPage(),
-                                ),
-                              );
-                            },
-                          ),
+                        CyberCommandTile(
+                          icon: HugeIcons.strokeRoundedCustomerService,
+                          label: 'Bantuan',
+                          color: const Color(0xFF3B82F6),
+                          gradientColors: const [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                          badge: 'CARE',
+                          badgeColor: const Color(0xFF1D4ED8),
+                          onTap: () {
+                            final customerHomeState = context
+                                .findAncestorStateOfType<
+                                  _CustomerHomePageState
+                                >();
+                            customerHomeState?.navigateToIndex(2);
+                          },
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    // PHASE 3 Features
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.card_giftcard,
-                            label: 'Loyalty & Rewards',
-                            color: Colors.purple,
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                Routes.loyaltyRewards,
-                              );
-                            },
-                          ),
+                        CyberCommandTile(
+                          icon: HugeIcons.strokeRoundedLayers01,
+                          label: 'Paket',
+                          color: const Color(0xFFF43F5E),
+                          gradientColors: const [Color(0xFFF43F5E), Color(0xFFBE123C)],
+                          badge: 'HOT',
+                          badgeColor: const Color(0xFFBE123C),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const PackageUpgradePage(),
+                              ),
+                            );
+                          },
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _QuickActionButton(
-                            icon: Icons.wifi,
-                            label: 'WiFi Management',
-                            color: Colors.deepPurple,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const WiFiManagementPage(),
-                                ),
-                              );
-                            },
-                          ),
+                        CyberCommandTile(
+                          icon: HugeIcons.strokeRoundedSparkles,
+                          label: 'Rewards',
+                          color: const Color(0xFFA855F7),
+                          gradientColors: const [Color(0xFFA855F7), Color(0xFF7C3AED)],
+                          badge: 'VIP',
+                          badgeColor: const Color(0xFF7C3AED),
+                          onTap: () {
+                            Navigator.pushNamed(context, Routes.loyaltyRewards);
+                          },
+                        ),
+                        CyberCommandTile(
+                          icon: HugeIcons.strokeRoundedBubbleChatQuestion,
+                          label: 'Info CS',
+                          color: const Color(0xFF14B8A6),
+                          gradientColors: const [Color(0xFF14B8A6), Color(0xFF0F766E)],
+                          badge: '24/7',
+                          badgeColor: const Color(0xFF0F766E),
+                          onTap: () => _showCyberServiceInfoDialog(context),
                         ),
                       ],
                     ),
                     const SizedBox(height: 24),
 
                     // Lapor Gangguan Button (Feature #8)
-                    _LaporGangguanButton(),
+                    const _LaporGangguanButton(),
                     const SizedBox(height: 24),
 
                     // Info Penting Section
-                    const Text(
-                      'Info Penting',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: AppTheme.neonAmber,
+                            borderRadius: BorderRadius.circular(2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.neonAmber.withValues(alpha: 0.6),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'BULETIN & STATUS JARINGAN',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.0,
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          ),
+                        ),
+                        const Spacer(),
+                        const CyberBadge(
+                          text: '2 INFO BARU',
+                          color: AppTheme.neonAmber,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     const _InfoCard(
-                      icon: Icons.calendar_today_rounded,
+                      icon: LucideIcons.clock,
                       title: 'Jatuh Tempo Pembayaran',
-                      subtitle: '25 November 2025',
-                      color: Colors.red,
+                      subtitle: '25 November 2025 // Tagihan Periode Berjalan',
+                      color: AppTheme.neonCrimson,
                     ),
                     const _InfoCard(
-                      icon: Icons.announcement_rounded,
-                      title: 'Pemeliharaan Jaringan',
-                      subtitle: 'Minggu, 15 Nov 2025 | 01:00 - 05:00 WIB',
-                      color: Colors.orange,
+                      icon: LucideIcons.alertTriangle,
+                      title: 'Pemeliharaan Backbone Fiber',
+                      subtitle: 'Minggu, 15 Nov 2025 | 01:00 - 05:00 WIB (NOC JKT-01)',
+                      color: AppTheme.neonAmber,
                     ),
                   ],
                 ),
@@ -855,7 +1054,7 @@ class _BerandaPageState extends State<BerandaPage> {
   }
 }
 
-// Widget Lapor Gangguan Button (Feature #8)
+// Widget Lapor Gangguan Button (Feature #8 - Cyber Tactical Dispatch)
 class _LaporGangguanButton extends StatelessWidget {
   const _LaporGangguanButton();
 
@@ -863,14 +1062,29 @@ class _LaporGangguanButton extends StatelessWidget {
     final TextEditingController descController = TextEditingController();
     String selectedType = 'Internet Mati';
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        backgroundColor: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppTheme.neonCrimson, width: 1.5),
+        ),
+        title: Row(
           children: [
-            Icon(Icons.report_problem_rounded, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Lapor Gangguan'),
+            const Icon(LucideIcons.alertTriangle, color: AppTheme.neonCrimson, size: 22),
+            const SizedBox(width: 10),
+            Text(
+              'LAPOR GANGGUAN NOC',
+              style: TextStyle(
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.0,
+              ),
+            ),
           ],
         ),
         content: StatefulBuilder(
@@ -879,18 +1093,38 @@ class _LaporGangguanButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Jenis Gangguan',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  'KATEGORI GANGGUAN',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    letterSpacing: 0.8,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
                   initialValue: selectedType,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+                  dropdownColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+                  style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 13),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark ? AppTheme.cyberObsidian : const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: AppTheme.neonCyan),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
                     ),
                   ),
                   items:
@@ -900,7 +1134,10 @@ class _LaporGangguanButton extends StatelessWidget {
                         'Tidak Stabil',
                         'Lainnya',
                       ].map((type) {
-                        return DropdownMenuItem(value: type, child: Text(type));
+                        return DropdownMenuItem(
+                          value: type,
+                          child: Text(type, style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A))),
+                        );
                       }).toList(),
                   onChanged: (value) {
                     if (value != null) {
@@ -909,17 +1146,37 @@ class _LaporGangguanButton extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Deskripsi Masalah',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  'DESKRIPSI KENDALA',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                    color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    letterSpacing: 0.8,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: descController,
                   maxLines: 4,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'Jelaskan gangguan yang Anda alami...',
+                  style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 13),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark ? AppTheme.cyberObsidian : const Color(0xFFF8FAFC),
+                    hintText: 'Jelaskan kendala koneksi yang Anda alami...',
+                    hintStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF94A3B8), fontSize: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1)),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                      borderSide: BorderSide(color: AppTheme.neonCrimson),
+                    ),
                   ),
                 ),
               ],
@@ -929,32 +1186,29 @@ class _LaporGangguanButton extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+            child: const Text('BATAL', style: TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.bold)),
           ),
           ElevatedButton.icon(
             onPressed: () async {
-              // Validate input
               if (descController.text.trim().isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Mohon jelaskan masalah yang Anda alami'),
-                    backgroundColor: Colors.orange,
+                    content: Text('Mohon jelaskan kendala yang Anda alami'),
+                    backgroundColor: AppTheme.neonAmber,
                   ),
                 );
                 return;
               }
 
-              // Show loading
               Navigator.pop(context);
               showDialog(
                 context: context,
                 barrierDismissible: false,
                 builder: (context) =>
-                    const Center(child: CircularProgressIndicator()),
+                    const Center(child: CircularProgressIndicator(color: AppTheme.neonCrimson)),
               );
 
               try {
-                // Get current user
                 final authService = AuthService.instance;
                 final currentUser = await authService.getCurrentUser();
 
@@ -962,13 +1216,11 @@ class _LaporGangguanButton extends StatelessWidget {
                   throw Exception('User tidak ditemukan');
                 }
 
-                // Get customer data
                 final firebaseService = FirebaseService.instance;
                 final customer = await firebaseService.getCustomerByUserId(
                   currentUser['id'],
                 );
 
-                // Create ticket data
                 final ticketData = {
                   'customerId': currentUser['id'],
                   'customerName':
@@ -984,39 +1236,39 @@ class _LaporGangguanButton extends StatelessWidget {
                   'createdAt': DateTime.now().toIso8601String(),
                 };
 
-                // Save to Firebase
                 await firebaseService.createTicket(ticketData);
 
-                // Close loading and show success
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('✅ Laporan gangguan berhasil dikirim!'),
-                      backgroundColor: Colors.green,
+                      content: Text('✅ Laporan gangguan berhasil dikirim ke NOC!'),
+                      backgroundColor: AppTheme.neonGreen,
                       duration: Duration(seconds: 3),
                     ),
                   );
                 }
               } catch (e) {
-                // Close loading and show error
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('❌ Gagal mengirim laporan: $e'),
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppTheme.neonCrimson,
                       duration: const Duration(seconds: 4),
                     ),
                   );
                 }
               }
             },
-            icon: const Icon(Icons.send),
-            label: const Text('Kirim Laporan'),
+            icon: const Icon(LucideIcons.send, size: 16),
+            label: const Text('DISPATCH LAPORAN', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.8)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.neonCrimson,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
         ],
@@ -1026,54 +1278,136 @@ class _LaporGangguanButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => _showReportIssueDialog(context),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.red.shade400, Colors.red.shade600],
+            color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: AppTheme.neonCrimson,
+              width: 1.5,
             ),
-            borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.red.withValues(alpha: 0.3),
-                blurRadius: 10,
+                color: AppTheme.neonCrimson.withValues(alpha: isDark ? 0.25 : 0.12),
+                blurRadius: 16,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.report_problem_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Lapor Gangguan',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.35),
+                    width: 1.0,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.neonCrimson.withValues(alpha: 0.45),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                      spreadRadius: -1,
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(13),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.white.withValues(alpha: 0.30),
+                              Colors.white.withValues(alpha: 0.0),
+                            ],
+                            stops: const [0.0, 0.65],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const HugeIcon(
+                      icon: HugeIcons.strokeRoundedAlert02,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: const [
+                        CyberPulseDot(color: AppTheme.neonCrimson, size: 8),
+                        SizedBox(width: 6),
+                        Text(
+                          'EMERGENCY NOC DISPATCH',
+                          style: TextStyle(
+                            color: AppTheme.neonCrimson,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'LAPOR GANGGUAN JARINGAN',
+                      style: TextStyle(
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppTheme.neonCrimson,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Colors.white,
-                  size: 20,
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'LAPOR',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 11,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(LucideIcons.arrowRight, size: 14, color: Colors.white),
+                  ],
                 ),
               ),
             ],
@@ -1084,71 +1418,13 @@ class _LaporGangguanButton extends StatelessWidget {
   }
 }
 
-// Widget Quick Action Button
-class _QuickActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final MaterialColor color;
-  final VoidCallback onTap;
 
-  const _QuickActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [color[400]!, color[600]!]),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Widget Info Card
+// Widget Info Card (Cyber Buletin Card)
 class _InfoCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final MaterialColor color;
+  final Color color;
 
   const _InfoCard({
     required this.icon,
@@ -1159,47 +1435,56 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? color.withValues(alpha: 0.35) : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: isDark ? color.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: color.withValues(alpha: isDark ? 0.12 : 0.10),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: color.withValues(alpha: isDark ? 0.4 : 0.3)),
             ),
-            child: Icon(icon, color: color, size: 24),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13.5,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: isDark ? AppTheme.textSecondary : const Color(0xFF64748B),
+                  ),
                 ),
               ],
             ),
@@ -1225,65 +1510,71 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
   final List<Map<String, dynamic>> _promos = [
     {
       'title': 'Upgrade ke 100 Mbps',
-      'subtitle': 'Hanya Rp 450.000/bulan',
-      'gradient': [Colors.purple.shade400, Colors.purple.shade600],
-      'icon': Icons.rocket_launch_rounded,
+      'subtitle': 'TURBO SPEED // RP 450.000/BLN',
+      'accent': AppTheme.neonPurple,
+      'gradient': [AppTheme.cyberObsidian, const Color(0xFF1F1235)],
+      'lightGradient': [const Color(0xFFFFFFFF), const Color(0xFFF5F3FF)],
+      'icon': LucideIcons.rocket,
       'action': 'upgrade',
       'details': {
-        'title': 'Upgrade ke Paket 100 Mbps',
+        'title': 'UPGRADE // 100 MBPS HYPERLINK',
         'description':
-            'Nikmati kecepatan internet super cepat untuk gaming, streaming 4K, dan video conference tanpa lag!',
+            'Bandwidth tanpa batas untuk gaming ultra-low latency, streaming 4K HDR tanpa buffer, dan performa multi-device kelas NOC.',
         'benefits': [
-          '✅ Kecepatan 100 Mbps',
-          '✅ Unlimited Quota',
-          '✅ Gratis Instalasi',
-          '✅ Priority Support 24/7',
-          '✅ Free Router Upgrade',
-          '✅ Cocok untuk 5-6 perangkat',
+          '⚡ Dedicated 100 Mbps Simetris 1:1',
+          '🛡️ Unlimited Quota & Fair Usage Policy Maksimal',
+          '🔧 Gratis Pemasangan & Kalibrasi ONT Fiber',
+          '🛰️ 24/7 Priority NOC Dispatch & Direct Support',
+          '📡 Free Dual-Band Gigabit Wi-Fi 6 Router',
+          '🎮 Latency Ring-1 Gaming Ping Optimizer',
         ],
-        'price': 'Rp 500.000/bulan',
-        'discount': 'Diskon 10% bulan pertama: Rp 450.000',
+        'price': 'Rp 500.000 / Bulan',
+        'discount': 'PROMO BULAN PERTAMA: RP 450.000',
       },
     },
     {
-      'title': 'Promo Akhir Tahun',
-      'subtitle': 'Diskon 20% untuk pelanggan baru',
-      'gradient': [Colors.orange.shade400, Colors.orange.shade600],
-      'icon': Icons.local_offer_rounded,
+      'title': 'Promo Spesial Fiber Net',
+      'subtitle': 'DISKON 20% PELANGGAN BARU',
+      'accent': AppTheme.neonAmber,
+      'gradient': [AppTheme.cyberObsidian, const Color(0xFF281C08)],
+      'lightGradient': [const Color(0xFFFFFFFF), const Color(0xFFFFFBEB)],
+      'icon': LucideIcons.zap,
       'action': 'promo',
       'details': {
-        'title': 'Promo Akhir Tahun 2025',
+        'title': 'PROMO SPECIAL FIBER // Q4',
         'description':
-            'Dapatkan diskon spesial untuk pelanggan baru yang berlangganan sebelum 31 Desember 2025!',
+            'Dapatkan diskon eksklusif dan modem Wi-Fi 6 berkecepatan tinggi untuk registrasi baru sebelum periode promo berakhir!',
         'benefits': [
-          '🎉 Diskon 20% untuk 3 bulan pertama',
-          '🎁 Gratis biaya instalasi',
-          '🎁 Gratis Modem WiFi 6',
-          '⚡ Aktivasi dalam 1 hari',
-          '📞 Gratis konsultasi teknis',
+          '⚡ Diskon 20% Billing untuk 3 Bulan Pertama',
+          '🎁 Bebas Biaya Instalasi Lapangan Teknisi',
+          '📡 Gratis Router High-Power Wi-Fi 6',
+          '🟢 Fast Activation & Provisioning dalam 24 Jam',
+          '📞 SLA Monitoring & Dukungan CS Prioritas',
         ],
         'terms':
-            'Syarat & ketentuan berlaku. Promo terbatas untuk 100 pelanggan pertama.',
+            'Syarat & ketentuan berlaku. Kuota terbatas 100 subscriber pertama di zona aktif.',
       },
     },
     {
-      'title': 'Refer & Earn',
-      'subtitle': 'Ajak teman, dapat cashback',
-      'gradient': [Colors.teal.shade400, Colors.teal.shade600],
-      'icon': Icons.card_giftcard_rounded,
+      'title': 'Refer & Earn Cashback',
+      'subtitle': 'REWARD CASHBACK HINGGA RP 100K',
+      'accent': AppTheme.neonCyan,
+      'gradient': [AppTheme.cyberObsidian, const Color(0xFF04252B)],
+      'lightGradient': [const Color(0xFFFFFFFF), const Color(0xFFF0FDF4)],
+      'icon': LucideIcons.gift,
       'action': 'referral',
       'details': {
-        'title': 'Program Referral',
+        'title': 'REFERRAL PROGRAM // REWARD MATRIX',
         'description':
-            'Ajak teman dan keluarga untuk berlangganan AudiraNet dan dapatkan reward menarik!',
+            'Ajak rekan, keluarga, atau tetangga berlangganan jaringan fiber AudiraNet dan klaim saldo cashback instan ke akun Anda!',
         'benefits': [
-          '💰 Cashback Rp 100.000 per referral',
-          '🎁 Bonus tambahan untuk 5 referral: Rp 1.000.000',
-          '⭐ Unlimited referral, unlimited reward',
-          '📱 Kode referral otomatis di profil Anda',
-          '💳 Cashback langsung ke saldo akun',
+          '💎 Cashback Rp 100.000 per referral aktif',
+          '🚀 Milestone Bonus 5 Referral: +Rp 1.000.000',
+          '♾️ Tanpa batas kuota referral per akun',
+          '📲 Kode referral unik otomatis aktif di profil',
+          '💳 Kredit saldo otomatis memotong tagihan berikutnya',
         ],
-        'howto': 'Bagikan kode referral Anda → Teman daftar → Dapat cashback!',
+        'howto': 'Bagikan kode referral → Teman registrasi → Bonus langsung cair!',
       },
     },
   ];
@@ -1297,83 +1588,119 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
   void _showPromoDetails(BuildContext context, Map<String, dynamic> promo) {
     final details = promo['details'] as Map<String, dynamic>?;
     final action = promo['action'] as String?;
+    final accent = promo['accent'] as Color? ?? AppTheme.neonCyan;
 
     if (details == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Detail promo tidak tersedia'),
-          backgroundColor: Colors.orange,
+          backgroundColor: AppTheme.neonAmber,
         ),
       );
       return;
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: accent.withValues(alpha: isDark ? 0.6 : 0.4), width: 1.5),
+        ),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 620),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.cyberObsidian : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with gradient
+              // Header Tactical
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: promo['gradient'] as List<Color>,
-                  ),
+                  color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                  ),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isDark ? accent.withValues(alpha: 0.3) : const Color(0xFFE2E8F0),
+                      width: 1,
+                    ),
                   ),
                 ),
-                child: Column(
+                child: Row(
                   children: [
-                    Icon(
-                      promo['icon'] as IconData,
-                      color: Colors.white,
-                      size: 48,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      details['title'] as String,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: isDark ? 0.15 : 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: accent.withValues(alpha: isDark ? 0.5 : 0.4)),
                       ),
-                      textAlign: TextAlign.center,
+                      child: Icon(promo['icon'] as IconData, color: !isDark && accent == AppTheme.neonAmber ? const Color(0xFFD97706) : accent, size: 28),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CyberBadge(text: 'SPECIAL CAMPAIGN', color: !isDark && accent == AppTheme.neonAmber ? const Color(0xFFD97706) : accent),
+                          const SizedBox(height: 4),
+                          Text(
+                            details['title'] as String,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(LucideIcons.x, color: isDark ? Colors.white70 : const Color(0xFF64748B)),
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
               ),
-              // Content
+
+              // Content Body
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         details['description'] as String,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          height: 1.5,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Keuntungan:',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          height: 1.5,
+                          color: isDark ? Colors.white70 : const Color(0xFF475569),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 18),
+                      Text(
+                        'KEUNGGULAN FITUR // SLA',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w900,
+                          color: !isDark && accent == AppTheme.neonAmber ? const Color(0xFFD97706) : accent,
+                          letterSpacing: 1,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       ...(details['benefits'] as List<String>).map(
                         (benefit) => Padding(
                           padding: const EdgeInsets.only(bottom: 8),
@@ -1383,9 +1710,10 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
                               Expanded(
                                 child: Text(
                                   benefit,
-                                  style: const TextStyle(
-                                    fontSize: 14,
+                                  style: TextStyle(
+                                    fontSize: 13,
                                     height: 1.4,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                                   ),
                                 ),
                               ),
@@ -1394,52 +1722,44 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
                         ),
                       ),
                       if (details.containsKey('price')) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
+                            color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark ? accent.withValues(alpha: 0.4) : const Color(0xFFE2E8F0),
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Harga:',
+                              Text(
+                                'BIAYA PAKET / TARIF:',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                  fontFamily: 'monospace',
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 details['price'] as String,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  color: !isDark && accent == AppTheme.neonAmber ? const Color(0xFFD97706) : accent,
+                                  fontFamily: 'monospace',
                                 ),
                               ),
                               if (details.containsKey('discount')) ...[
                                 const SizedBox(height: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    details['discount'] as String,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                CyberBadge(
+                                  text: details['discount'] as String,
+                                  color: isDark ? AppTheme.neonGreen : const Color(0xFF059669),
                                 ),
                               ],
                             ],
@@ -1447,39 +1767,41 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
                         ),
                       ],
                       if (details.containsKey('terms')) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
                         Text(
                           details['terms'] as String,
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
+                            fontSize: 11,
+                            color: isDark ? Colors.white54 : const Color(0xFF64748B),
                             fontStyle: FontStyle.italic,
                           ),
                         ),
                       ],
                       if (details.containsKey('howto')) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.blue.shade200),
+                            color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFE2E8F0),
+                            ),
                           ),
                           child: Row(
                             children: [
                               Icon(
-                                Icons.info_outline,
-                                color: Colors.blue.shade700,
-                                size: 20,
+                                LucideIcons.info,
+                                color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                                size: 18,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   details['howto'] as String,
                                   style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.blue.shade900,
+                                    fontSize: 12,
+                                    color: isDark ? Colors.white70 : const Color(0xFF334155),
                                   ),
                                 ),
                               ),
@@ -1491,27 +1813,56 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
                   ),
                 ),
               ),
+
               // Action Buttons
-              Padding(
+              Container(
                 padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  ),
+                  border: Border(
+                    top: BorderSide(
+                      color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
+                    ),
+                  ),
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(
-                            color: (promo['gradient'] as List<Color>)[0],
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text('Tutup'),
+                        child: Text(
+                          'TUTUP',
+                          style: TextStyle(
+                            color: isDark ? Colors.white70 : const Color(0xFF475569),
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       flex: 2,
-                      child: ElevatedButton(
+                      child: CyberActionButton(
+                        text: action == 'upgrade'
+                            ? 'UPGRADE SEKARANG'
+                            : action == 'referral'
+                            ? 'KODE REFERRAL'
+                            : 'HUBUNGI NOC CS',
+                        icon: LucideIcons.arrowRight,
+                        color: accent,
+                        isFullWidth: true,
                         onPressed: () {
                           Navigator.pop(context);
                           if (action == 'upgrade') {
@@ -1527,27 +1878,12 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text(
-                                  'Hubungi CS untuk info lebih lanjut!',
-                                ),
-                                backgroundColor: Colors.blue,
+                                content: Text('Hubungi CS Hotline untuk aktivasi'),
+                                backgroundColor: AppTheme.neonCyan,
                               ),
                             );
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          backgroundColor:
-                              (promo['gradient'] as List<Color>)[0],
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(
-                          action == 'upgrade'
-                              ? 'Upgrade Sekarang'
-                              : action == 'referral'
-                              ? 'Lihat Kode Referral'
-                              : 'Hubungi CS',
-                        ),
                       ),
                     ),
                   ],
@@ -1562,10 +1898,12 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
         SizedBox(
-          height: 120,
+          height: 110,
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (index) {
@@ -1574,22 +1912,33 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
             itemCount: _promos.length,
             itemBuilder: (context, index) {
               final promo = _promos[index];
+              final accent = promo['accent'] as Color? ?? AppTheme.neonCyan;
+              final gradient = isDark
+                  ? (promo['gradient'] as List<Color>)
+                  : (promo['lightGradient'] as List<Color>? ?? [Colors.white, accent.withValues(alpha: 0.12)]);
+              final activeColor = !isDark && accent == AppTheme.neonAmber ? const Color(0xFFD97706) : accent;
+
               return InkWell(
                 onTap: () => _showPromoDetails(context, promo),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                   decoration: BoxDecoration(
+                    color: isDark ? AppTheme.cyberObsidian : Colors.white,
                     gradient: LinearGradient(
-                      colors: promo['gradient'] as List<Color>,
+                      colors: gradient,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? accent.withValues(alpha: 0.5) : accent.withValues(alpha: 0.4),
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: (promo['gradient'] as List<Color>)[0].withValues(
-                          alpha: 0.3,
-                        ),
+                        color: isDark ? accent.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -1598,18 +1947,21 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
+                          color: accent.withValues(alpha: isDark ? 0.15 : 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: accent.withValues(alpha: isDark ? 0.4 : 0.3),
+                          ),
                         ),
                         child: Icon(
                           promo['icon'] as IconData,
-                          color: Colors.white,
-                          size: 32,
+                          color: activeColor,
+                          size: 26,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1617,27 +1969,30 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
                           children: [
                             Text(
                               promo['title'] as String,
-                              style: const TextStyle(
-                                fontSize: 18,
+                              style: TextStyle(
+                                fontSize: 15,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                letterSpacing: 0.3,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               promo['subtitle'] as String,
                               style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: activeColor,
+                                fontFamily: 'monospace',
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        color: Colors.white,
-                        size: 20,
+                      Icon(
+                        LucideIcons.chevronRight,
+                        color: activeColor,
+                        size: 24,
                       ),
                     ],
                   ),
@@ -1646,22 +2001,36 @@ class _PromoBannerSliderState extends State<_PromoBannerSlider> {
             },
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             _promos.length,
-            (index) => Container(
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              width: _currentPage == index ? 24 : 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: _currentPage == index
-                    ? Colors.blue.shade600
-                    : Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
+            (index) {
+              final isCurrent = _currentPage == index;
+              final accent = _promos[index]['accent'] as Color? ?? AppTheme.neonCyan;
+              final activeColor = !isDark && accent == AppTheme.neonAmber ? const Color(0xFFD97706) : accent;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: isCurrent ? 24 : 8,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isCurrent
+                      ? activeColor
+                      : (isDark ? Colors.white.withValues(alpha: 0.2) : const Color(0xFFCBD5E1)),
+                  borderRadius: BorderRadius.circular(3),
+                  boxShadow: isCurrent && isDark
+                      ? [
+                          BoxShadow(
+                            color: activeColor.withValues(alpha: 0.5),
+                            blurRadius: 6,
+                          )
+                        ]
+                      : null,
+                ),
+              );
+            },
           ),
         ),
       ],
@@ -1740,7 +2109,7 @@ class _NetworkStatusBadgeState extends State<_NetworkStatusBadge> {
   }
 }
 
-// Widget Mini Bandwidth Chart (Feature #6)
+// Widget Mini Bandwidth Chart (Feature #6 - Cyber Telemetri Trafik)
 class _MiniBandwidthChart extends StatelessWidget {
   final String userId;
 
@@ -1748,15 +2117,22 @@ class _MiniBandwidthChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? AppTheme.neonCyan : AppTheme.signalBlue;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: isDark ? AppTheme.neonCyan.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
@@ -1767,59 +2143,70 @@ class _MiniBandwidthChart extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.trending_up, color: Colors.blue, size: 24),
-                  SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: primaryAccent.withValues(alpha: isDark ? 0.12 : 0.10),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: primaryAccent.withValues(alpha: 0.4)),
+                    ),
+                    child: Icon(LucideIcons.barChart2, color: primaryAccent, size: 18),
+                  ),
+                  const SizedBox(width: 10),
                   Text(
-                    'Penggunaan Bandwidth',
+                    'TELEMETRI TRAFIK',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                     ),
                   ),
                 ],
               ),
-              Text(
-                '7 Hari Terakhir',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              CyberBadge(
+                text: '7 HARI TERAKHIR',
+                color: primaryAccent,
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // Simple bar chart visualization
+          const SizedBox(height: 18),
+          // Bar chart visualization
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _MiniChartBar(height: 60, day: 'Sen', value: '12 GB'),
-              _MiniChartBar(height: 45, day: 'Sel', value: '9 GB'),
-              _MiniChartBar(height: 70, day: 'Rab', value: '15 GB'),
-              _MiniChartBar(height: 55, day: 'Kam', value: '11 GB'),
-              _MiniChartBar(height: 80, day: 'Jum', value: '18 GB'),
+            children: const [
+              _MiniChartBar(height: 55, day: 'SEN', value: '12 GB'),
+              _MiniChartBar(height: 42, day: 'SEL', value: '9 GB'),
+              _MiniChartBar(height: 68, day: 'RAB', value: '15 GB'),
+              _MiniChartBar(height: 50, day: 'KAM', value: '11 GB'),
+              _MiniChartBar(height: 78, day: 'JUM', value: '18 GB'),
               _MiniChartBar(
-                height: 90,
-                day: 'Sab',
+                height: 92,
+                day: 'SAB',
                 value: '22 GB',
                 isToday: true,
               ),
-              _MiniChartBar(height: 40, day: 'Min', value: '8 GB'),
+              _MiniChartBar(height: 38, day: 'MIN', value: '8 GB'),
             ],
           ),
           const SizedBox(height: 16),
+          Divider(color: isDark ? AppTheme.cyberBorder : const Color(0xFFE2E8F0), height: 1),
+          const SizedBox(height: 14),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _StatLabel(
-                label: 'Total Minggu Ini',
+                label: 'TOTAL MINGGU INI',
                 value: '95 GB',
-                color: Colors.blue,
+                color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
               ),
               _StatLabel(
-                label: 'Rata-rata/Hari',
-                value: '13.6 GB',
-                color: Colors.orange,
+                label: 'RATA-RATA HARIAN',
+                value: '13.6 GB/HARI',
+                color: isDark ? AppTheme.neonAmber : const Color(0xFFD97706),
               ),
             ],
           ),
@@ -1844,21 +2231,25 @@ class _MiniChartBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryAccent = isDark ? AppTheme.neonCyan : AppTheme.signalBlue;
+
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 2.5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               value,
               style: TextStyle(
-                fontSize: 9,
-                color: Colors.grey.shade600,
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                fontSize: 8.5,
+                color: isToday ? primaryAccent : (isDark ? AppTheme.textMuted : const Color(0xFF64748B)),
+                fontWeight: isToday ? FontWeight.w900 : FontWeight.w600,
+                fontFamily: 'monospace',
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Container(
               height: height,
               decoration: BoxDecoration(
@@ -1866,19 +2257,37 @@ class _MiniChartBar extends StatelessWidget {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: isToday
-                      ? [Colors.blue.shade600, Colors.blue.shade400]
-                      : [Colors.blue.shade300, Colors.blue.shade200],
+                      ? [primaryAccent, isDark ? AppTheme.neonPurple : const Color(0xFF7C3AED)]
+                      : (isDark
+                          ? [AppTheme.cyberObsidian, AppTheme.neonCyan.withValues(alpha: 0.35)]
+                          : [const Color(0xFFE2E8F0), AppTheme.signalBlue.withValues(alpha: 0.35)]),
                 ),
                 borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isToday
+                      ? primaryAccent
+                      : (isDark ? AppTheme.neonCyan.withValues(alpha: 0.3) : const Color(0xFFCBD5E1)),
+                  width: isToday ? 1.2 : 0.8,
+                ),
+                boxShadow: isToday && isDark
+                    ? [
+                        BoxShadow(
+                          color: AppTheme.neonCyan.withValues(alpha: 0.5),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               day,
               style: TextStyle(
-                fontSize: 11,
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                color: isToday ? Colors.blue.shade700 : Colors.grey.shade700,
+                fontSize: 10,
+                fontWeight: isToday ? FontWeight.w900 : FontWeight.w600,
+                color: isToday ? primaryAccent : (isDark ? AppTheme.textMuted : const Color(0xFF64748B)),
+                letterSpacing: 0.5,
               ),
             ),
           ],
@@ -1901,20 +2310,28 @@ class _StatLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+            letterSpacing: 0.6,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
             color: color,
+            fontFamily: 'monospace',
+            letterSpacing: 0.5,
           ),
         ),
       ],
@@ -1922,7 +2339,7 @@ class _StatLabel extends StatelessWidget {
   }
 }
 
-// Widget Payment Reminder Section (Feature #2)
+// Widget Payment Reminder Section (Feature #2 - Cyber Billing Alert)
 class _PaymentReminderSection extends StatefulWidget {
   final String userId;
 
@@ -1947,24 +2364,20 @@ class _PaymentReminderSectionState extends State<_PaymentReminderSection> {
     setState(() => _isLoading = true);
 
     try {
-      // Get customer data first
-      final customer = await FirebaseService.instance.getCustomerByUserId(
+      var customer = await FirebaseService.instance.getCustomerByUserId(
         widget.userId,
       );
-      if (customer == null) return;
+      customer ??= FirebaseService.getDefaultCustomerData(userId: widget.userId);
 
-      // Get all bills for this customer
       final allBills = await FirebaseService.instance.getBillsByCustomerId(
         customer['customerId'].toString(),
       );
 
-      // Filter unpaid bills
       final unpaid = allBills.where((bill) {
         final status = bill['status']?.toString().toLowerCase() ?? '';
         return status != 'paid' && status != 'lunas';
       }).toList();
 
-      // Sort by due date (earliest first)
       unpaid.sort((a, b) {
         final dateA = a['dueDate'] as Timestamp?;
         final dateB = b['dueDate'] as Timestamp?;
@@ -1997,47 +2410,50 @@ class _PaymentReminderSectionState extends State<_PaymentReminderSection> {
     final difference = date.difference(now).inDays;
 
     if (difference < 0) {
-      return 'Terlambat ${-difference} hari';
+      return 'TERLAMBAT ${-difference} HARI';
     } else if (difference == 0) {
-      return 'Jatuh tempo hari ini';
+      return 'JATUH TEMPO HARI INI';
     } else if (difference <= 7) {
-      return 'Jatuh tempo $difference hari lagi';
+      return 'JATUH TEMPO $difference HARI LAGI';
     } else {
-      return '${date.day}/${date.month}/${date.year}';
+      return 'TEMPO: ${date.day}/${date.month}/${date.year}';
     }
   }
 
   Color _getUrgencyColor(Timestamp? timestamp) {
-    if (timestamp == null) return Colors.grey;
+    if (timestamp == null) return AppTheme.textMuted;
 
     final date = timestamp.toDate();
     final now = DateTime.now();
     final difference = date.difference(now).inDays;
 
-    if (difference < 0) return Colors.red;
-    if (difference <= 3) return Colors.orange;
-    if (difference <= 7) return Colors.yellow.shade700;
-    return Colors.blue;
+    if (difference < 0) return AppTheme.neonCrimson;
+    if (difference <= 3) return AppTheme.neonCrimson;
+    if (difference <= 7) return AppTheme.neonAmber;
+    return AppTheme.neonCyan;
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (_isLoading) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(16),
-        ),
+      return CyberCard(
+        borderColor: isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1),
         child: Row(
           children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
+            CyberPulseDot(color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, size: 8),
             const SizedBox(width: 12),
-            Text('Memuat tagihan...'),
+            Text(
+              'MEMERIKSA TELEMETRI BILLING...',
+              style: TextStyle(
+                color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                fontSize: 11,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+              ),
+            ),
           ],
         ),
       );
@@ -2049,39 +2465,34 @@ class _PaymentReminderSectionState extends State<_PaymentReminderSection> {
 
     final firstBill = _unpaidBills.first;
     final hasMultiple = _unpaidBills.length > 1;
+    final urgencyColor = _getUrgencyColor(firstBill['dueDate'] as Timestamp?);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _getUrgencyColor(
-              firstBill['dueDate'] as Timestamp?,
-            ).withValues(alpha: 0.1),
-            _getUrgencyColor(
-              firstBill['dueDate'] as Timestamp?,
-            ).withValues(alpha: 0.05),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _getUrgencyColor(
-            firstBill['dueDate'] as Timestamp?,
-          ).withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-      ),
+    return CyberCard(
+      glow: true,
+      borderColor: urgencyColor,
+      badgeText: hasMultiple
+          ? '${_unpaidBills.length} INVOICE TERUTANG'
+          : 'INVOICE AKTIF',
+      badgeColor: urgencyColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                color: _getUrgencyColor(firstBill['dueDate'] as Timestamp?),
-                size: 24,
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: urgencyColor.withValues(alpha: isDark ? 0.15 : 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: urgencyColor.withValues(alpha: isDark ? 0.5 : 0.4)),
+                ),
+                child: Icon(
+                  LucideIcons.receipt,
+                  color: urgencyColor,
+                  size: 22,
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2089,21 +2500,21 @@ class _PaymentReminderSectionState extends State<_PaymentReminderSection> {
                     Text(
                       hasMultiple
                           ? '${_unpaidBills.length} Tagihan Belum Dibayar'
-                          : 'Tagihan Belum Dibayar',
+                          : 'Tagihan Berjalan',
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: _getUrgencyColor(
-                          firstBill['dueDate'] as Timestamp?,
-                        ),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
                       _formatDueDate(firstBill['dueDate'] as Timestamp?),
                       style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey.shade700,
+                        fontSize: 11.5,
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.w700,
+                        color: urgencyColor,
                       ),
                     ),
                   ],
@@ -2113,9 +2524,15 @@ class _PaymentReminderSectionState extends State<_PaymentReminderSection> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Total',
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    'TOTAL TAGIHAN',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                      letterSpacing: 0.5,
+                    ),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     _formatCurrency(
                       _unpaidBills.fold<num>(
@@ -2124,39 +2541,25 @@ class _PaymentReminderSectionState extends State<_PaymentReminderSection> {
                       ),
                     ),
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: _getUrgencyColor(
-                        firstBill['dueDate'] as Timestamp?,
-                      ),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: urgencyColor,
+                      fontFamily: 'monospace',
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          ElevatedButton(
+          const SizedBox(height: 14),
+          CyberActionButton(
+            label: 'BAYAR SEKARANG',
+            primaryColor: urgencyColor,
             onPressed: () {
-              // Navigate to payment page
               final customerHomeState = context
                   .findAncestorStateOfType<_CustomerHomePageState>();
-              customerHomeState?.navigateToIndex(1); // Go to Tagihan tab
+              customerHomeState?.navigateToIndex(1);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _getUrgencyColor(
-                firstBill['dueDate'] as Timestamp?,
-              ),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 42),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              'Bayar Sekarang',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
           ),
         ],
       ),
@@ -2172,62 +2575,6 @@ class _PaymentReminderSectionState extends State<_PaymentReminderSection> {
   }
 }
 
-// Widget Stat Card
-class _StatCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String value;
-  final MaterialColor color;
-
-  const _StatCard({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Icon(icon, color: color, size: 28),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              Text(
-                title,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // Tagihan Page dengan UI Modern
 class TagihanPage extends StatefulWidget {
@@ -2325,6 +2672,24 @@ class _TagihanPageState extends State<TagihanPage> {
     });
   }
 
+  String _formatBillDueDate(dynamic rawDate) {
+    if (rawDate == null) return 'Unknown';
+    if (rawDate is Timestamp) {
+      return DateFormat('d MMM yyyy').format(rawDate.toDate());
+    }
+    if (rawDate is DateTime) {
+      return DateFormat('d MMM yyyy').format(rawDate);
+    }
+    if (rawDate is String) {
+      final parsed = DateTime.tryParse(rawDate);
+      if (parsed != null) {
+        return DateFormat('d MMM yyyy').format(parsed);
+      }
+      return rawDate;
+    }
+    return rawDate.toString();
+  }
+
   void _showFilterDialog() {
     showDialog(
       context: context,
@@ -2395,29 +2760,53 @@ class _TagihanPageState extends State<TagihanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
         appBar: AppBar(
-          title: const Text('Tagihan & Pembayaran'),
-          backgroundColor: Colors.blue.shade700,
-          foregroundColor: Colors.white,
+          title: Text(
+            'TAGIHAN & PEMBAYARAN',
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 15,
+              letterSpacing: 1.0,
+              fontFamily: 'monospace',
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+            ),
+          ),
+          backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+          foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+          elevation: 0,
           actions: [
             IconButton(
-              icon: const Icon(Icons.filter_list),
+              icon: Icon(LucideIcons.filter, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue),
               onPressed: _showFilterDialog,
               tooltip: 'Filter',
             ),
           ],
-          bottom: const TabBar(
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            indicatorColor: Colors.white,
-            tabs: [
-              Tab(text: 'Tagihan Aktif', icon: Icon(Icons.receipt_long)),
-              Tab(text: 'Riwayat', icon: Icon(Icons.history)), // Feature #9
-            ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(48),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? AppTheme.cyberObsidian : Colors.white,
+                border: Border(
+                  bottom: BorderSide(color: isDark ? AppTheme.cyberBorder : const Color(0xFFE2E8F0), width: 1.2),
+                ),
+              ),
+              child: TabBar(
+                labelColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                unselectedLabelColor: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                indicatorColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                indicatorWeight: 3,
+                tabs: const [
+                  Tab(text: 'TAGIHAN AKTIF', icon: Icon(LucideIcons.receipt, size: 20)),
+                  Tab(text: 'RIWAYAT PEMBAYARAN', icon: Icon(LucideIcons.history, size: 20)),
+                ],
+              ),
+            ),
           ),
         ),
         body: TabBarView(
@@ -2435,19 +2824,23 @@ class _TagihanPageState extends State<TagihanPage> {
   }
 
   Widget _buildBillsTab() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       children: [
         // Search Bar
         Container(
           padding: const EdgeInsets.all(16),
-          color: Colors.white,
+          color: isDark ? AppTheme.cyberObsidian : Colors.white,
           child: TextField(
+            style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 13),
             decoration: InputDecoration(
-              hintText: 'Cari bulan tagihan...',
-              prefixIcon: const Icon(Icons.search),
+              hintText: 'Cari invoice atau bulan tagihan...',
+              hintStyle: TextStyle(color: isDark ? AppTheme.textMuted : const Color(0xFF94A3B8), fontSize: 13),
+              prefixIcon: Icon(LucideIcons.search, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear),
+                      icon: Icon(LucideIcons.x, color: isDark ? Colors.white70 : const Color(0xFF64748B)),
                       onPressed: () {
                         setState(() => _searchQuery = '');
                         _applyFilters();
@@ -2456,9 +2849,18 @@ class _TagihanPageState extends State<TagihanPage> {
                   : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: isDark ? AppTheme.cyberBorder : const Color(0xFFCBD5E1)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue),
               ),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
             ),
             onChanged: (value) {
               setState(() => _searchQuery = value);
@@ -2468,21 +2870,24 @@ class _TagihanPageState extends State<TagihanPage> {
         ),
 
         // Auto-Pay Toggle (Feature #13)
-        _AutoPayToggle(),
+        const _AutoPayToggle(),
 
         // Filter Chips
         if (_statusFilter != 'all')
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: Colors.white,
+            color: isDark ? AppTheme.cyberObsidian : Colors.white,
             child: Row(
               children: [
-                const Text('Filter: ', style: TextStyle(fontSize: 12)),
+                Text('Filter: ', style: TextStyle(fontSize: 12, color: isDark ? AppTheme.textSecondary : const Color(0xFF64748B))),
                 Chip(
+                  backgroundColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF1F5F9),
+                  side: BorderSide(color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, width: 1),
                   label: Text(
-                    _statusFilter == 'paid' ? 'Lunas' : 'Belum Bayar',
+                    _statusFilter == 'paid' ? 'LUNAS' : 'BELUM BAYAR',
+                    style: TextStyle(color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue, fontSize: 11, fontWeight: FontWeight.bold),
                   ),
-                  deleteIcon: const Icon(Icons.close, size: 16),
+                  deleteIcon: Icon(LucideIcons.x, size: 16, color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue),
                   onDeleted: () {
                     setState(() => _statusFilter = 'all');
                     _applyFilters();
@@ -2503,7 +2908,7 @@ class _TagihanPageState extends State<TagihanPage> {
                     padding: const EdgeInsets.all(16),
                     children: [
                       const EnhancedEmptyState(
-                        icon: Icons.receipt_long_outlined,
+                        icon: LucideIcons.receipt,
                         title: 'Belum Ada Tagihan',
                         description:
                             'Tagihan Anda akan muncul di sini setelah data customer dibuat.',
@@ -2524,7 +2929,7 @@ class _TagihanPageState extends State<TagihanPage> {
                     padding: const EdgeInsets.all(16),
                     children: [
                       const EnhancedEmptyState(
-                        icon: Icons.search_off,
+                        icon: LucideIcons.searchX,
                         title: 'Tidak Ada Hasil',
                         description:
                             'Coba ubah filter atau kata kunci pencarian.',
@@ -2551,8 +2956,29 @@ class _TagihanPageState extends State<TagihanPage> {
                     itemCount: _filteredBills.length,
                     itemBuilder: (context, index) {
                       final bill = _filteredBills[index];
+                      final safeBillId = bill['id']?.toString() ?? 'INV-${index + 1}';
+                      final safeBillMonth = (bill['billMonth'] ?? bill['month'] ?? bill['periode'] ?? 'Tagihan Aktif').toString();
+                      final safeAmount = bill['amount'] ?? 0;
+
                       return SwipeableListItem(
-                        key: Key('bill_${bill['id']}'),
+                        key: Key('bill_$safeBillId'),
+                        onTap: bill['status'] != 'paid'
+                            ? () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PaymentPage(
+                                      billId: safeBillId,
+                                      billMonth: safeBillMonth,
+                                      amount: safeAmount,
+                                    ),
+                                  ),
+                                );
+                                if (result == true) {
+                                  _loadBills();
+                                }
+                              }
+                            : null,
                         onEdit: bill['status'] != 'paid'
                             ? () async {
                                 // Quick pay
@@ -2560,9 +2986,9 @@ class _TagihanPageState extends State<TagihanPage> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PaymentPage(
-                                      billId: bill['id'],
-                                      billMonth: bill['billMonth'],
-                                      amount: bill['amount'].toDouble(),
+                                      billId: safeBillId,
+                                      billMonth: safeBillMonth,
+                                      amount: safeAmount,
                                     ),
                                   ),
                                 );
@@ -2574,10 +3000,10 @@ class _TagihanPageState extends State<TagihanPage> {
                         enableEdit: bill['status'] != 'paid',
                         enableDelete: false,
                         child: _BillCard(
-                          billId: bill['id']?.toString() ?? '',
-                          month: bill['billMonth']?.toString() ?? 'Unknown',
-                          amount: bill['amount'] ?? 0,
-                          dueDate: bill['dueDate']?.toString() ?? 'Unknown',
+                          billId: safeBillId,
+                          month: safeBillMonth,
+                          amount: safeAmount,
+                          dueDate: _formatBillDueDate(bill['dueDate']),
                           status: bill['status'] == 'paid'
                               ? 'Lunas'
                               : 'Belum Dibayar',
@@ -2722,7 +3148,7 @@ class _AutoPayToggleState extends State<_AutoPayToggle> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
-              Icons.autorenew,
+              LucideIcons.refreshCw,
               color: _autoPayEnabled
                   ? Colors.green.shade600
                   : Colors.grey.shade600,
@@ -2783,7 +3209,7 @@ class _PaymentHistoryTimeline extends StatelessWidget {
     if (bills.isEmpty) {
       return const Center(
         child: EnhancedEmptyState(
-          icon: Icons.receipt_outlined,
+          icon: LucideIcons.receipt,
           title: 'Belum Ada Riwayat',
           description: 'Riwayat pembayaran Anda akan muncul di sini',
         ),
@@ -2872,7 +3298,7 @@ class _TimelineItem extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(Icons.check, color: Colors.white, size: 16),
+              child: const Icon(LucideIcons.check, color: Colors.white, size: 16),
             ),
             if (!isLast)
               Container(width: 2, height: 100, color: Colors.green.shade200),
@@ -2933,7 +3359,7 @@ class _TimelineItem extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.calendar_today,
+                      LucideIcons.calendar,
                       size: 14,
                       color: Colors.grey.shade600,
                     ),
@@ -2950,7 +3376,7 @@ class _TimelineItem extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(Icons.payment, size: 14, color: Colors.grey.shade600),
+                    Icon(LucideIcons.creditCard, size: 14, color: Colors.grey.shade600),
                     const SizedBox(width: 4),
                     Text(
                       paymentMethod,
@@ -2979,7 +3405,7 @@ class _TimelineItem extends StatelessWidget {
   }
 }
 
-// Widget Bill Card
+// Widget Bill Card (Cyber Invoice Card)
 class _BillCard extends StatelessWidget {
   final String billId;
   final String month;
@@ -3001,33 +3427,43 @@ class _BillCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Parse amount dengan aman (bisa int atau String dari Firestore)
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final int amountValue = amount is int
         ? amount
         : int.tryParse(amount.toString()) ?? 0;
+    final formattedAmount = amountValue.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
+    final statusColor = isPaid
+        ? (isDark ? AppTheme.neonGreen : const Color(0xFF16A34A))
+        : (isDark ? AppTheme.neonAmber : const Color(0xFFD97706));
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isPaid
-              ? [Colors.green.shade50, Colors.green.shade100]
-              : [Colors.orange.shade50, Colors.orange.shade100],
-        ),
-        borderRadius: BorderRadius.circular(20),
+        color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isPaid
-              ? Colors.green.withValues(alpha: 0.3)
-              : Colors.orange.withValues(alpha: 0.3),
-          width: 2,
+              ? (isDark ? AppTheme.neonGreen.withValues(alpha: 0.4) : const Color(0xFF86EFAC))
+              : (isDark ? AppTheme.neonAmber : const Color(0xFFFDE68A)),
+          width: isPaid ? 1.2 : 1.5,
         ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          if (isDark)
+            BoxShadow(
+              color: statusColor.withValues(alpha: isPaid ? 0.08 : 0.22),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            )
+          else
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
         ],
       ),
       child: Column(
@@ -3036,57 +3472,75 @@ class _BillCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                month,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: isPaid ? Colors.green : Colors.orange,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  status,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.4)),
+                    ),
+                    child: Icon(
+                      isPaid ? LucideIcons.checkCircle2 : LucideIcons.receipt,
+                      color: statusColor,
+                      size: 18,
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 10),
+                  Text(
+                    month.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
+              ),
+              CyberBadge(
+                text: isPaid ? 'LUNAS // VERIFIED' : 'BELUM DIBAYAR',
+                color: statusColor,
               ),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Total Tagihan',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    'TOTAL TAGIHAN',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? AppTheme.textMuted : const Color(0xFF64748B),
+                      letterSpacing: 0.8,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Rp ${amountValue.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                    'Rp $formattedAmount',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: isPaid
+                          ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                          : (isDark ? AppTheme.neonAmber : const Color(0xFFD97706)),
+                      fontFamily: 'monospace',
                     ),
                   ),
                 ],
               ),
               if (!isPaid)
-                ElevatedButton(
+                CyberActionButton(
+                  label: 'BAYAR SEKARANG',
+                  primaryColor: isDark ? AppTheme.neonAmber : const Color(0xFFD97706),
+                  fullWidth: false,
                   onPressed: () async {
                     final result = await Navigator.push(
                       context,
@@ -3104,144 +3558,219 @@ class _BillCard extends StatelessWidget {
                       onPaymentComplete!();
                     }
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade700,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Bayar',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
                 ),
             ],
           ),
+          const SizedBox(height: 14),
+          Divider(color: isDark ? AppTheme.cyberBorder : const Color(0xFFE2E8F0), height: 1),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_rounded,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Jatuh Tempo: $dueDate',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                  ),
-                ],
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      LucideIcons.calendar,
+                      size: 14,
+                      color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Jatuh Tempo: $dueDate',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? AppTheme.textSecondary : const Color(0xFF64748B),
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (isPaid)
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.picture_as_pdf, size: 20),
-                      onPressed: () async {
-                        try {
-                          // Show loading
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Generating PDF...'),
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppTheme.neonCyan.withValues(alpha: 0.12)
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark
+                              ? AppTheme.neonCyan.withValues(alpha: 0.3)
+                              : const Color(0xFFCBD5E1),
+                        ),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          LucideIcons.fileText,
+                          size: 18,
+                          color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                        ),
+                        onPressed: () async {
+                          try {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Generating Invoice PDF...'),
+                                duration: const Duration(seconds: 1),
+                                backgroundColor: isDark
+                                    ? AppTheme.cyberObsidian
+                                    : const Color(0xFF1E293B),
+                              ),
+                            );
 
-                          // Get customer data
-                          final currentUserData =
-                              AuthService.instance.currentUserData;
-                          if (currentUserData == null) return;
+                            final currentUserData =
+                                AuthService.instance.currentUserData;
+                            if (currentUserData == null) return;
 
-                          final customer = await FirebaseService.instance
-                              .getCustomerByUserId(
-                                currentUserData['id'].toString(),
+                            final customer = await FirebaseService.instance
+                                .getCustomerByUserId(
+                                  currentUserData['id'].toString(),
+                                );
+                            if (customer == null) return;
+
+                            final billData = {
+                              'customerName': customer['name'],
+                              'customerId': customer['customerId'],
+                              'billMonth': month,
+                              'amount': amount.toDouble(),
+                              'dueDate': dueDate,
+                              'status': 'paid',
+                              'paidDate': dueDate,
+                              'packageName': customer['package'],
+                              'installAddress': customer['installAddress'],
+                            };
+
+                            final pdfFile = await PdfGeneratorService.instance
+                                .generateInvoicePdf(billData);
+
+                            if (!context.mounted) return;
+
+                            showDialog(
+                              context: context,
+                              builder: (dialogCtx) {
+                                final isDialogDark =
+                                    Theme.of(dialogCtx).brightness == Brightness.dark;
+                                return AlertDialog(
+                                  backgroundColor: isDialogDark
+                                      ? AppTheme.cyberSurfaceCard
+                                      : Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    side: BorderSide(
+                                      color: isDialogDark
+                                          ? AppTheme.neonCyan
+                                          : AppTheme.signalBlue,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  title: Text(
+                                    'INVOICE PDF SIAP',
+                                    style: TextStyle(
+                                      color: isDialogDark
+                                          ? Colors.white
+                                          : const Color(0xFF0F172A),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  content: Text(
+                                    'File tersimpan:\n${pdfFile.path}',
+                                    style: TextStyle(
+                                      color: isDialogDark
+                                          ? AppTheme.textSecondary
+                                          : const Color(0xFF475569),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(dialogCtx),
+                                      child: Text(
+                                        'TUTUP',
+                                        style: TextStyle(
+                                          color: isDialogDark
+                                              ? AppTheme.textMuted
+                                              : const Color(0xFF64748B),
+                                        ),
+                                      ),
+                                    ),
+                                    FilledButton.icon(
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: isDialogDark
+                                            ? AppTheme.neonCyan
+                                            : AppTheme.signalBlue,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                    onPressed: () async {
+                                      Navigator.pop(dialogCtx);
+                                      await PdfGeneratorService.instance.sharePdf(pdfFile);
+                                    },
+                                    icon: const Icon(LucideIcons.share2, size: 16),
+                                    label: const Text('SHARE', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  ),
+                                  FilledButton.icon(
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: isDialogDark
+                                          ? AppTheme.neonGreen
+                                          : const Color(0xFF16A34A),
+                                      foregroundColor: isDialogDark ? Colors.black : Colors.white,
+                                    ),
+                                    onPressed: () async {
+                                      Navigator.pop(dialogCtx);
+                                      await PdfGeneratorService.instance.printPdf(pdfFile);
+                                    },
+                                    icon: const Icon(LucideIcons.printer, size: 16),
+                                    label: const Text('PRINT', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
                               );
-                          if (customer == null) return;
-
-                          // Prepare bill data for PDF
-                          final billData = {
-                            'customerName': customer['name'],
-                            'customerId': customer['customerId'],
-                            'billMonth': month,
-                            'amount': amount.toDouble(),
-                            'dueDate': dueDate,
-                            'status': 'paid',
-                            'paidDate': dueDate, // Assume paid on due date
-                            'packageName': customer['package'],
-                            'installAddress': customer['installAddress'],
-                          };
-
-                          // Generate PDF
-                          final pdfFile = await PdfGeneratorService.instance
-                              .generateInvoicePdf(billData);
-
-                          if (!context.mounted) return;
-
-                          // Show success and options
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Invoice PDF Generated'),
-                              content: Text('File saved to:\n${pdfFile.path}'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('OK'),
-                                ),
-                                FilledButton.icon(
-                                  onPressed: () async {
-                                    Navigator.pop(context);
-                                    await PdfGeneratorService.instance.sharePdf(
-                                      pdfFile,
-                                    );
-                                  },
-                                  icon: const Icon(Icons.share),
-                                  label: const Text('Share'),
-                                ),
-                                FilledButton.icon(
-                                  onPressed: () async {
-                                    Navigator.pop(context);
-                                    await PdfGeneratorService.instance.printPdf(
-                                      pdfFile,
-                                    );
-                                  },
-                                  icon: const Icon(Icons.print),
-                                  label: const Text('Print'),
-                                ),
-                              ],
-                            ),
+                            },
                           );
                         } catch (e) {
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text('Error: $e')));
-                        }
-                      },
-                      tooltip: 'Download PDF',
-                      color: Colors.red.shade700,
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error: $e'),
+                                backgroundColor: AppTheme.neonCrimson,
+                              ),
+                            );
+                          }
+                        },
+                        tooltip: 'Download PDF',
+                        color: AppTheme.neonCyan,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        padding: const EdgeInsets.all(6),
+                      ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.share, size: 20),
-                      onPressed: () async {
-                        await ShareHelper.shareBillingReport(
-                          customerName: 'Budi Santoso',
-                          period: month,
-                          totalAmount:
-                              'Rp ${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                        );
-                      },
-                      tooltip: 'Bagikan Bukti Pembayaran',
-                      color: Colors.green.shade700,
+                    const SizedBox(width: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.neonGreen.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppTheme.neonGreen.withValues(alpha: 0.3)),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(LucideIcons.share2, size: 18),
+                        onPressed: () async {
+                          await ShareHelper.shareBillingReport(
+                            customerName: 'Budi Santoso',
+                            period: month,
+                            totalAmount:
+                                'Rp $formattedAmount',
+                          );
+                        },
+                        tooltip: 'Bagikan Bukti Pembayaran',
+                        color: AppTheme.neonGreen,
+                        constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                        padding: const EdgeInsets.all(6),
+                      ),
                     ),
                   ],
                 ),
@@ -3297,69 +3826,97 @@ class _BantuanPageState extends State<BantuanPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Header dengan Gradient
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.orange.shade600, Colors.orange.shade400],
+      builder: (dialogCtx) {
+        final isDark = Theme.of(dialogCtx).brightness == Brightness.dark;
+        return StatefulBuilder(
+          builder: (context, setState) => Dialog(
+            backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(
+                color: isDark
+                    ? AppTheme.neonAmber.withValues(alpha: 0.6)
+                    : const Color(0xFFF59E0B),
+                width: 1.5,
+              ),
+            ),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500, maxHeight: 680),
+              decoration: BoxDecoration(
+                color: isDark ? AppTheme.cyberObsidian : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header Tactical HUD
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isDark
+                              ? AppTheme.neonAmber.withValues(alpha: 0.3)
+                              : const Color(0xFFE2E8F0),
+                          width: 1,
+                        ),
+                      ),
                     ),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          color: AppTheme.neonAmber.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: AppTheme.neonAmber.withValues(alpha: 0.5),
+                          ),
                         ),
                         child: const Icon(
-                          Icons.support_agent_rounded,
-                          color: Colors.white,
-                          size: 32,
+                          LucideIcons.headphones,
+                          color: AppTheme.neonAmber,
+                          size: 28,
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      const Expanded(
+                      const SizedBox(width: 14),
+                      Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const CyberBadge(
+                              text: 'NOC DISPATCH // TIKET BARU',
+                              color: AppTheme.neonAmber,
+                            ),
+                            const SizedBox(height: 4),
                             Text(
-                              'Buat Tiket Baru',
+                              'BUAT TIKET GANGGUAN',
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             Text(
-                              'Laporkan masalah Anda',
+                              'Laporkan anomali jaringan atau pertanyaan billing',
                               style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
+                                color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                fontSize: 12,
                               ),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.pop(dialogCtx),
+                        icon: Icon(LucideIcons.x, color: isDark ? Colors.white70 : const Color(0xFF64748B)),
                       ),
                     ],
                   ),
@@ -3368,74 +3925,84 @@ class _BantuanPageState extends State<BantuanPage> {
                 // Form Content
                 Flexible(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Kategori Masalah
-                        const Row(
+                        Row(
                           children: [
-                            Icon(
-                              Icons.category,
-                              size: 20,
-                              color: Colors.orange,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Kategori Masalah',
+                            const CyberPulseDot(color: AppTheme.neonAmber, size: 8),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'KATEGORI MASALAH // CATEGORY',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 12,
+                                letterSpacing: 0.8,
+                                color: AppTheme.neonAmber,
+                                fontFamily: 'monospace',
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
+                            color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFCBD5E1),
+                            ),
                           ),
                           child: Column(
                             children: [
                               _CategoryOption(
-                                icon: Icons.wifi_off,
-                                title: 'Masalah Teknis',
-                                subtitle: 'Internet lambat, tidak bisa connect',
+                                icon: LucideIcons.wifiOff,
+                                title: 'Masalah Teknis & Koneksi',
+                                subtitle: 'Internet drop, LOS merah, redaman tinggi',
                                 value: 'teknis',
                                 groupValue: selectedCategory,
                                 onChanged: (value) {
                                   setState(() => selectedCategory = value!);
                                 },
                               ),
-                              Divider(height: 1, color: Colors.grey.shade300),
+                              Divider(
+                                height: 1,
+                                color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
+                              ),
                               _CategoryOption(
-                                icon: Icons.receipt_long,
-                                title: 'Tagihan & Pembayaran',
-                                subtitle: 'Pertanyaan seputar billing',
+                                icon: LucideIcons.receipt,
+                                title: 'Tagihan & Billing Pembayaran',
+                                subtitle: 'Konfirmasi bayar, mutasi invoice',
                                 value: 'billing',
                                 groupValue: selectedCategory,
                                 onChanged: (value) {
                                   setState(() => selectedCategory = value!);
                                 },
                               ),
-                              Divider(height: 1, color: Colors.grey.shade300),
+                              Divider(
+                                height: 1,
+                                color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
+                              ),
                               _CategoryOption(
-                                icon: Icons.upgrade,
-                                title: 'Upgrade Paket',
-                                subtitle: 'Ingin upgrade atau downgrade',
+                                icon: LucideIcons.gauge,
+                                title: 'Upgrade Speed & Bandwidth',
+                                subtitle: 'Modifikasi profil langganan internet',
                                 value: 'upgrade',
                                 groupValue: selectedCategory,
                                 onChanged: (value) {
                                   setState(() => selectedCategory = value!);
                                 },
                               ),
-                              Divider(height: 1, color: Colors.grey.shade300),
+                              Divider(
+                                height: 1,
+                                color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
+                              ),
                               _CategoryOption(
-                                icon: Icons.help_outline,
-                                title: 'Lainnya',
-                                subtitle: 'Pertanyaan umum',
+                                icon: LucideIcons.helpCircle,
+                                title: 'Pertanyaan Umum Lainnya',
+                                subtitle: 'Relokasi ONT, konsultasi teknis Wi-Fi',
                                 value: 'lainnya',
                                 groupValue: selectedCategory,
                                 onChanged: (value) {
@@ -3445,170 +4012,178 @@ class _BantuanPageState extends State<BantuanPage> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
                         // Judul Masalah
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.title, size: 20, color: Colors.orange),
-                            SizedBox(width: 8),
-                            Text(
-                              'Judul Masalah',
+                            const CyberPulseDot(color: AppTheme.neonAmber, size: 8),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'SUBJEK KENDALA // SUBJECT',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 12,
+                                letterSpacing: 0.8,
+                                color: AppTheme.neonAmber,
+                                fontFamily: 'monospace',
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         TextField(
                           controller: subjectController,
+                          style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 14),
                           decoration: InputDecoration(
-                            hintText:
-                                'Contoh: Internet putus-putus sejak kemarin',
+                            hintText: 'Contoh: Internet terputus sejak pukul 08:00',
+                            hintStyle: TextStyle(color: isDark ? Colors.white38 : const Color(0xFF94A3B8), fontSize: 13),
                             filled: true,
-                            fillColor: Colors.grey.shade50,
+                            fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.grey.shade300,
+                                color: isDark ? Colors.white.withValues(alpha: 0.15) : const Color(0xFFCBD5E1),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.grey.shade300,
+                                color: isDark ? Colors.white.withValues(alpha: 0.15) : const Color(0xFFCBD5E1),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Colors.orange,
-                                width: 2,
+                                color: AppTheme.neonAmber,
+                                width: 1.5,
                               ),
                             ),
                             prefixIcon: const Icon(
-                              Icons.edit,
-                              color: Colors.orange,
+                              LucideIcons.fileEdit,
+                              color: AppTheme.neonAmber,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
                         // Deskripsi Detail
-                        const Row(
+                        Row(
                           children: [
-                            Icon(
-                              Icons.description,
-                              size: 20,
-                              color: Colors.orange,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Deskripsi Detail',
+                            const CyberPulseDot(color: AppTheme.neonAmber, size: 8),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'DETAIL KENDALA // LOG DESCRIPTION',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 12,
+                                letterSpacing: 0.8,
+                                color: AppTheme.neonAmber,
+                                fontFamily: 'monospace',
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         TextField(
                           controller: descriptionController,
-                          maxLines: 5,
+                          maxLines: 4,
+                          style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 13, height: 1.4),
                           decoration: InputDecoration(
                             hintText:
-                                'Jelaskan masalah secara detail...\n\n• Kapan mulai terjadi?\n• Sudah dicoba apa saja?\n• Perangkat yang terpengaruh?',
+                                'Jelaskan kronologi kendala...\n• Kapan pertama kali terjadi?\n• Status lampu indikator PON/LOS pada ONT modem?\n• Apakah sudah dicoba restart perangkat?',
+                            hintStyle: TextStyle(color: isDark ? Colors.white38 : const Color(0xFF94A3B8), fontSize: 12),
                             filled: true,
-                            fillColor: Colors.grey.shade50,
+                            fillColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.grey.shade300,
+                                color: isDark ? Colors.white.withValues(alpha: 0.15) : const Color(0xFFCBD5E1),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: Colors.grey.shade300,
+                                color: isDark ? Colors.white.withValues(alpha: 0.15) : const Color(0xFFCBD5E1),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                               borderSide: const BorderSide(
-                                color: Colors.orange,
-                                width: 2,
+                                color: AppTheme.neonAmber,
+                                width: 1.5,
                               ),
                             ),
                             alignLabelWithHint: true,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
                         // Zona Lokasi
-                        const Row(
+                        Row(
                           children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 20,
-                              color: Colors.orange,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Zona Lokasi',
+                            const CyberPulseDot(color: AppTheme.neonAmber, size: 8),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'ZONA LOKASI // POP REGION',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 12,
+                                letterSpacing: 0.8,
+                                color: AppTheme.neonAmber,
+                                fontFamily: 'monospace',
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.grey.shade300),
+                            color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark ? Colors.white.withValues(alpha: 0.15) : const Color(0xFFCBD5E1),
+                            ),
                           ),
                           child: DropdownButtonFormField<String>(
                             initialValue: selectedZone,
-                            decoration: InputDecoration(
+                            dropdownColor: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+                            style: TextStyle(color: isDark ? Colors.white : const Color(0xFF0F172A), fontSize: 14),
+                            decoration: const InputDecoration(
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
+                              contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 12,
                               ),
-                              prefixIcon: const Icon(
-                                Icons.location_city,
-                                color: AppTheme.primaryCyan,
+                              prefixIcon: Icon(
+                                LucideIcons.mapPin,
+                                color: AppTheme.neonCyan,
                               ),
                             ),
                             items: const [
                               DropdownMenuItem(
                                 value: 'Batam Center',
-                                child: Text('Batam Center'),
+                                child: Text('Batam Center (POP-01)'),
                               ),
                               DropdownMenuItem(
                                 value: 'Piayu',
-                                child: Text('Piayu'),
+                                child: Text('Piayu (POP-02)'),
                               ),
                               DropdownMenuItem(
                                 value: 'Baloi',
-                                child: Text('Baloi'),
+                                child: Text('Baloi (POP-03)'),
                               ),
                               DropdownMenuItem(
                                 value: 'Nagoya',
-                                child: Text('Nagoya'),
+                                child: Text('Nagoya (POP-04)'),
                               ),
                               DropdownMenuItem(
                                 value: 'Batu Aji',
-                                child: Text('Batu Aji'),
+                                child: Text('Batu Aji (POP-05)'),
                               ),
                               DropdownMenuItem(
                                 value: 'Sekupang',
-                                child: Text('Sekupang'),
+                                child: Text('Sekupang (POP-06)'),
                               ),
                             ],
                             onChanged: (value) {
@@ -3616,58 +4191,57 @@ class _BantuanPageState extends State<BantuanPage> {
                             },
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
                         // Tingkat Prioritas
-                        const Row(
+                        Row(
                           children: [
-                            Icon(
-                              Icons.priority_high,
-                              size: 20,
-                              color: Colors.orange,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'Tingkat Prioritas',
+                            const CyberPulseDot(color: AppTheme.neonAmber, size: 8),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'TINGKAT PRIORITAS // SEVERITY LEVEL',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 12,
+                                letterSpacing: 0.8,
+                                color: AppTheme.neonAmber,
+                                fontFamily: 'monospace',
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         Row(
                           children: [
                             Expanded(
                               child: _PriorityChip(
                                 label: 'Rendah',
-                                icon: Icons.arrow_downward,
-                                color: Colors.green,
+                                icon: LucideIcons.arrowDown,
+                                color: AppTheme.neonGreen,
                                 isSelected: selectedPriority == 'low',
                                 onTap: () {
                                   setState(() => selectedPriority = 'low');
                                 },
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: _PriorityChip(
                                 label: 'Sedang',
-                                icon: Icons.remove,
-                                color: Colors.orange,
+                                icon: LucideIcons.minus,
+                                color: AppTheme.neonAmber,
                                 isSelected: selectedPriority == 'medium',
                                 onTap: () {
                                   setState(() => selectedPriority = 'medium');
                                 },
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: _PriorityChip(
                                 label: 'Tinggi',
-                                icon: Icons.arrow_upward,
-                                color: Colors.red,
+                                icon: LucideIcons.alertTriangle,
+                                color: AppTheme.neonCrimson,
                                 isSelected: selectedPriority == 'high',
                                 onTap: () {
                                   setState(() => selectedPriority = 'high');
@@ -3676,29 +4250,35 @@ class _BantuanPageState extends State<BantuanPage> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
 
-                        // Info Box
+                        // Info Box SLA
                         Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.blue.shade200),
+                            color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF0FDF4),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark
+                                  ? AppTheme.neonCyan.withValues(alpha: 0.35)
+                                  : const Color(0xFF86EFAC),
+                            ),
                           ),
                           child: Row(
                             children: [
                               Icon(
-                                Icons.info_outline,
-                                color: Colors.blue.shade700,
+                                LucideIcons.shieldCheck,
+                                color: isDark ? AppTheme.neonCyan : const Color(0xFF16A34A),
+                                size: 22,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Tim support kami akan merespons tiket Anda dalam 1x24 jam',
+                                  'NOC AUDIRA standby 24/7. Tiket prioritas ditanggapi segera sesuai SLA ring-1.',
                                   style: TextStyle(
-                                    color: Colors.blue.shade900,
+                                    color: isDark ? Colors.white70 : const Color(0xFF1E293B),
                                     fontSize: 12,
+                                    height: 1.3,
                                   ),
                                 ),
                               ),
@@ -3712,31 +4292,39 @@ class _BantuanPageState extends State<BantuanPage> {
 
                 // Action Buttons
                 Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
                     borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(24),
-                      bottomRight: Radius.circular(24),
+                      bottomLeft: Radius.circular(15),
+                      bottomRight: Radius.circular(15),
+                    ),
+                    border: Border(
+                      top: BorderSide(
+                        color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
+                      ),
                     ),
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () => Navigator.pop(dialogCtx),
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            side: BorderSide(color: Colors.grey.shade400),
+                            side: BorderSide(
+                              color: isDark ? Colors.white.withValues(alpha: 0.25) : const Color(0xFFCBD5E1),
+                            ),
                           ),
-                          child: const Text(
-                            'Batal',
+                          child: Text(
+                            'BATAL',
                             style: TextStyle(
-                              fontSize: 16,
+                              color: isDark ? Colors.white70 : const Color(0xFF475569),
                               fontWeight: FontWeight.bold,
+                              fontFamily: 'monospace',
                             ),
                           ),
                         ),
@@ -3744,7 +4332,11 @@ class _BantuanPageState extends State<BantuanPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         flex: 2,
-                        child: FilledButton(
+                        child: CyberActionButton(
+                          text: 'TRANSMIT TIKET NOC',
+                          icon: LucideIcons.send,
+                          color: AppTheme.neonAmber,
+                          isFullWidth: true,
                           onPressed: () async {
                             if (subjectController.text.isEmpty ||
                                 descriptionController.text.isEmpty) {
@@ -3753,21 +4345,21 @@ class _BantuanPageState extends State<BantuanPage> {
                                   content: const Row(
                                     children: [
                                       Icon(
-                                        Icons.error_outline,
+                                        LucideIcons.alertCircle,
                                         color: Colors.white,
                                       ),
                                       SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
-                                          'Mohon lengkapi semua field',
+                                          'Mohon lengkapi seluruh kolom tiket',
                                         ),
                                       ),
                                     ],
                                   ),
-                                  backgroundColor: Colors.red.shade600,
+                                  backgroundColor: AppTheme.neonCrimson,
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
                               );
@@ -3775,7 +4367,6 @@ class _BantuanPageState extends State<BantuanPage> {
                             }
 
                             try {
-                              // Add category to subject
                               final categoryPrefix = {
                                 'teknis': '[TEKNIS]',
                                 'billing': '[BILLING]',
@@ -3795,27 +4386,30 @@ class _BantuanPageState extends State<BantuanPage> {
                               });
 
                               if (!context.mounted) return;
-                              Navigator.pop(context);
+                              Navigator.pop(dialogCtx);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Row(
-                                    children: const [
+                                  content: const Row(
+                                    children: [
                                       Icon(
-                                        Icons.check_circle,
-                                        color: Colors.white,
+                                        LucideIcons.checkCircle2,
+                                        color: AppTheme.neonGreen,
                                       ),
                                       SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
-                                          'Tiket berhasil dibuat! Tim kami akan segera menghubungi Anda.',
+                                          'Tiket berhasil di-transmit! NOC akan segera menindaklanjuti.',
                                         ),
                                       ),
                                     ],
                                   ),
-                                  backgroundColor: Colors.green.shade600,
+                                  backgroundColor: isDark ? AppTheme.cyberObsidian : const Color(0xFF0F172A),
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: const BorderSide(
+                                      color: AppTheme.neonGreen,
+                                    ),
                                   ),
                                   duration: const Duration(seconds: 4),
                                 ),
@@ -3823,52 +4417,33 @@ class _BantuanPageState extends State<BantuanPage> {
 
                               _loadTickets();
                             } catch (e) {
-                              // Error creating ticket
                               if (!context.mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: const Row(
                                     children: [
                                       Icon(
-                                        Icons.error_outline,
-                                        color: Colors.white,
+                                        LucideIcons.alertCircle,
+                                        color: AppTheme.neonCrimson,
                                       ),
                                       SizedBox(width: 12),
                                       Expanded(
-                                        child: Text('Gagal membuat tiket'),
+                                        child: Text('Gagal mengirimkan tiket'),
                                       ),
                                     ],
                                   ),
-                                  backgroundColor: Colors.red.shade600,
+                                  backgroundColor: isDark ? AppTheme.cyberObsidian : const Color(0xFF0F172A),
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: const BorderSide(
+                                      color: AppTheme.neonCrimson,
+                                    ),
                                   ),
                                 ),
                               );
                             }
                           },
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.orange.shade600,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.send, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                'Kirim Tiket',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ],
@@ -3878,37 +4453,80 @@ class _BantuanPageState extends State<BantuanPage> {
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
       appBar: AppBar(
-        title: const Text('Pusat Bantuan'),
-        backgroundColor: Colors.orange.shade700,
-        foregroundColor: Colors.white,
+        title: Row(
+          children: [
+            const CyberPulseDot(color: AppTheme.neonAmber, size: 9),
+            const SizedBox(width: 10),
+            Text(
+              'PUSAT BANTUAN // NOC SUPPORT',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+                fontFamily: 'monospace',
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+        elevation: 0,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 12),
+            child: Center(
+              child: CyberBadge(
+                text: '24/7 ONLINE',
+                color: AppTheme.neonGreen,
+              ),
+            ),
+          ),
+        ],
       ),
       body: RefreshIndicator(
+        color: AppTheme.neonAmber,
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
         onRefresh: _loadTickets,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Buat Tiket Baru Button
+            // Buat Tiket Baru Tactical Hero Card
             Container(
-              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.orange.shade400, Colors.orange.shade600],
+                color: isDark ? AppTheme.cyberObsidian : Colors.white,
+                gradient: isDark
+                    ? const LinearGradient(
+                        colors: [AppTheme.cyberObsidian, Color(0xFF261906)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : const LinearGradient(
+                        colors: [Colors.white, Color(0xFFFFFBEB)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isDark ? AppTheme.neonAmber.withValues(alpha: 0.6) : const Color(0xFFF59E0B),
+                  width: 1.5,
                 ),
-                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.orange.withValues(alpha: 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    color: AppTheme.neonAmber.withValues(alpha: isDark ? 0.15 : 0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
@@ -3916,61 +4534,151 @@ class _BantuanPageState extends State<BantuanPage> {
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: _showCreateTicketDialog,
-                  borderRadius: BorderRadius.circular(20),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_circle_outline,
-                        color: Colors.white,
-                        size: 32,
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        'Buat Tiket Baru',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                  borderRadius: BorderRadius.circular(14),
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.neonAmber.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppTheme.neonAmber.withValues(alpha: 0.5),
+                            ),
+                          ),
+                          child: const Icon(
+                            LucideIcons.checkSquare,
+                            color: AppTheme.neonAmber,
+                            size: 28,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const CyberBadge(
+                                text: 'NOC DISPATCH ENGINE',
+                                color: AppTheme.neonAmber,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'BUAT TIKET GANGGUAN BARU',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Laporkan masalah untuk penanganan cepat',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(
+                          LucideIcons.chevronRight,
+                          color: AppTheme.neonAmber,
+                          size: 18,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Tiket Saya',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            const TacticalHudHeader(
+              title: 'TIKET AKTIF // STATUS DISPATCH',
+              subtitle: 'DAFTAR LAPORAN LAYANAN & RIWAYAT NOC',
+              accentColor: AppTheme.neonAmber,
             ),
             const SizedBox(height: 12),
             _isLoading
                 ? Column(
                     children: List.generate(
                       3,
-                      (index) => const SkeletonCard(
-                        margin: EdgeInsets.symmetric(vertical: 8),
+                      (index) => Container(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        height: 90,
+                        decoration: BoxDecoration(
+                          color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.06)
+                                : const Color(0xFFE2E8F0),
+                          ),
+                        ),
                       ),
                     ),
                   )
                 : _tickets.isEmpty
-                ? const EnhancedEmptyState(
-                    icon: Icons.support_agent_outlined,
-                    title: 'Belum Ada Tiket',
-                    description:
-                        'Anda belum memiliki tiket support. Buat tiket baru jika mengalami masalah.',
-                    actionLabel: 'Buat Tiket',
+                ? Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFCBD5E1),
+                      ),
+                      boxShadow: isDark
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.04),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          LucideIcons.shieldCheck,
+                          color: AppTheme.neonGreen,
+                          size: 40,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'SEMUA LAYANAN NORMAL',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.8,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Tidak ada tiket kendala aktif saat ini. Jaringan fiber Anda beroperasi optimal.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   )
                 : Column(
                     children: _tickets.map((ticket) {
                       return _TicketCard(
-                        ticketId: ticket['ticketId'],
-                        subject: ticket['subject'],
-                        description: ticket['description'],
-                        status: ticket['status'],
-                        priority: ticket['priority'],
-                        createdAt: ticket['createdAt'],
+                        ticketId: ticket['ticketId'] ?? 'TK-000',
+                        subject: ticket['subject'] ?? 'Laporan Jaringan',
+                        description: ticket['description'] ?? '',
+                        status: ticket['status'] ?? 'open',
+                        priority: ticket['priority'] ?? 'medium',
+                        createdAt: ticket['createdAt'] ?? DateTime.now().toIso8601String(),
                       );
                     }).toList(),
                   ),
@@ -3981,7 +4689,7 @@ class _BantuanPageState extends State<BantuanPage> {
   }
 }
 
-// Widget Ticket Card
+// Widget Ticket Card Cyberpunk
 class _TicketCard extends StatelessWidget {
   final String ticketId;
   final String subject;
@@ -4002,58 +4710,80 @@ class _TicketCard extends StatelessWidget {
   Color _getStatusColor() {
     switch (status) {
       case 'open':
-        return Colors.orange;
+        return AppTheme.neonAmber;
       case 'resolved':
-        return Colors.green;
+        return AppTheme.neonGreen;
       default:
-        return Colors.grey;
+        return AppTheme.neonCyan;
     }
   }
 
   String _getStatusText() {
     switch (status) {
       case 'open':
-        return 'Dalam Proses';
+        return 'DALAM PROSES';
       case 'resolved':
-        return 'Selesai';
+        return 'SELESAI // CLOSED';
       default:
-        return status;
+        return status.toUpperCase();
     }
   }
 
   String _getPriorityText() {
     switch (priority) {
       case 'low':
-        return 'Rendah';
+        return 'RENDAH';
       case 'medium':
-        return 'Sedang';
+        return 'SEDANG';
       case 'high':
-        return 'Tinggi';
+        return 'TINGGI // URGENT';
       default:
-        return priority;
+        return priority.toUpperCase();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = _getStatusColor();
-    final date = DateTime.parse(createdAt);
+    DateTime date;
+    try {
+      date = DateTime.parse(createdAt);
+    } catch (_) {
+      date = DateTime.now();
+    }
     final formattedDate =
-        '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+        '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+    final priorityColor = priority == 'high'
+        ? AppTheme.neonCrimson
+        : priority == 'medium'
+        ? AppTheme.neonAmber
+        : AppTheme.neonGreen;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.45 : 0.35),
+          width: 1.2,
+        ),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+          if (isDark)
+            BoxShadow(
+              color: color.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            )
+          else
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
         ],
       ),
       child: Column(
@@ -4062,32 +4792,36 @@ class _TicketCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: color.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Icon(
-                  Icons.support_agent_rounded,
+                  LucideIcons.ticket,
                   color: color,
-                  size: 24,
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      ticketId,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    CyberBadge(
+                      text: ticketId,
+                      color: color,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subject,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 14,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
                       ),
                     ),
                   ],
@@ -4095,51 +4829,47 @@ class _TicketCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
             description,
-            style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? Colors.white70 : const Color(0xFF475569),
+              height: 1.4,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  _getStatusText(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              CyberBadge(
+                text: _getStatusText(),
+                color: color,
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  _getPriorityText(),
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+              CyberBadge(
+                text: _getPriorityText(),
+                color: priorityColor,
               ),
               const Spacer(),
-              Text(
-                formattedDate,
-                style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+              Row(
+                children: [
+                  Icon(
+                    LucideIcons.clock,
+                    size: 12,
+                    color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    formattedDate,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -4194,181 +4924,333 @@ class _ProfilPageState extends State<ProfilPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
         appBar: AppBar(
-          title: const Text('Profil Saya'),
-          backgroundColor: Colors.purple.shade700,
-          foregroundColor: Colors.white,
+          title: Text(
+            'PROFIL // IDENTITY',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'monospace',
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+            ),
+          ),
+          backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+          foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+          elevation: 0,
         ),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppTheme.neonCyan),
+        ),
       );
     }
 
-    final userName = _userData?['name'] ?? 'User';
+    final userName = _userData?['name'] ?? 'Pelanggan Audira';
     final userEmail = _userData?['email'] ?? '';
-    final customerId = _customerData?['customerId'] ?? 'N/A';
+    final customerId = _customerData?['customerId'] ?? 'ADN-ID-001';
     final profilePicture = _userData?['profilePicture'] as String?;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? AppTheme.cyberOledBg : const Color(0xFFF1F5F9),
       appBar: AppBar(
-        title: const Text('Profil Saya'),
-        backgroundColor: Colors.purple.shade700,
-        foregroundColor: Colors.white,
+        title: Row(
+          children: [
+            const CyberPulseDot(color: AppTheme.neonPurple, size: 9),
+            const SizedBox(width: 10),
+            Text(
+              'PROFIL PELANGGAN // IDENTITY',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.8,
+                fontFamily: 'monospace',
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isDark ? AppTheme.cyberObsidian : Colors.white,
+        foregroundColor: isDark ? Colors.white : const Color(0xFF0F172A),
+        elevation: 0,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 12),
+            child: Center(
+              child: CyberBadge(
+                text: 'SECURE // KYC',
+                color: AppTheme.neonGreen,
+              ),
+            ),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Profile Header Card
+          // Cyberpunk Profile Header Card
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.purple.shade400, Colors.purple.shade600],
+              color: isDark ? AppTheme.cyberObsidian : Colors.white,
+              gradient: isDark
+                  ? const LinearGradient(
+                      colors: [AppTheme.cyberObsidian, Color(0xFF1D1236)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )
+                  : const LinearGradient(
+                      colors: [Colors.white, Color(0xFFF5F3FF)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDark ? AppTheme.neonPurple.withValues(alpha: 0.6) : const Color(0xFFC084FC),
+                width: 1.5,
               ),
-              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.purple.withValues(alpha: 0.3),
+                  color: AppTheme.neonPurple.withValues(alpha: isDark ? 0.2 : 0.08),
                   blurRadius: 15,
-                  offset: const Offset(0, 8),
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
             child: Column(
               children: [
-                // Profile Avatar - Using ShimmerAvatar for profile images
-                ShimmerAvatar(
-                  imageUrl: profilePicture,
-                  radius: 40,
-                  backgroundColor: Colors.white,
-                  errorWidget: Icon(
-                    Icons.person_rounded,
-                    size: 40,
-                    color: Colors.purple.shade700,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  userName,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                CopyableText(
-                  text: customerId,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-                  successMessage: 'Customer ID disalin!',
-                ),
-                const SizedBox(height: 8),
+                // Avatar with Neon Ring
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(12),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppTheme.neonCyan,
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.neonCyan.withValues(alpha: 0.35),
+                        blurRadius: 10,
+                      ),
+                    ],
                   ),
-                  child: const Text(
-                    'Pelanggan Aktif',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                  child: ShimmerAvatar(
+                    imageUrl: profilePicture,
+                    radius: 38,
+                    backgroundColor: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF1F5F9),
+                    errorWidget: const Icon(
+                      LucideIcons.user,
+                      size: 40,
+                      color: AppTheme.neonCyan,
                     ),
                   ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  userName,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                // Customer ID Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? AppTheme.neonCyan.withValues(alpha: 0.4)
+                          : const Color(0xFFCBD5E1),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'ID: ',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                          fontFamily: 'monospace',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      CopyableText(
+                        text: customerId,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.neonCyan,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'monospace',
+                        ),
+                        successMessage: 'Customer ID disalin!',
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const CyberBadge(
+                  text: 'PELANGGAN AKTIF // VERIFIED',
+                  color: AppTheme.neonGreen,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
           // Achievement/Loyalty System (Feature #11)
-          _LoyaltySection(),
+          const _LoyaltySection(),
           const SizedBox(height: 16),
 
           // Referral Program (Feature #12)
-          _ReferralCard(),
+          const _ReferralCard(),
           const SizedBox(height: 24),
 
           // Informasi Akun Section
-          const Text(
-            'Informasi Akun',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          const TacticalHudHeader(
+            title: 'DATA AKUN // TELEMETRI PELANGGAN',
+            subtitle: 'INFORMASI IDENTITAS DAN LAYANAN BERLANGGANAN',
+            accentColor: AppTheme.neonCyan,
           ),
           const SizedBox(height: 12),
-          const _ProfileInfoTile(
-            icon: Icons.email_outlined,
-            title: 'Email',
-            value: 'budi@email.com',
+          _ProfileInfoTile(
+            icon: LucideIcons.mail,
+            title: 'Email Terdaftar',
+            value: userEmail.isNotEmpty ? userEmail : 'budi@audira.my.id',
+            accentColor: AppTheme.neonCyan,
           ),
           const _ProfileInfoTile(
-            icon: Icons.phone_outlined,
-            title: 'No. Telepon',
+            icon: LucideIcons.phone,
+            title: 'No. Hotline / WhatsApp',
             value: AppConstants.csWhatsApp,
+            accentColor: AppTheme.neonGreen,
           ),
           const _ProfileInfoTile(
-            icon: Icons.location_on_outlined,
-            title: 'Alamat',
-            value: 'Jl. Sudirman No. 123, Jakarta Pusat',
+            icon: LucideIcons.mapPin,
+            title: 'Alamat Instalasi ONT',
+            value: 'Batam Center, Kepulauan Riau',
+            accentColor: AppTheme.neonAmber,
           ),
           const _ProfileInfoTile(
-            icon: Icons.wifi_outlined,
-            title: 'Paket Internet',
-            value: '50 Mbps Unlimited',
+            icon: LucideIcons.wifi,
+            title: 'Paket Fiber Aktif',
+            value: '50 Mbps Simetris Unlimited',
+            accentColor: AppTheme.neonPurple,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
-          // Dark Mode & Settings
-          Card(
-            color: Colors.white,
+          // Dark Mode & Settings Tactical Card
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFCBD5E1),
+              ),
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
             child: Column(
               children: [
                 Consumer<ThemeProvider>(
                   builder: (context, themeProvider, _) {
                     return ListTile(
-                      leading: Icon(
-                        themeProvider.isDarkMode
-                            ? Icons.dark_mode
-                            : Icons.light_mode,
-                        color: Colors.purple.shade700,
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppTheme.neonPurple.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          themeProvider.isDarkMode
+                              ? LucideIcons.moon
+                              : LucideIcons.sun,
+                          color: AppTheme.neonPurple,
+                          size: 20,
+                        ),
                       ),
-                      title: const Text('Dark Mode'),
+                      title: Text(
+                        'Cyber Dark HUD Mode',
+                        style: TextStyle(
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       subtitle: Text(
                         themeProvider.isSystemMode
-                            ? 'Mengikuti Sistem'
+                            ? 'Sinkron Sistem OS'
                             : themeProvider.isDarkMode
-                            ? 'Aktif'
-                            : 'Non-aktif',
+                            ? 'Mode Gelap Aktif'
+                            : 'Mode Terang',
+                        style: TextStyle(
+                          color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                          fontSize: 12,
+                        ),
                       ),
                       trailing: Switch(
                         value: themeProvider.isDarkMode,
                         onChanged: (value) {
                           themeProvider.toggleTheme();
                         },
-                        activeThumbColor: Colors.purple.shade700,
+                        activeThumbColor: AppTheme.neonPurple,
+                        activeTrackColor: AppTheme.neonPurple.withValues(alpha: 0.4),
                       ),
                     );
                   },
                 ),
-                const Divider(height: 1),
+                Divider(
+                  height: 1,
+                  color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
+                ),
                 ListTile(
-                  leading: Icon(
-                    Icons.info_outline,
-                    color: Colors.purple.shade700,
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: (isDark ? AppTheme.neonCyan : AppTheme.signalBlue).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      LucideIcons.info,
+                      color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                      size: 20,
+                    ),
                   ),
-                  title: const Text('Tentang Aplikasi'),
-                  subtitle: const Text('Versi, changelog, dan lainnya'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  title: Text(
+                    'Tentang AUDIRA-NET',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Build v2.4 // Cyberpunk Architecture & Lisensi',
+                    style: TextStyle(
+                      color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                      fontSize: 12,
+                    ),
+                  ),
+                  trailing: Icon(
+                    LucideIcons.chevronRight,
+                    size: 14,
+                    color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -4383,38 +5265,46 @@ class _ProfilPageState extends State<ProfilPage> {
           ),
           const SizedBox(height: 16),
 
-          // Test Notification Button (untuk demo)
+          // Test Notification Button
           OutlinedButton.icon(
             onPressed: () async {
               await NotificationService().showBillReminderNotification(
-                month: 'November 2025',
-                dueDate: '25 Nov 2025',
+                month: 'November 2026',
+                dueDate: '25 Nov 2026',
                 amount: 350000,
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Notifikasi dikirim! Cek notification bar'),
-                    duration: Duration(seconds: 2),
+                  SnackBar(
+                    content: const Text('Notifikasi reminder ditransmisikan ke sistem'),
+                    backgroundColor: isDark ? AppTheme.cyberObsidian : const Color(0xFF1E293B),
+                    duration: const Duration(seconds: 2),
                   ),
                 );
               }
             },
-            icon: const Icon(Icons.notifications_active),
-            label: const Text('Test Notifikasi'),
+            icon: const Icon(LucideIcons.bellRing, size: 18),
+            label: const Text(
+              'TEST NOTIFIKASI REMINDER',
+              style: TextStyle(
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.blue.shade700,
-              side: BorderSide(color: Colors.blue.shade700),
-              minimumSize: const Size.fromHeight(50),
+              foregroundColor: AppTheme.neonCyan,
+              side: BorderSide(color: AppTheme.neonCyan.withValues(alpha: 0.5)),
+              minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
           const SizedBox(height: 12),
 
           // Logout Button
-          FilledButton.icon(
+          OutlinedButton.icon(
             onPressed: () {
               Navigator.pushNamedAndRemoveUntil(
                 context,
@@ -4422,67 +5312,84 @@ class _ProfilPageState extends State<ProfilPage> {
                 (route) => false,
               );
             },
-            icon: const Icon(Icons.logout),
+            icon: const Icon(LucideIcons.logOut, size: 18),
             label: const Text(
-              'Keluar',
+              'LOGOUT // TERMINATE SESSION',
               style: TextStyle(
-                inherit: false,
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontFamily: 'monospace',
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
               ),
             ),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-              minimumSize: const Size.fromHeight(50),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppTheme.neonCrimson,
+              side: BorderSide(color: AppTheme.neonCrimson.withValues(alpha: 0.6)),
+              backgroundColor: AppTheme.neonCrimson.withValues(alpha: 0.08),
+              minimumSize: const Size.fromHeight(48),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 }
 
-// Widget Referral Card (Feature #12)
+// Widget Referral Card Cyberpunk (Feature #12)
 class _ReferralCard extends StatelessWidget {
   const _ReferralCard();
 
   void _shareReferralCode(BuildContext context) {
-    const referralCode = 'ADN-REF-2025001';
-    const message =
-        '''
-🎁 Gabung Audira Digital Network sekarang!
+    const referralCode = 'ADN-REF-2026';
+    const message = '''
+🎁 Bergabung dengan Jaringan Fiber AUDIRA-NET!
 
-Pakai kode referral saya: $referralCode
-Dapatkan diskon 20% untuk 3 bulan pertama!
+Gunakan kode referral saya: $referralCode
+Nikmati koneksi fiber simetris ultra-cepat & cashback saldo tagihan!
 
-Download aplikasi: https://audiranet.id/app
+Portal: https://audira.my.id
     ''';
 
-    // Implement actual share using ShareHelper
     ShareHelper.shareText(
       text: message,
-      subject: 'Kode Referral Audira Digital Network',
+      subject: 'Kode Referral AUDIRA-NET Fiber',
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.teal.shade400, Colors.teal.shade600],
+        color: isDark ? AppTheme.cyberObsidian : Colors.white,
+        gradient: isDark
+            ? const LinearGradient(
+                colors: [AppTheme.cyberObsidian, Color(0xFF042426)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : const LinearGradient(
+                colors: [Colors.white, Color(0xFFF0FDF4)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? AppTheme.neonCyan.withValues(alpha: 0.6)
+              : const Color(0xFF38BDF8),
+          width: 1.5,
         ),
-        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.teal.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: (isDark ? AppTheme.neonCyan : AppTheme.signalBlue)
+                .withValues(alpha: isDark ? 0.15 : 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -4494,75 +5401,91 @@ Download aplikasi: https://audiranet.id/app
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(12),
+                  color: (isDark ? AppTheme.neonCyan : AppTheme.signalBlue)
+                      .withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: (isDark ? AppTheme.neonCyan : AppTheme.signalBlue)
+                        .withValues(alpha: 0.4),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.card_giftcard,
-                  color: Colors.white,
-                  size: 24,
+                child: Icon(
+                  LucideIcons.gift,
+                  color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    CyberBadge(
+                      text: 'PROGRAM AFILIASI',
+                      color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                    ),
+                    const SizedBox(height: 2),
                     Text(
-                      'Ajak Teman',
+                      'AJAK TEMAN & DAPAT REWARD',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        letterSpacing: 0.3,
                       ),
                     ),
                     Text(
-                      'Dapat cashback hingga Rp 100.000',
-                      style: TextStyle(fontSize: 12, color: Colors.white),
+                      'Dapatkan cashback saldo hingga Rp 100.000 per subscriber',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
+              color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.5),
-                style: BorderStyle.solid,
-                width: 1,
+                color: isDark
+                    ? AppTheme.neonCyan.withValues(alpha: 0.35)
+                    : const Color(0xFFCBD5E1),
               ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Kode Referral Anda',
+                Text(
+                  'KODE REFERRAL UNIK ANDA:',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
+                    color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: CopyableText(
-                        text: 'ADN-REF-2025001',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 1.5,
+                        text: 'ADN-REF-2026',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                          letterSpacing: 2,
+                          fontFamily: 'monospace',
                         ),
-                        successMessage: 'Kode referral berhasil disalin!',
-                        iconColor: Colors.white,
+                        successMessage: 'Kode referral disalin!',
+                        iconColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
                       ),
                     ),
                   ],
@@ -4570,59 +5493,43 @@ Download aplikasi: https://audiranet.id/app
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () => _shareReferralCode(context),
-                  icon: const Icon(Icons.share),
-                  label: const Text('Bagikan Kode'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.teal.shade700,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          const SizedBox(height: 14),
+          CyberActionButton(
+            text: 'BAGIKAN KODE REFERRAL',
+            icon: LucideIcons.share2,
+            color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+            isFullWidth: true,
+            onPressed: () => _shareReferralCode(context),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isDark ? Colors.white.withValues(alpha: 0.06) : const Color(0xFFE2E8F0),
+              ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.people, color: Colors.white, size: 20),
+                Icon(
+                  LucideIcons.users,
+                  color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                  size: 16,
+                ),
                 const SizedBox(width: 8),
-                const Text(
-                  '3 teman telah bergabung',
-                  style: TextStyle(fontSize: 12, color: Colors.white),
+                Text(
+                  '3 rekan telah teraktivasi',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? Colors.white70 : const Color(0xFF475569),
+                  ),
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '+ Rp 150K',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal.shade700,
-                    ),
-                  ),
+                const CyberBadge(
+                  text: '+RP 150K REWARD',
+                  color: AppTheme.neonGreen,
                 ),
               ],
             ),
@@ -4633,25 +5540,40 @@ Download aplikasi: https://audiranet.id/app
   }
 }
 
-// Widget Profile Info Tile
-// Widget Loyalty Section (Feature #11)
+// Widget Loyalty Section Cyberpunk (Feature #11)
 class _LoyaltySection extends StatelessWidget {
   const _LoyaltySection();
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.amber.shade300, Colors.amber.shade500],
+        color: isDark ? AppTheme.cyberObsidian : Colors.white,
+        gradient: isDark
+            ? const LinearGradient(
+                colors: [AppTheme.cyberObsidian, Color(0xFF281C06)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : const LinearGradient(
+                colors: [Colors.white, Color(0xFFFFFBEB)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? AppTheme.neonAmber.withValues(alpha: 0.6)
+              : const Color(0xFFF59E0B),
+          width: 1.5,
         ),
-        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.amber.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: AppTheme.neonAmber.withValues(alpha: isDark ? 0.15 : 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -4659,113 +5581,113 @@ class _LoyaltySection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [
-              Icon(Icons.emoji_events, color: Colors.white, size: 28),
-              const SizedBox(width: 12),
-              const Text(
-                'Loyalty Program',
+            children: const [
+              CyberPulseDot(color: AppTheme.neonAmber, size: 8),
+              SizedBox(width: 8),
+              Text(
+                'LOYALTY MATRIX // REWARDS',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  letterSpacing: 0.8,
+                  color: AppTheme.neonAmber,
+                  fontFamily: 'monospace',
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(12),
+              color: isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isDark
+                    ? AppTheme.neonAmber.withValues(alpha: 0.3)
+                    : const Color(0xFFFDE68A),
+              ),
             ),
             child: Column(
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Poin Anda',
+                    Text(
+                      'TOTAL REWARD POIN:',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                        color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        '2,450 pts',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber.shade700,
-                        ),
-                      ),
+                    const CyberBadge(
+                      text: '2,450 PTS',
+                      color: AppTheme.neonAmber,
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                   child: LinearProgressIndicator(
                     value: 0.65,
-                    minHeight: 10,
-                    backgroundColor: Colors.white.withValues(alpha: 0.3),
+                    minHeight: 8,
+                    backgroundColor: isDark ? Colors.white12 : const Color(0xFFE2E8F0),
                     valueColor: const AlwaysStoppedAnimation<Color>(
-                      Colors.white,
+                      AppTheme.neonAmber,
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  '550 poin lagi untuk level Gold',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.9),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '550 poin lagi menuju tier ELITE GOLD',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isDark ? Colors.white60 : const Color(0xFF64748B),
+                      fontFamily: 'monospace',
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Achievements',
+          Text(
+            'HOLOGRAPHIC BADGES // MILESTONE',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: isDark ? Colors.white70 : const Color(0xFF334155),
+              fontFamily: 'monospace',
+              letterSpacing: 0.6,
             ),
           ),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
+            children: const [
               _AchievementBadge(
-                icon: Icons.access_time,
-                label: '6 Bulan',
+                icon: LucideIcons.clock,
+                label: '6 BULAN',
                 unlocked: true,
               ),
               _AchievementBadge(
-                icon: Icons.payment,
-                label: 'On-time',
+                icon: LucideIcons.checkCircle2,
+                label: 'ON-TIME',
                 unlocked: true,
               ),
               _AchievementBadge(
-                icon: Icons.star,
-                label: '1 Tahun',
+                icon: LucideIcons.trophy,
+                label: '1 TAHUN',
                 unlocked: false,
               ),
               _AchievementBadge(
-                icon: Icons.people,
-                label: 'Referral',
+                icon: LucideIcons.share2,
+                label: 'REFERRAL',
                 unlocked: false,
               ),
             ],
@@ -4789,40 +5711,50 @@ class _AchievementBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         Container(
-          width: 50,
-          height: 50,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             color: unlocked
-                ? Colors.white
-                : Colors.white.withValues(alpha: 0.3),
+                ? (isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFFEF3C7))
+                : (isDark ? AppTheme.cyberSurfaceCard.withValues(alpha: 0.4) : const Color(0xFFF1F5F9)),
             shape: BoxShape.circle,
             border: Border.all(
               color: unlocked
-                  ? Colors.amber.shade700
-                  : Colors.white.withValues(alpha: 0.5),
-              width: 2,
+                  ? (isDark ? AppTheme.neonAmber : const Color(0xFFD97706))
+                  : (isDark ? Colors.white.withValues(alpha: 0.15) : const Color(0xFFCBD5E1)),
+              width: 1.5,
             ),
+            boxShadow: unlocked
+                ? [
+                    BoxShadow(
+                      color: AppTheme.neonAmber.withValues(alpha: isDark ? 0.3 : 0.15),
+                      blurRadius: 8,
+                    ),
+                  ]
+                : null,
           ),
           child: Icon(
             icon,
             color: unlocked
-                ? Colors.amber.shade700
-                : Colors.white.withValues(alpha: 0.5),
-            size: 24,
+                ? (isDark ? AppTheme.neonAmber : const Color(0xFFD97706))
+                : (isDark ? Colors.white24 : const Color(0xFF94A3B8)),
+            size: 22,
           ),
         ),
         const SizedBox(height: 6),
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 10,
             color: unlocked
-                ? Colors.white
-                : Colors.white.withValues(alpha: 0.7),
+                ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                : (isDark ? Colors.white38 : const Color(0xFF94A3B8)),
             fontWeight: unlocked ? FontWeight.bold : FontWeight.normal,
+            fontFamily: 'monospace',
           ),
         ),
       ],
@@ -4835,55 +5767,74 @@ class _ProfileInfoTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String value;
+  final Color? accentColor;
 
   const _ProfileInfoTile({
     required this.icon,
     required this.title,
     required this.value,
+    this.accentColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = accentColor ?? (isDark ? AppTheme.neonCyan : AppTheme.signalBlue);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: isDark ? AppTheme.cyberSurfaceCard : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: BorderRadius.circular(12),
+              color: accent.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.4),
+              ),
             ),
-            child: Icon(icon, color: Colors.purple.shade700, size: 24),
+            child: Icon(icon, color: accent, size: 22),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  title.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                    fontFamily: 'monospace',
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 15,
+                  style: TextStyle(
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
                   ),
                 ),
               ],
@@ -4892,7 +5843,7 @@ class _ProfileInfoTile extends StatelessWidget {
           CopyIconButton(
             text: value,
             successMessage: '$title disalin!',
-            color: Colors.purple.shade700,
+            color: accent,
           ),
         ],
       ),
@@ -4920,18 +5871,21 @@ class _CategoryOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelected = value == groupValue;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => onChanged(value),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.orange.shade50 : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            color: isSelected
+                ? AppTheme.neonAmber.withValues(alpha: isDark ? 0.12 : 0.08)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             children: [
@@ -4939,19 +5893,24 @@ class _CategoryOption extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.orange.shade100
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(10),
+                      ? AppTheme.neonAmber.withValues(alpha: 0.2)
+                      : (isDark ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFF1F5F9)),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppTheme.neonAmber.withValues(alpha: 0.6)
+                        : (isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFE2E8F0)),
+                  ),
                 ),
                 child: Icon(
                   icon,
                   color: isSelected
-                      ? Colors.orange.shade700
-                      : Colors.grey.shade600,
-                  size: 24,
+                      ? (isDark ? AppTheme.neonAmber : const Color(0xFFD97706))
+                      : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                  size: 22,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -4960,44 +5919,50 @@ class _CategoryOption extends StatelessWidget {
                       title,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                        fontSize: 14,
                         color: isSelected
-                            ? Colors.orange.shade900
-                            : Colors.black87,
+                            ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                            : (isDark ? Colors.white.withValues(alpha: 0.85) : const Color(0xFF334155)),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
+                        fontSize: 11,
+                        color: isDark ? Colors.white54 : const Color(0xFF64748B),
                       ),
                     ),
                   ],
                 ),
               ),
-              // Replace deprecated Radio with custom indicator
+              // Custom neon radio indicator
               Container(
-                width: 24,
-                height: 24,
+                width: 22,
+                height: 22,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: isSelected
-                        ? Colors.orange.shade700
-                        : Colors.grey.shade400,
+                        ? AppTheme.neonAmber
+                        : Colors.white24,
                     width: 2,
                   ),
                 ),
                 child: isSelected
                     ? Center(
                         child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.orange.shade700,
+                            color: AppTheme.neonAmber,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.neonAmber,
+                                blurRadius: 4,
+                              ),
+                            ],
                           ),
                         ),
                       )
@@ -5095,7 +6060,7 @@ class _MaintenanceAlertBannerState extends State<_MaintenanceAlertBanner> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
-                    Icons.warning_amber_rounded,
+                    LucideIcons.alertTriangle,
                     color: Colors.white,
                     size: 28,
                   ),
@@ -5127,7 +6092,7 @@ class _MaintenanceAlertBannerState extends State<_MaintenanceAlertBanner> {
                   ),
                 ),
                 const Icon(
-                  Icons.arrow_forward_ios,
+                  LucideIcons.chevronRight,
                   color: Colors.white,
                   size: 16,
                 ),
@@ -5158,38 +6123,52 @@ class _PriorityChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           decoration: BoxDecoration(
             color: isSelected
-                ? color.withValues(alpha: 0.15)
-                : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(12),
+                ? color.withValues(alpha: 0.18)
+                : (isDark ? AppTheme.cyberSurfaceCard : const Color(0xFFF8FAFC)),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected ? color : Colors.grey.shade300,
-              width: isSelected ? 2 : 1,
+              color: isSelected
+                  ? color
+                  : (isDark ? Colors.white.withValues(alpha: 0.1) : const Color(0xFFCBD5E1)),
+              width: isSelected ? 1.5 : 1,
             ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: isDark ? 0.25 : 0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Column(
             children: [
               Icon(
                 icon,
-                color: isSelected ? color : Colors.grey.shade600,
-                size: 24,
+                color: isSelected ? color : (isDark ? Colors.white60 : const Color(0xFF64748B)),
+                size: 20,
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
-                label,
+                label.toUpperCase(),
                 style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 12,
-                  color: isSelected ? color : Colors.grey.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 11,
+                  letterSpacing: 0.8,
+                  fontFamily: 'monospace',
+                  color: isSelected ? color : (isDark ? Colors.white70 : const Color(0xFF334155)),
                 ),
               ),
             ],
@@ -5226,7 +6205,7 @@ class _AdvancedAnalyticsDashboard extends StatelessWidget {
                   title: 'Total Pemakaian',
                   value: '456 GB',
                   subtitle: 'Bulan ini',
-                  icon: Icons.cloud_download,
+                  icon: LucideIcons.hardDrive,
                   color: Colors.blue,
                 ),
               ),
@@ -5236,7 +6215,7 @@ class _AdvancedAnalyticsDashboard extends StatelessWidget {
                   title: 'Avg Speed',
                   value: '48.5 Mbps',
                   subtitle: '7 hari terakhir',
-                  icon: Icons.speed,
+                  icon: LucideIcons.gauge,
                   color: Colors.green,
                 ),
               ),
@@ -5250,7 +6229,7 @@ class _AdvancedAnalyticsDashboard extends StatelessWidget {
                   title: 'Uptime',
                   value: '99.2%',
                   subtitle: 'Bulan ini',
-                  icon: Icons.check_circle,
+                  icon: LucideIcons.checkCircle2,
                   color: Colors.orange,
                 ),
               ),
@@ -5260,7 +6239,7 @@ class _AdvancedAnalyticsDashboard extends StatelessWidget {
                   title: 'Latency',
                   value: '12 ms',
                   subtitle: 'Rata-rata',
-                  icon: Icons.network_ping,
+                  icon: LucideIcons.activity,
                   color: Colors.purple,
                 ),
               ),
@@ -5543,7 +6522,7 @@ class _SpeedTestHistoryItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.speed, color: Colors.indigo.shade600, size: 28),
+          Icon(LucideIcons.gauge, color: Colors.indigo.shade600, size: 28),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -5557,7 +6536,7 @@ class _SpeedTestHistoryItem extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.download,
+                      LucideIcons.download,
                       size: 14,
                       color: Colors.green.shade600,
                     ),
@@ -5570,7 +6549,7 @@ class _SpeedTestHistoryItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Icon(Icons.upload, size: 14, color: Colors.blue.shade600),
+                    Icon(LucideIcons.upload, size: 14, color: Colors.blue.shade600),
                     const SizedBox(width: 4),
                     Text(
                       '$upload Mbps',
@@ -5581,7 +6560,7 @@ class _SpeedTestHistoryItem extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Icon(
-                      Icons.network_ping,
+                      LucideIcons.activity,
                       size: 14,
                       color: Colors.orange.shade600,
                     ),

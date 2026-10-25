@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_theme.dart';
 
 /// Provider untuk theme management
 class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.dark;
 
   ThemeMode get themeMode => _themeMode;
   bool get isDarkMode => _themeMode == ThemeMode.dark;
@@ -18,7 +19,7 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> _loadThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
-    final themeModeString = prefs.getString(_themeKey) ?? 'system';
+    final themeModeString = prefs.getString(_themeKey) ?? 'dark';
     _themeMode = _themeModeFromString(themeModeString);
     notifyListeners();
   }
@@ -32,11 +33,16 @@ class ThemeProvider extends ChangeNotifier {
     await prefs.setString(_themeKey, _themeModeToString(mode));
   }
 
-  Future<void> toggleTheme() async {
-    if (_themeMode == ThemeMode.light) {
-      await setThemeMode(ThemeMode.dark);
-    } else {
+  Future<void> toggleTheme([BuildContext? context]) async {
+    bool currentlyDark = _themeMode == ThemeMode.dark;
+    if (_themeMode == ThemeMode.system && context != null) {
+      currentlyDark =
+          MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    }
+    if (currentlyDark) {
       await setThemeMode(ThemeMode.light);
+    } else {
+      await setThemeMode(ThemeMode.dark);
     }
   }
 
@@ -318,12 +324,21 @@ class ThemeToggleFab extends StatelessWidget {
 
 /// Icon button untuk theme toggle di app bar
 class ThemeToggleIconButton extends StatelessWidget {
-  final ThemeProvider themeProvider;
+  final ThemeProvider? themeProvider;
 
-  const ThemeToggleIconButton({super.key, required this.themeProvider});
+  const ThemeToggleIconButton({super.key, this.themeProvider});
 
   @override
   Widget build(BuildContext context) {
+    if (themeProvider != null) {
+      return _buildButton(context, themeProvider!);
+    }
+    return Consumer<ThemeProvider>(
+      builder: (ctx, provider, _) => _buildButton(ctx, provider),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, ThemeProvider provider) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return IconButton(
@@ -336,12 +351,15 @@ class ThemeToggleIconButton extends StatelessWidget {
           );
         },
         child: Icon(
-          isDark ? Icons.light_mode : Icons.dark_mode,
-          key: ValueKey(isDark),
+          isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+          key: ValueKey<bool>(isDark),
+          color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
         ),
       ),
-      onPressed: () => themeProvider.toggleTheme(),
-      tooltip: isDark ? 'Mode Terang' : 'Mode Gelap',
+      onPressed: () {
+        provider.toggleTheme();
+      },
+      tooltip: isDark ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap',
     );
   }
 }

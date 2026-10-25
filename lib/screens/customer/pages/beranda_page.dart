@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/routes.dart';
 import '../../../utils/constants.dart';
 import '../../../widgets/stat_cards.dart';
@@ -73,7 +74,7 @@ class _BerandaPageState extends State<BerandaPage> {
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.notifications_outlined),
+                icon: const Icon(LucideIcons.bell),
                 onPressed: () {},
               ),
             ],
@@ -188,25 +189,25 @@ class _BerandaPageState extends State<BerandaPage> {
                     childAspectRatio: 1.4,
                     children: const [
                       StatCard(
-                        icon: Icons.speed_rounded,
+                        icon: LucideIcons.gauge,
                         title: 'Kecepatan',
                         value: '45.2 Mbps',
                         color: Colors.blue,
                       ),
                       StatCard(
-                        icon: Icons.data_usage_rounded,
+                        icon: LucideIcons.activity,
                         title: 'Penggunaan',
                         value: '125.5 GB',
                         color: Colors.orange,
                       ),
                       StatCard(
-                        icon: Icons.signal_wifi_4_bar_rounded,
+                        icon: LucideIcons.wifi,
                         title: 'Uptime',
                         value: '99.8%',
                         color: Colors.green,
                       ),
                       StatCard(
-                        icon: Icons.router_rounded,
+                        icon: LucideIcons.router,
                         title: 'Ping',
                         value: '12 ms',
                         color: Colors.purple,
@@ -229,7 +230,7 @@ class _BerandaPageState extends State<BerandaPage> {
                     children: [
                       Expanded(
                         child: _QuickActionButton(
-                          icon: Icons.payment_rounded,
+                          icon: LucideIcons.creditCard,
                           label: 'Bayar Tagihan',
                           color: Colors.blue,
                           onTap: () {
@@ -240,7 +241,7 @@ class _BerandaPageState extends State<BerandaPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _QuickActionButton(
-                          icon: Icons.support_agent_rounded,
+                          icon: LucideIcons.headphones,
                           label: 'Buat Tiket',
                           color: Colors.orange,
                           onTap: () {
@@ -255,7 +256,7 @@ class _BerandaPageState extends State<BerandaPage> {
                     children: [
                       Expanded(
                         child: _QuickActionButton(
-                          icon: Icons.speed_rounded,
+                          icon: LucideIcons.gauge,
                           label: 'Speed Test',
                           color: Colors.green,
                           onTap: () {
@@ -266,7 +267,7 @@ class _BerandaPageState extends State<BerandaPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _QuickActionButton(
-                          icon: Icons.info_rounded,
+                          icon: LucideIcons.info,
                           label: 'Info Layanan',
                           color: Colors.purple,
                           onTap: () => _showServiceInfo(context),
@@ -287,13 +288,13 @@ class _BerandaPageState extends State<BerandaPage> {
                   ),
                   const SizedBox(height: 12),
                   const _InfoCard(
-                    icon: Icons.calendar_today_rounded,
+                    icon: LucideIcons.calendar,
                     title: 'Jatuh Tempo Pembayaran',
                     subtitle: '25 November 2025',
                     color: Colors.red,
                   ),
                   const _InfoCard(
-                    icon: Icons.announcement_rounded,
+                    icon: LucideIcons.megaphone,
                     title: 'Pemeliharaan Jaringan',
                     subtitle: 'Minggu, 15 Nov 2025 | 01:00 - 05:00 WIB',
                     color: Colors.orange,
@@ -313,7 +314,7 @@ class _BerandaPageState extends State<BerandaPage> {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.info_rounded, color: Colors.purple),
+            Icon(LucideIcons.info, color: Colors.purple),
             SizedBox(width: 8),
             Text('Info Layanan'),
           ],

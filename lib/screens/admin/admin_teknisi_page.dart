@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/firebase_service.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/theme_provider.dart';
 
 class AdminTeknisiPage extends StatefulWidget {
   const AdminTeknisiPage({super.key});
@@ -49,21 +50,35 @@ class _AdminTeknisiPageState extends State<AdminTeknisiPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
+        title: Text(
+          'Management Teknisi',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
         ),
-        title: const Text('Management Teknisi'),
-        backgroundColor: AppTheme.primaryCyan,
-        foregroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : AppTheme.lightTextPrimary,
         elevation: 0,
         actions: [
           if (_zones.isNotEmpty)
             PopupMenuButton<String>(
-              icon: const Icon(Icons.filter_list),
+              icon: Icon(
+                Icons.filter_list,
+                color: isDark ? const Color(0xFF00F0FF) : AppTheme.lightTextPrimary,
+              ),
               tooltip: 'Filter Zona',
               onSelected: (zone) {
                 setState(() {
@@ -78,34 +93,89 @@ class _AdminTeknisiPageState extends State<AdminTeknisiPage> {
                 ),
               ],
             ),
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadData),
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+              color: isDark ? Colors.white70 : AppTheme.lightTextPrimary,
+            ),
+            onPressed: _loadData,
+          ),
+          const ThemeToggleIconButton(),
+          const SizedBox(width: 8),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+              ),
+            )
           : RefreshIndicator(
+              color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+              backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
               onRefresh: _loadData,
               child: _filteredTeknisi.isEmpty
                   ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.engineering_outlined,
-                            size: 80,
-                            color: Colors.grey[400],
+                      child: Container(
+                        margin: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF080D1E) : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF00F0FF).withValues(alpha: 0.2)
+                                : const Color(0xFFE2E8F0),
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _filterZone == null
-                                ? 'Belum ada teknisi'
-                                : 'Tidak ada teknisi di zona $_filterZone',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDark
+                                  ? Colors.black.withValues(alpha: 0.4)
+                                  : Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF00F0FF).withValues(alpha: 0.1)
+                                    : Colors.cyan.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.engineering_rounded,
+                                size: 48,
+                                color: isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _filterZone == null
+                                  ? 'Belum ada teknisi'
+                                  : 'Tidak ada teknisi di zona $_filterZone',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Kelola penugasan teknisi lapangan AUDIRA di sini',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: isDark ? Colors.white54 : Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   : ListView.builder(
@@ -123,9 +193,10 @@ class _AdminTeknisiPageState extends State<AdminTeknisiPage> {
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showTeknisiForm(null),
-        backgroundColor: AppTheme.primaryCyan,
+        backgroundColor: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+        foregroundColor: isDark ? const Color(0xFF030712) : Colors.white,
         icon: const Icon(Icons.add),
-        label: const Text('Tambah Teknisi'),
+        label: const Text('Tambah Teknisi', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -345,55 +416,117 @@ class _TeknisiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF080D1E) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF00F0FF).withValues(alpha: 0.15)
+              : const Color(0xFFE2E8F0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppTheme.primaryCyan,
-          child: Text(
-            (teknisi['name'] as String).substring(0, 1).toUpperCase(),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF00F0FF).withValues(alpha: 0.15)
+                : Colors.cyan.shade50,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isDark
+                  ? const Color(0xFF00F0FF).withValues(alpha: 0.4)
+                  : Colors.cyan.shade200,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              (teknisi['name'] as String).substring(0, 1).toUpperCase(),
+              style: TextStyle(
+                color: isDark ? const Color(0xFF00F0FF) : AppTheme.primaryCyan,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
             ),
           ),
         ),
         title: Text(
           teknisi['name'],
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: isDark ? Colors.white : AppTheme.lightTextPrimary,
+          ),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Row(
               children: [
-                const Icon(Icons.email, size: 14, color: Colors.grey),
-                const SizedBox(width: 4),
+                Icon(
+                  Icons.email,
+                  size: 14,
+                  color: isDark ? Colors.white38 : Colors.grey.shade500,
+                ),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     teknisi['email'],
-                    style: const TextStyle(fontSize: 12),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.white70 : Colors.grey.shade700,
+                    ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.phone, size: 14, color: Colors.grey),
-                const SizedBox(width: 4),
+                Icon(
+                  Icons.phone,
+                  size: 14,
+                  color: isDark ? Colors.white38 : Colors.grey.shade500,
+                ),
+                const SizedBox(width: 6),
                 Text(
                   teknisi['phone'] ?? '-',
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white70 : Colors.grey.shade700,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(4),
+                color: isDark
+                    ? const Color(0xFF00F0FF).withValues(alpha: 0.1)
+                    : Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF00F0FF).withValues(alpha: 0.25)
+                      : Colors.blue.shade200,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -401,7 +534,7 @@ class _TeknisiCard extends StatelessWidget {
                   Icon(
                     Icons.location_on,
                     size: 12,
-                    color: Colors.blue.shade700,
+                    color: isDark ? const Color(0xFF00F0FF) : Colors.blue.shade700,
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -409,7 +542,7 @@ class _TeknisiCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Colors.blue.shade700,
+                      color: isDark ? const Color(0xFF00F0FF) : Colors.blue.shade700,
                     ),
                   ),
                 ],
@@ -421,11 +554,14 @@ class _TeknisiCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
+              icon: Icon(
+                Icons.edit,
+                color: isDark ? const Color(0xFF00F0FF) : Colors.blue,
+              ),
               onPressed: onEdit,
             ),
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: const Icon(Icons.delete, color: Colors.redAccent),
               onPressed: onDelete,
             ),
           ],
