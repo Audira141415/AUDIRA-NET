@@ -268,11 +268,11 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
 
                     Material(
                       color: cardBg,
-                      borderRadius: BorderRadius.circular(14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                         side: BorderSide(color: borderColor),
                       ),
+                      clipBehavior: Clip.antiAlias,
                       child: Column(
                         children: [
                           // Theme switch

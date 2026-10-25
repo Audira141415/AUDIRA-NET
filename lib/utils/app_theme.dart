@@ -125,7 +125,7 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  // Shared Typography Generator with inherit: false for flawless Theme interpolation
+  // Shared Typography Generator with inherit: false and alphabetic baseline for flawless Theme interpolation & ListTile safety
   static TextTheme _buildTextTheme({
     required Color primaryColor,
     required Color secondaryColor,
@@ -137,6 +137,7 @@ class AppTheme {
         fontWeight: FontWeight.w700,
         color: primaryColor,
         letterSpacing: -0.5,
+        textBaseline: TextBaseline.alphabetic,
       ),
       displayMedium: TextStyle(
         inherit: false,
@@ -144,6 +145,7 @@ class AppTheme {
         fontWeight: FontWeight.w700,
         color: primaryColor,
         letterSpacing: -0.25,
+        textBaseline: TextBaseline.alphabetic,
       ),
       displaySmall: TextStyle(
         inherit: false,
@@ -151,6 +153,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0,
+        textBaseline: TextBaseline.alphabetic,
       ),
       headlineLarge: TextStyle(
         inherit: false,
@@ -158,6 +161,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.15,
+        textBaseline: TextBaseline.alphabetic,
       ),
       headlineMedium: TextStyle(
         inherit: false,
@@ -165,6 +169,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.15,
+        textBaseline: TextBaseline.alphabetic,
       ),
       headlineSmall: TextStyle(
         inherit: false,
@@ -172,6 +177,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.15,
+        textBaseline: TextBaseline.alphabetic,
       ),
       titleLarge: TextStyle(
         inherit: false,
@@ -179,6 +185,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.15,
+        textBaseline: TextBaseline.alphabetic,
       ),
       titleMedium: TextStyle(
         inherit: false,
@@ -186,6 +193,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.15,
+        textBaseline: TextBaseline.alphabetic,
       ),
       titleSmall: TextStyle(
         inherit: false,
@@ -193,6 +201,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.1,
+        textBaseline: TextBaseline.alphabetic,
       ),
       bodyLarge: TextStyle(
         inherit: false,
@@ -200,6 +209,7 @@ class AppTheme {
         fontWeight: FontWeight.w400,
         color: primaryColor,
         letterSpacing: 0.25,
+        textBaseline: TextBaseline.alphabetic,
       ),
       bodyMedium: TextStyle(
         inherit: false,
@@ -207,6 +217,7 @@ class AppTheme {
         fontWeight: FontWeight.w400,
         color: primaryColor,
         letterSpacing: 0.25,
+        textBaseline: TextBaseline.alphabetic,
       ),
       bodySmall: TextStyle(
         inherit: false,
@@ -214,6 +225,7 @@ class AppTheme {
         fontWeight: FontWeight.w400,
         color: secondaryColor,
         letterSpacing: 0.25,
+        textBaseline: TextBaseline.alphabetic,
       ),
       labelLarge: TextStyle(
         inherit: false,
@@ -221,6 +233,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.5,
+        textBaseline: TextBaseline.alphabetic,
       ),
       labelMedium: TextStyle(
         inherit: false,
@@ -228,6 +241,7 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.5,
+        textBaseline: TextBaseline.alphabetic,
       ),
       labelSmall: TextStyle(
         inherit: false,
@@ -235,6 +249,7 @@ class AppTheme {
         fontWeight: FontWeight.w500,
         color: secondaryColor,
         letterSpacing: 0.5,
+        textBaseline: TextBaseline.alphabetic,
       ),
     );
   }
@@ -412,23 +427,25 @@ class AppTheme {
 
       // Chip Theme
       chipTheme: ChipThemeData(
-        backgroundColor: surfaceGray,
-        deleteIconColor: textSecondary,
-        disabledColor: borderGray,
+        backgroundColor: lightSurfaceElevated,
+        deleteIconColor: lightTextSecondary,
+        disabledColor: lightBorder,
         selectedColor: primaryCyan,
         secondarySelectedColor: signalBlue,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         labelStyle: const TextStyle(
           inherit: false,
-          color: textPrimary,
+          color: lightTextPrimary,
           fontSize: 13,
           fontWeight: FontWeight.w500,
+          textBaseline: TextBaseline.alphabetic,
         ),
         secondaryLabelStyle: const TextStyle(
           inherit: false,
           color: backgroundWhite,
           fontSize: 13,
           fontWeight: FontWeight.w600,
+          textBaseline: TextBaseline.alphabetic,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -442,28 +459,31 @@ class AppTheme {
         ),
         titleTextStyle: TextStyle(
           inherit: false,
-          color: textPrimary,
+          color: lightTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.15,
+          textBaseline: TextBaseline.alphabetic,
         ),
         contentTextStyle: TextStyle(
           inherit: false,
-          color: textSecondary,
+          color: lightTextSecondary,
           fontSize: 15,
           fontWeight: FontWeight.w400,
           letterSpacing: 0.25,
+          textBaseline: TextBaseline.alphabetic,
         ),
       ),
 
       // Snackbar Theme
       snackBarTheme: const SnackBarThemeData(
-        backgroundColor: textPrimary,
+        backgroundColor: lightTextPrimary,
         contentTextStyle: TextStyle(
           inherit: false,
           color: backgroundWhite,
           fontSize: 14,
           fontWeight: FontWeight.w500,
+          textBaseline: TextBaseline.alphabetic,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
         behavior: SnackBarBehavior.floating,
@@ -478,6 +498,30 @@ class AppTheme {
 
       // Icon Theme
       iconTheme: const IconThemeData(color: signalBlue, size: 24),
+
+      // ListTile Theme
+      listTileTheme: const ListTileThemeData(
+        titleTextStyle: TextStyle(
+          inherit: false,
+          color: lightTextPrimary,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          textBaseline: TextBaseline.alphabetic,
+        ),
+        subtitleTextStyle: TextStyle(
+          inherit: false,
+          color: lightTextSecondary,
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+          textBaseline: TextBaseline.alphabetic,
+        ),
+        leadingAndTrailingTextStyle: TextStyle(
+          inherit: false,
+          color: lightTextSecondary,
+          fontSize: 12,
+          textBaseline: TextBaseline.alphabetic,
+        ),
+      ),
 
       // Text Theme
       textTheme: _buildTextTheme(
@@ -835,12 +879,14 @@ class AppTheme {
           color: darkOnSurface,
           fontSize: 13,
           fontWeight: FontWeight.w500,
+          textBaseline: TextBaseline.alphabetic,
         ),
         secondaryLabelStyle: const TextStyle(
           inherit: false,
           color: cyberOledBg,
           fontSize: 13,
           fontWeight: FontWeight.w600,
+          textBaseline: TextBaseline.alphabetic,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
@@ -859,6 +905,7 @@ class AppTheme {
           fontSize: 20,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.15,
+          textBaseline: TextBaseline.alphabetic,
         ),
         contentTextStyle: TextStyle(
           inherit: false,
@@ -866,6 +913,7 @@ class AppTheme {
           fontSize: 15,
           fontWeight: FontWeight.w400,
           letterSpacing: 0.25,
+          textBaseline: TextBaseline.alphabetic,
         ),
       ),
 
@@ -877,6 +925,7 @@ class AppTheme {
           color: darkOnSurface,
           fontSize: 14,
           fontWeight: FontWeight.w500,
+          textBaseline: TextBaseline.alphabetic,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -894,6 +943,30 @@ class AppTheme {
 
       // Icon Theme
       iconTheme: const IconThemeData(color: neonCyan, size: 24),
+
+      // ListTile Theme
+      listTileTheme: const ListTileThemeData(
+        titleTextStyle: TextStyle(
+          inherit: false,
+          color: darkOnSurface,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          textBaseline: TextBaseline.alphabetic,
+        ),
+        subtitleTextStyle: TextStyle(
+          inherit: false,
+          color: textSecondary,
+          fontSize: 13,
+          fontWeight: FontWeight.w400,
+          textBaseline: TextBaseline.alphabetic,
+        ),
+        leadingAndTrailingTextStyle: TextStyle(
+          inherit: false,
+          color: textSecondary,
+          fontSize: 12,
+          textBaseline: TextBaseline.alphabetic,
+        ),
+      ),
 
       // Text Theme
       textTheme: _buildTextTheme(
