@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../services/firebase_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../utils/theme_provider.dart';
+import '../../../utils/app_theme.dart';
 import '../../notifications_page.dart';
 import '../widgets/customer_hero_service_card.dart';
 import '../widgets/customer_quick_actions.dart';
@@ -93,7 +94,7 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Clean Header
+                // Clean Enterprise Header
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -101,24 +102,29 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Halo, $userName',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
-                              color: textPrimary,
-                              letterSpacing: -0.4,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: [
+                              Text(
+                                'Halo, $userName',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w800,
+                                  color: textPrimary,
+                                  letterSpacing: -0.5,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(height: 3),
                           Text(
                             'ID Pelanggan: $customerId',
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 12.5,
                               color: textSecondary,
                               fontFamily: 'monospace',
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -144,15 +150,64 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+
+                const SizedBox(height: 12),
+
+                // Gateway Telemetry Pill
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF0284C7).withValues(alpha: 0.1)
+                        : const Color(0xFFE0F2FE),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF0284C7).withValues(alpha: 0.3)
+                          : const Color(0xFFBAE6FD),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF10B981),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF10B981).withValues(alpha: 0.6),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                      Text(
+                        'EDGE POP-JKT01 • LATENSI 11ms • BACKBONE OPTIMAL',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                          color: isDark ? AppTheme.neonCyan : const Color(0xFF0369A1),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
 
                 // Hero Card
                 if (_isLoading)
                   Container(
-                    height: 180,
+                    height: 200,
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF0F172A) : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Center(
                       child: CircularProgressIndicator(strokeWidth: 2),

@@ -409,7 +409,55 @@ class _AdminBerandaTabState extends State<AdminBerandaTab> {
                   ],
                 ),
 
-                const SizedBox(height: 18),
+                const SizedBox(height: 12),
+
+                // Backbone Core Telemetry Pill
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF0284C7).withValues(alpha: 0.1)
+                        : const Color(0xFFE0F2FE),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF0284C7).withValues(alpha: 0.3)
+                          : const Color(0xFFBAE6FD),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF10B981),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF10B981).withValues(alpha: 0.6),
+                              blurRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 7),
+                      Text(
+                        'BACKBONE CORE • 12ms LATENSI • SLA 99.94% • 1,248 ACTIVE PPPoE',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                          color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0369A1),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 14),
 
                 // 2x2 Executive KPI Grid
                 GridView.count(
