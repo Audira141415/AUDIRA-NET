@@ -266,55 +266,99 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                     ),
                     const SizedBox(height: 12),
 
-                    Container(
-                      decoration: BoxDecoration(
-                        color: cardBg,
+                    Material(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(14),
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: borderColor),
+                        side: BorderSide(color: borderColor),
                       ),
                       child: Column(
                         children: [
                           // Theme switch
                           Consumer<ThemeProvider>(
                             builder: (context, themeProvider, _) {
-                              return SwitchListTile(
-                                secondary: Icon(
-                                  themeProvider.isDarkMode ? LucideIcons.moon : LucideIcons.sun,
-                                  color: const Color(0xFF0284C7),
-                                  size: 20,
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      themeProvider.isDarkMode ? LucideIcons.moon : LucideIcons.sun,
+                                      color: const Color(0xFF0284C7),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Mode Gelap',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: textPrimary,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            themeProvider.isDarkMode
+                                                ? 'Tema OLED Midnight aktif'
+                                                : 'Tema Slate Canvas aktif',
+                                            style: TextStyle(fontSize: 12, color: textSecondary),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Switch.adaptive(
+                                      value: themeProvider.isDarkMode,
+                                      activeTrackColor: const Color(0xFF0284C7),
+                                      onChanged: (val) => themeProvider.toggleTheme(),
+                                    ),
+                                  ],
                                 ),
-                                title: Text(
-                                  'Mode Gelap',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: textPrimary,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  themeProvider.isDarkMode ? 'Tema OLED Midnight aktif' : 'Tema Slate Canvas aktif',
-                                  style: TextStyle(fontSize: 12, color: textSecondary),
-                                ),
-                                value: themeProvider.isDarkMode,
-                                onChanged: (val) => themeProvider.toggleTheme(),
                               );
                             },
                           ),
                           Divider(height: 1, color: borderColor),
-                          ListTile(
-                            leading: const Icon(LucideIcons.info, color: Color(0xFF0284C7), size: 20),
-                            title: Text(
-                              'Tentang AUDIRA',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textPrimary),
-                            ),
-                            subtitle: Text('Versi 2.4.0 • Audira Digital Network', style: TextStyle(fontSize: 12, color: textSecondary)),
-                            trailing: const Icon(LucideIcons.chevronRight, size: 16),
+                          InkWell(
+                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(14)),
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) => const AboutPage()),
                               );
                             },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              child: Row(
+                                children: [
+                                  const Icon(LucideIcons.info, color: Color(0xFF0284C7), size: 20),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Tentang AUDIRA',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            color: textPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Versi 2.4.0 • Audira Digital Network',
+                                          style: TextStyle(fontSize: 12, color: textSecondary),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(LucideIcons.chevronRight, size: 16, color: textSecondary),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
