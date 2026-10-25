@@ -6,7 +6,7 @@ import '../utils/app_theme.dart';
 /// Provider untuk theme management
 class ThemeProvider extends ChangeNotifier {
   static const String _themeKey = 'theme_mode';
-  ThemeMode _themeMode = ThemeMode.dark;
+  ThemeMode _themeMode = ThemeMode.light;
 
   ThemeMode get themeMode => _themeMode;
   bool get isDarkMode => _themeMode == ThemeMode.dark;
@@ -19,7 +19,7 @@ class ThemeProvider extends ChangeNotifier {
 
   Future<void> _loadThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
-    final themeModeString = prefs.getString(_themeKey) ?? 'dark';
+    final themeModeString = prefs.getString(_themeKey) ?? 'light';
     _themeMode = _themeModeFromString(themeModeString);
     notifyListeners();
   }
