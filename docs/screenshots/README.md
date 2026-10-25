@@ -1,0 +1,117 @@
+# 📸 AUDIRA NET — UI/UX Showcase Gallery
+### Neo-Brutalism + Cyberpunk Studio Design System
+
+Dokumentasi visual representasi antarmuka aplikasi **AUDIRA-NET** berbasis standar desain:
+- **Design Language**: *Neo-Brutalism + Cyberpunk Studio*
+- **Canvas Base**: *Deep Midnight OLED* (`#05070D` & `#0A0E1A`)
+- **Neon Tokens**: Electric Cyan (`#00F0FF`), Signal Blue (`#0070F3`), Neon Green (`#00FF9D`), Vivid Purple (`#7928CA`)
+- **Component Geometry**: Bento Box Modular Grids, Hard Tactile Drop Shadows (`offset: Offset(4, 4)`, `blurRadius: 0`), 1.8px - 2px Cyber Borders, and Floating Capsule Dock.
+
+---
+
+## 📑 Daftar Tangkapan Layar (Screenshots Index)
+
+| No | Tampilan | Berkas | Resolusi | Deskripsi |
+| :---: | :--- | :--- | :---: | :--- |
+| **01** | Unified Cyber Login | [`01_login_cyberpunk_dark.png`](./01_login_cyberpunk_dark.png) | 1344 x 2992 | Multi-role selector (Pelanggan / Teknisi / Admin), glowing halo logo, Passkey auth |
+| **02** | Customer Beranda (HUD) | [`02_customer_beranda_hud.png`](./02_customer_beranda_hud.png) | 1344 x 2992 | Cyber Command HUD Header, Speedometer Arc Gauge, Live RX/TX, Bento service cards |
+| **03** | Customer Tagihan (Bento) | [`03_customer_tagihan_bento.png`](./03_customer_tagihan_bento.png) | 1344 x 2992 | Invoicing bento, itemized breakdown, QRIS & Virtual Account rails, invoice ledger |
+| **04** | Customer Bantuan (NOC) | [`04_customer_bantuan_noc.png`](./04_customer_bantuan_noc.png) | 1344 x 2992 | NOC Network Health telemetry, 1-tap ticket creation dialog, 24/7 hotline bento, FAQ |
+| **05** | Customer Profil & Hardware | [`05_customer_profil_hardware.png`](./05_customer_profil_hardware.png) | 1344 x 2992 | Verified digital pass, ONT Wi-Fi 6 hardware specs, optic attenuation, OLED switches |
+| **06** | Logout Confirmation Modal | [`06_customer_logout_dialog.png`](./06_customer_logout_dialog.png) | 1344 x 2992 | Neo-brutalist security confirmation modal with high-contrast red accent |
+| **07** | Customer Beranda (Light Mode) | [`07_customer_beranda_light.png`](./07_customer_beranda_light.png) | 1344 x 2992 | High-contrast Neo-Brutalism daytime layout with bold borders & tactical typography |
+| **08** | Teknisi Field Ops Dashboard | [`08_teknisi_dashboard_capsule.png`](./08_teknisi_dashboard_capsule.png) | 1344 x 2992 | Floating Cyber-Capsule Dock, GPS selfie check-in, real-time dispatch telemetry |
+| **09** | Teknisi Profil & Kinerja | [`09_teknisi_profil_dark.png`](./09_teknisi_profil_dark.png) | 1344 x 2992 | KPI performance cards (Selesai, Instalasi, Rating, Response Time), utility controls |
+
+---
+
+## 🖼️ Galeri Visual Lengkap
+
+### 1. Unified Cyber Login & Passkey Authentication
+Autentikasi terpadu 3-in-1 untuk Pelanggan, Teknisi Lapangan, dan Admin/NOC. Dilengkapi indikator telemetri gateway real-time dan login cepat biometrik.
+
+<p align="center">
+  <img src="./01_login_cyberpunk_dark.png" alt="01 Unified Cyber Login" width="380" />
+</p>
+
+---
+
+### 2. Customer Beranda — Cyber Command HUD & Arc Gauge
+Pusat kendali pelanggan dengan Speedometer Arc dinamis, pemantauan trafik unduh/unggah langsung, telemetry ribbon GPON Core, serta tombol aksi cepat Bento.
+
+<p align="center">
+  <img src="./02_customer_beranda_hud.png" alt="02 Customer Beranda HUD" width="380" />
+</p>
+
+---
+
+### 3. Customer Tagihan — Bento Invoicing & Payment Rails
+Manajemen tagihan transparan dengan rincian biaya itemized, status jatuh tempo, integrasi QRIS Instan, BCA VA, Mandiri VA, dan e-wallet.
+
+<p align="center">
+  <img src="./03_customer_tagihan_bento.png" alt="03 Customer Tagihan Bento" width="380" />
+</p>
+
+---
+
+### 4. Customer Bantuan — NOC Incident Support & 24/7 Hotline
+Pusat kendali insiden dan bantuan 24/7 terhubung langsung ke hotline WhatsApp resmi (`+62 821-1200-1600`), Call Center 1500-888, AI Assistant *"Tanya Audi"*, dan FAQ interaktif.
+
+<p align="center">
+  <img src="./04_customer_bantuan_noc.png" alt="04 Customer Bantuan NOC" width="380" />
+</p>
+
+---
+
+### 5. Customer Profil & ONT Hardware Specs
+Identitas digital *AUDIRA Digital Pass* terverifikasi, spesifikasi perangkat ONT Huawei Wi-Fi 6, MAC address, daya redaman optik real-time, dan kontrol keamanan sesi.
+
+<p align="center">
+  <img src="./05_customer_profil_hardware.png" alt="05 Customer Profil Hardware" width="380" />
+</p>
+
+---
+
+### 6. Modal Konfirmasi Keluar (Neo-Brutalist Security Dialog)
+Dialog keamanan taktil berlatar OLED gelap dengan border sian tegas dan tombol aksi darurat merah kontras.
+
+<p align="center">
+  <img src="./06_customer_logout_dialog.png" alt="06 Customer Logout Dialog" width="380" />
+</p>
+
+---
+
+### 7. Customer Beranda — Mode Terang (High-Contrast Neo-Brutalism)
+Tampilan mode siang adaptif tetap mengedepankan ketegasan border cyber, bayangan terstruktur, dan tipografi teknis.
+
+<p align="center">
+  <img src="./07_customer_beranda_light.png" alt="07 Customer Beranda Light" width="380" />
+</p>
+
+---
+
+### 8. Teknisi Field Ops — Floating Cyber-Capsule Navigation Dock
+Dashboard teknisi lapangan dengan navigasi kapsul melayang beraksen pendar hijau neon (`#00FF9D`), status presensi GPS selfie, dan ringkasan penugasan harian.
+
+<p align="center">
+  <img src="./08_teknisi_dashboard_capsule.png" alt="08 Teknisi Dashboard Capsule" width="380" />
+</p>
+
+---
+
+### 9. Teknisi Profil & Evaluasi Performa
+Pelaporan KPI teknisi (Tiket Selesai, Total Instalasi, Rating, Response Time), sinkronisasi peta, dan manajemen alat kerja.
+
+<p align="center">
+  <img src="./09_teknisi_profil_dark.png" alt="09 Teknisi Profil Dark" width="380" />
+</p>
+
+---
+
+## ⚖️ Hak Cipta & Kepemilikan
+Seluruh aset visual, desain antarmuka, dan kode sumber merupakan kekayaan intelektual milik:
+- **Brand**: AUDIRA
+- **Founder & Author**: Agus Dwi Rianto
+- **Organization**: Audira Multimedia Digital / Audira Sukses Mandiri
+- **Official Domain**: [https://audira.my.id](https://audira.my.id)
+- **Official Email**: [agusdwirianto@gmail.com](mailto:agusdwirianto@gmail.com)

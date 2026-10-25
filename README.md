@@ -32,6 +32,26 @@ AudiraNet adalah aplikasi manajemen ISP lengkap yang dirancang untuk mengoptimal
 
 ---
 
+## 🎨 **UI/UX Showcase — Neo-Brutalism + Cyberpunk Studio**
+
+Aplikasi AUDIRA NET mengadopsi standar desain mutakhir berkarakter **Neo-Brutalism + Cyberpunk Studio**:
+- **Midnight OLED Canvas** (`#05070D` & `#0A0E1A`) dengan border cyber kontras tinggi (`1.8px - 2px`).
+- **Electric Neon Tokens**: Cyan (`#00F0FF`), Neon Green (`#00FF9D`), Signal Blue (`#0070F3`), dan Purple (`#7928CA`).
+- **Bento Box Grid Layout** dengan bayangan taktil tegas (`offset: Offset(4, 4)`, `blurRadius: 0`).
+- **Floating Cyber-Capsule Navigation Dock** melayang di seluruh portal pengguna.
+
+| 01. Cyber Login | 02. Beranda HUD & Arc | 03. Bento Invoicing |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/01_login_cyberpunk_dark.png" width="230"/> | <img src="docs/screenshots/02_customer_beranda_hud.png" width="230"/> | <img src="docs/screenshots/03_customer_tagihan_bento.png" width="230"/> |
+
+| 04. NOC Incident Center | 05. Profil & Hardware Bento | 06. Floating Teknisi Dock |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/04_customer_bantuan_noc.png" width="230"/> | <img src="docs/screenshots/05_customer_profil_hardware.png" width="230"/> | <img src="docs/screenshots/08_teknisi_dashboard_capsule.png" width="230"/> |
+
+👉 *Dokumentasi visual lengkap resolusi penuh dapat dilihat di [docs/screenshots/README.md](docs/screenshots/README.md).*
+
+---
+
 ## 📂 **Project Structure**
 
 ```
