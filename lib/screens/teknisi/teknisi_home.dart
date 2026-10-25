@@ -4,18 +4,12 @@ import '../../config/routes.dart';
 import '../../widgets/dialogs.dart';
 import '../../utils/constants.dart';
 import '../../services/firebase_service.dart';
-import '../../services/auth_service.dart';
 import '../../utils/app_theme.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'barcode_scanner_page.dart';
-import 'installation_map_view.dart';
-import 'leaderboard_page.dart';
-import 'checkin_history_page.dart';
-import 'enhanced_kpi_dashboard.dart';
 import 'package:provider/provider.dart';
 import '../../utils/theme_provider.dart';
 import 'tabs/teknisi_dashboard_tab.dart';
@@ -75,38 +69,105 @@ class _TeknisiHomePageState extends State<TeknisiHomePage> {
       },
       child: Scaffold(
         backgroundColor: isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg,
-        body: _pages[_selectedIndex],
-        bottomNavigationBar: NavigationBar(
-          backgroundColor: isDark ? const Color(0xFF080D1E) : Colors.white,
-          indicatorColor: isDark
-              ? const Color(0xFF00F0FF).withValues(alpha: 0.2)
-              : AppTheme.primaryCyan.withValues(alpha: 0.2),
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: (index) {
-            setState(() => _selectedIndex = index);
-          },
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: 'Dashboard',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.assignment_outlined),
-              selectedIcon: Icon(Icons.assignment),
-              label: 'Tiket',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.build_outlined),
-              selectedIcon: Icon(Icons.build),
-              label: 'Instalasi',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person),
-              label: 'Profil',
+        body: Stack(
+          children: [
+            _pages[_selectedIndex],
+            // Floating Cyber-Capsule Navigation Dock
+            Positioned(
+              left: 18,
+              right: 18,
+              bottom: 16,
+              child: SafeArea(
+                top: false,
+                child: Container(
+                  height: 66,
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF00FF9D).withValues(alpha: 0.35)
+                          : const Color(0xFF0F172A),
+                      width: 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark
+                            ? const Color(0xFF00FF9D).withValues(alpha: 0.12)
+                            : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                        offset: const Offset(0, 6),
+                        blurRadius: 16,
+                      ),
+                      BoxShadow(
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.6)
+                            : const Color(0xFF0F172A).withValues(alpha: 0.05),
+                        offset: const Offset(3, 3),
+                        blurRadius: 0,
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildTeknisiNavItem(0, 'Dashboard', Icons.dashboard_outlined, Icons.dashboard, isDark),
+                      _buildTeknisiNavItem(1, 'Tiket', Icons.assignment_outlined, Icons.assignment, isDark),
+                      _buildTeknisiNavItem(2, 'Instalasi', Icons.build_outlined, Icons.build, isDark),
+                      _buildTeknisiNavItem(3, 'Profil', Icons.person_outline, Icons.person, isDark),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTeknisiNavItem(int index, String label, IconData icon, IconData activeIcon, bool isDark) {
+    final isSelected = _selectedIndex == index;
+    const activeColor = Color(0xFF00FF9D);
+    final inactiveColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _selectedIndex = index),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? activeColor.withValues(alpha: isDark ? 0.15 : 0.1) : Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            border: isSelected
+                ? Border.all(
+                    color: activeColor.withValues(alpha: isDark ? 0.4 : 0.2),
+                    width: 1,
+                  )
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isSelected ? activeIcon : icon,
+                size: 20,
+                color: isSelected ? activeColor : inactiveColor,
+              ),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  color: isSelected ? activeColor : inactiveColor,
+                  letterSpacing: isSelected ? 0.3 : 0,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1313,7 +1374,7 @@ Terima kasih atas kerja kerasnya!
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 110),
                 ],
               ),
             ),

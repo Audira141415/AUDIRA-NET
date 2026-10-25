@@ -1,9 +1,10 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../utils/app_theme.dart';
 
-/// Card Layanan Utama Pelanggan berstandar Cyber-Utility / Linear Fintech
-/// Menyajikan telemetri jaringan fiber optic, status FUP, dan tagihan bulanan
+/// Hero Card Layanan Utama berstandar Neo-Brutalism + Cyberpunk Studio
+/// Dilengkapi Speedometer Arc CustomPainter, telemetri fiber optik dBm, dan tagihan bulanan
 class CustomerHeroServiceCard extends StatelessWidget {
   final Map<String, dynamic>? customerData;
   final VoidCallback onPayPressed;
@@ -27,32 +28,31 @@ class CustomerHeroServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final packageName = customerData?['packageName'] ?? 'Fiber Home 50 Mbps';
+    final packageName = customerData?['packageName'] ?? 'Fiber Ultra 50 Mbps';
     final customerId = customerData?['customerId'] ?? 'ADN-FIBER';
     final monthlyFee = customerData?['monthlyFee'] ?? 250000;
     final isActive = (customerData?['status'] ?? 'active') == 'active';
 
-    final cardBg = isDark ? const Color(0xFF0F172A) : Colors.white;
-    final cardInnerBg = isDark ? const Color(0xFF0B1120) : const Color(0xFFF8FAFC);
-    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final cardBg = isDark ? const Color(0xFF0A0E1A) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFF0F172A);
     final textPrimary = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
     final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
-          width: 1.2,
+          color: isDark ? const Color(0xFF00F0FF).withValues(alpha: 0.35) : borderColor,
+          width: 2.0,
         ),
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? AppTheme.neonCyan.withValues(alpha: 0.04)
-                : Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+                ? const Color(0xFF00F0FF).withValues(alpha: 0.12)
+                : const Color(0xFF0F172A).withValues(alpha: 0.08),
+            offset: const Offset(5, 5),
+            blurRadius: 0, // Neo-Brutalism signature hard shadow
           ),
         ],
       ),
@@ -61,21 +61,21 @@ class CustomerHeroServiceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Telemetry Header
+            // Top Technical Ribbon
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF0284C7).withValues(alpha: 0.08)
-                    : const Color(0xFF0284C7).withValues(alpha: 0.05),
+                color: isDark ? const Color(0xFF05070D) : const Color(0xFFF8FAFC),
                 border: Border(
-                  bottom: BorderSide(color: borderColor, width: 1.0),
+                  bottom: BorderSide(
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    width: 1.5,
+                  ),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Live Connection Status
                   Row(
                     children: [
                       Container(
@@ -83,58 +83,55 @@ class CustomerHeroServiceCard extends StatelessWidget {
                         height: 8,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isActive
-                              ? const Color(0xFF10B981)
-                              : const Color(0xFFF59E0B),
+                          color: isActive ? AppTheme.neonGreen : AppTheme.neonAmber,
                           boxShadow: [
                             BoxShadow(
-                              color: (isActive
-                                      ? const Color(0xFF10B981)
-                                      : const Color(0xFFF59E0B))
-                                  .withValues(alpha: 0.6),
+                              color: (isActive ? AppTheme.neonGreen : AppTheme.neonAmber)
+                                  .withValues(alpha: 0.8),
                               blurRadius: 6,
-                              spreadRadius: 1,
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        isActive ? 'LAYANAN AKTIF' : 'TERISOLIR',
+                        isActive ? 'LINK ACTIVE' : 'SUSPENDED',
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.6,
-                          color: isActive
-                              ? (isDark ? const Color(0xFF34D399) : const Color(0xFF059669))
-                              : const Color(0xFFD97706),
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                          color: isActive ? const Color(0xFF00FF9D) : const Color(0xFFFFB800),
+                          fontFamily: 'monospace',
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 10),
                       Text(
-                        '•  OPTICAL -19.4 dBm',
+                        '// OPTIC: -19.4 dBm',
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: textSecondary,
-                          letterSpacing: 0.4,
+                          fontFamily: 'monospace',
                         ),
                       ),
                     ],
                   ),
-                  // Monospace ID Pill
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                      color: isDark ? const Color(0xFF162032) : const Color(0xFFE2E8F0),
                       borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                        width: 1,
+                      ),
                     ),
                     child: Text(
                       customerId,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 10.5,
                         fontWeight: FontWeight.w700,
-                        color: textSecondary,
+                        color: textPrimary,
                         fontFamily: 'monospace',
                       ),
                     ),
@@ -143,230 +140,275 @@ class CustomerHeroServiceCard extends StatelessWidget {
               ),
             ),
 
-            // Main Plan & Bandwidth Info
+            // Speedometer Arc Section
             Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  // Circular Speedometer Arc Widget
+                  SizedBox(
+                    width: 110,
+                    height: 110,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CustomPaint(
+                          size: const Size(110, 110),
+                          painter: _SpeedGaugePainter(
+                            progress: 0.65,
+                            isDark: isDark,
+                          ),
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              packageName,
+                              '50',
                               style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w900,
                                 color: textPrimary,
-                                letterSpacing: -0.5,
+                                height: 1.0,
+                                letterSpacing: -1.0,
                               ),
                             ),
-                            const SizedBox(height: 4),
                             Text(
-                              'Koneksi Fiber Optic Dedicated Tanpa Batas Kuota (FUP Unlimited)',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: textSecondary,
-                                height: 1.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: isDark
-                                ? [
-                                    const Color(0xFF0284C7).withValues(alpha: 0.25),
-                                    const Color(0xFF06B6D4).withValues(alpha: 0.25),
-                                  ]
-                                : [
-                                    const Color(0xFFE0F2FE),
-                                    const Color(0xFFCCFBF1),
-                                  ],
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF0284C7).withValues(alpha: 0.5)
-                                : const Color(0xFF0284C7).withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              LucideIcons.zap,
-                              size: 14,
-                              color: isDark ? AppTheme.neonCyan : const Color(0xFF0284C7),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'GIGABIT',
+                              'Mbps',
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w800,
-                                color: isDark ? AppTheme.neonCyan : const Color(0xFF0284C7),
-                                letterSpacing: 0.5,
+                                color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                                letterSpacing: 0.4,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  // Plan Details & Tier Badge
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xFF00F0FF), Color(0xFF0070F3)],
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'ULTRA-FIBER',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white,
+                                  letterSpacing: 0.6,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'UNLIMITED FUP',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w700,
+                                color: textSecondary,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          packageName,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                            color: textPrimary,
+                            letterSpacing: -0.4,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Koneksi stabil dedicated 1:1 langsung ke backbone fiber optik.',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: textSecondary,
+                            height: 1.3,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(LucideIcons.arrowDown, size: 12, color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669)),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '50.8M',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: textPrimary,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 10),
+                            Row(
+                              children: [
+                                Icon(LucideIcons.arrowUp, size: 12, color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7)),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '15.4M',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: textPrimary,
+                                    fontFamily: 'monospace',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
 
-            Divider(height: 1, color: borderColor),
+            const SizedBox(height: 8),
 
-            // Lower Section: Billing & Telemetry Metrics
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: cardInnerBg,
-              ),
-              child: Column(
+            // Middle 3 Telemetry Metrics (Pills)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  _buildTelemetryBadge(
+                    icon: LucideIcons.radio,
+                    label: 'Ping CDN',
+                    value: '11 ms',
+                    color: const Color(0xFF10B981),
+                    isDark: isDark,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildTelemetryBadge(
+                    icon: LucideIcons.shieldCheck,
+                    label: 'SLA Uptime',
+                    value: '99.9%',
+                    color: const Color(0xFF00F0FF),
+                    isDark: isDark,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildTelemetryBadge(
+                    icon: LucideIcons.zap,
+                    label: 'Jitter',
+                    value: '< 1 ms',
+                    color: const Color(0xFFA855F7),
+                    isDark: isDark,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // Bottom Billing Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
+                border: Border(
+                  top: BorderSide(
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      Row(
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Tagihan Berjalan',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                  color: textSecondary,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF10B981).withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'Jatuh Tempo: 20 Bln Ini',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF10B981),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
                           Text(
-                            _formatCurrency(monthlyFee),
+                            'Tagihan Berjalan',
                             style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: textPrimary,
-                              letterSpacing: -0.4,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: textSecondary,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                              ),
+                            ),
+                            child: const Text(
+                              'Tgl 20',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF10B981),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: isDark
-                                ? [
-                                    const Color(0xFF0284C7),
-                                    const Color(0xFF0369A1),
-                                  ]
-                                : [
-                                    const Color(0xFF0284C7),
-                                    const Color(0xFF0369A1),
-                                  ],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF0284C7).withValues(alpha: 0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: onPayPressed,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(LucideIcons.creditCard, size: 16, color: Colors.white),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Bayar Tagihan',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _formatCurrency(monthlyFee),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: textPrimary,
+                          letterSpacing: -0.4,
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 16),
-                  Divider(height: 1, color: borderColor),
-                  const SizedBox(height: 14),
-
-                  // 3 Real Telemetry Badges
-                  Row(
-                    children: [
-                      _buildMetricCol(
-                        'Kecepatan',
-                        '50 Mbps',
-                        LucideIcons.zap,
-                        const Color(0xFF0284C7),
-                        textSecondary,
-                        textPrimary,
+                  ElevatedButton.icon(
+                    onPressed: onPayPressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? AppTheme.signalBlue : const Color(0xFF0F172A),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(
+                          color: isDark ? AppTheme.neonCyan : Colors.black,
+                          width: 1.5,
+                        ),
                       ),
-                      _buildDivider(borderColor),
-                      _buildMetricCol(
-                        'Latensi CDN',
-                        '11 ms',
-                        LucideIcons.radio,
-                        const Color(0xFF10B981),
-                        textSecondary,
-                        textPrimary,
-                      ),
-                      _buildDivider(borderColor),
-                      _buildMetricCol(
-                        'SLA Jaringan',
-                        '99.9%',
-                        LucideIcons.shieldCheck,
-                        const Color(0xFF8B5CF6),
-                        textSecondary,
-                        textPrimary,
-                      ),
-                    ],
+                    ),
+                    icon: const Icon(LucideIcons.creditCard, size: 15),
+                    label: const Text(
+                      'Bayar Tagihan',
+                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                    ),
                   ),
                 ],
               ),
@@ -377,58 +419,129 @@ class CustomerHeroServiceCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricCol(
-    String label,
-    String value,
-    IconData icon,
-    Color iconColor,
-    Color textSecondary,
-    Color textPrimary,
-  ) {
+  Widget _buildTelemetryBadge({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+    required bool isDark,
+  }) {
     return Expanded(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF162032) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 5),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 8.5,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      fontFamily: 'monospace',
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-            child: Icon(icon, size: 14, color: iconColor),
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: textSecondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildDivider(Color color) {
-    return Container(
-      width: 1,
-      height: 24,
-      color: color,
+/// CustomPainter for the Futuristic Speedometer Arc Gauge
+class _SpeedGaugePainter extends CustomPainter {
+  final double progress;
+  final bool isDark;
+
+  _SpeedGaugePainter({required this.progress, required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - 14) / 2;
+
+    const startAngle = 135.0 * (math.pi / 180.0);
+    const sweepAngle = 270.0 * (math.pi / 180.0);
+
+    // 1. Background Arc Track
+    final bgPaint = Paint()
+      ..color = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7.0
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      bgPaint,
     );
+
+    // 2. Active Gradient Arc
+    final activePaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFF00F0FF), Color(0xFF0070F3), Color(0xFF7928CA)],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7.0
+      ..strokeCap = StrokeCap.round;
+
+    final currentSweep = sweepAngle * progress.clamp(0.0, 1.0);
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      currentSweep,
+      false,
+      activePaint,
+    );
+
+    // 3. Pointer Glow Dot
+    final dotAngle = startAngle + currentSweep;
+    final dotX = center.dx + radius * math.cos(dotAngle);
+    final dotY = center.dy + radius * math.sin(dotAngle);
+
+    final glowPaint = Paint()
+      ..color = const Color(0xFF00F0FF)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4.0);
+
+    canvas.drawCircle(Offset(dotX, dotY), 4.5, glowPaint);
+
+    final dotPaint = Paint()..color = Colors.white;
+    canvas.drawCircle(Offset(dotX, dotY), 3.0, dotPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SpeedGaugePainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.isDark != isDark;
   }
 }

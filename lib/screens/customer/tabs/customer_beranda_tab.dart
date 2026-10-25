@@ -3,7 +3,6 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../services/firebase_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../utils/theme_provider.dart';
-import '../../../utils/app_theme.dart';
 import '../../notifications_page.dart';
 import '../widgets/customer_hero_service_card.dart';
 import '../widgets/customer_quick_actions.dart';
@@ -94,105 +93,234 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Clean Enterprise Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                // Cyber Command HUD Header
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF00F0FF).withValues(alpha: 0.35)
+                          : const Color(0xFF0F172A),
+                      width: 1.8,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isDark
+                            ? const Color(0xFF00F0FF).withValues(alpha: 0.12)
+                            : const Color(0xFF0F172A).withValues(alpha: 0.08),
+                        offset: const Offset(4, 4),
+                        blurRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      // Holographic Avatar with status dot
+                      Stack(
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                'Halo, $userName',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: textPrimary,
-                                  letterSpacing: -0.5,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                          Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF00F0FF), Color(0xFF7928CA)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                            ],
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 2,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                userName.isNotEmpty ? userName[0].toUpperCase() : 'A',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'ID Pelanggan: $customerId',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: textSecondary,
-                              fontFamily: 'monospace',
-                              fontWeight: FontWeight.w600,
+                          Positioned(
+                            bottom: 1,
+                            right: 1,
+                            child: Container(
+                              width: 13,
+                              height: 13,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFF00FF9D),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFF00FF9D).withValues(alpha: 0.8),
+                                    blurRadius: 6,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    Row(
-                      children: [
-                        const ThemeToggleIconButton(),
-                        const SizedBox(width: 4),
-                        IconButton(
-                          icon: const Icon(LucideIcons.bell, size: 20),
-                          color: textSecondary,
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const NotificationsPage(),
+                      const SizedBox(width: 12),
+
+                      // User Identity & ID
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    userName,
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w900,
+                                      color: textPrimary,
+                                      letterSpacing: -0.4,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(color: const Color(0xFF00FF9D), width: 0.8),
+                                  ),
+                                  child: const Text(
+                                    'ONLINE',
+                                    style: TextStyle(
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.w900,
+                                      color: Color(0xFF00FF9D),
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              '// ID: $customerId',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: textSecondary,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.w700,
                               ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 12),
-
-                // Gateway Telemetry Pill
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF0284C7).withValues(alpha: 0.1)
-                        : const Color(0xFFE0F2FE),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF0284C7).withValues(alpha: 0.3)
-                          : const Color(0xFFBAE6FD),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF10B981),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.6),
-                              blurRadius: 4,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 7),
+
+                      // Controls: Theme Toggle & Bell
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const ThemeToggleIconButton(),
+                          const SizedBox(width: 4),
+                          Stack(
+                            children: [
+                              IconButton(
+                                icon: const Icon(LucideIcons.bell, size: 20),
+                                color: textPrimary,
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const NotificationsPage(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              Positioned(
+                                top: 9,
+                                right: 9,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: const Color(0xFF00F0FF),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF00F0FF).withValues(alpha: 0.8),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Gateway Telemetry HUD Strip
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF1E293B)
+                          : const Color(0xFFCBD5E1),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF00F0FF),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF00F0FF).withValues(alpha: 0.8),
+                              blurRadius: 5,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Text(
-                        'EDGE POP-JKT01 • LATENSI 11ms • BACKBONE OPTIMAL',
+                        'GPON CORE',
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                          color: isDark ? AppTheme.neonCyan : const Color(0xFF0369A1),
+                          fontWeight: FontWeight.w900,
+                          color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                          fontFamily: 'monospace',
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                      Text(
+                        ' // -19.4 dBm // LATENSI 11ms // POP: JKT-01',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w600,
+                          color: textSecondary,
+                          fontFamily: 'monospace',
                         ),
                       ),
                     ],
@@ -232,7 +360,7 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                 // Maintenance / Announcements
                 const CustomerMaintenanceCard(),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 90),
               ],
             ),
           ),

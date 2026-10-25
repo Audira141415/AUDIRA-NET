@@ -3,25 +3,55 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../config/routes.dart';
 import '../../services/auth_service.dart';
 import '../../services/firebase_service.dart';
+import '../../utils/app_theme.dart';
 import '../../widgets/app_logo_widget.dart';
 
 /// Role presets for swift development & demo access
 enum LoginRolePreset {
-  customer('Pelanggan', LucideIcons.user, 'budi@audira.my.id', 'pelanggan123', 'Akses Tagihan & FUP'),
-  teknisi('Teknisi', LucideIcons.wrench, 'budi.teknisi@audiranet.id', 'teknisi123', 'Field Ops & Tiket'),
-  admin('Admin / NOC', LucideIcons.shieldAlert, 'admin@audiranet.id', 'admin123', 'Command Center');
+  customer(
+    'Pelanggan',
+    LucideIcons.user,
+    'budi@audira.my.id',
+    'pelanggan123',
+    'Akses Tagihan & FUP',
+    Color(0xFF00F0FF),
+  ),
+  teknisi(
+    'Teknisi',
+    LucideIcons.wrench,
+    'budi.teknisi@audiranet.id',
+    'teknisi123',
+    'Field Ops & Tiket',
+    Color(0xFF00FF9D),
+  ),
+  admin(
+    'Admin / NOC',
+    LucideIcons.shieldAlert,
+    'admin@audiranet.id',
+    'admin123',
+    'Command Center',
+    Color(0xFFA855F7),
+  );
 
   final String label;
   final IconData icon;
   final String demoEmail;
   final String demoPassword;
   final String description;
+  final Color roleColor;
 
-  const LoginRolePreset(this.label, this.icon, this.demoEmail, this.demoPassword, this.description);
+  const LoginRolePreset(
+    this.label,
+    this.icon,
+    this.demoEmail,
+    this.demoPassword,
+    this.description,
+    this.roleColor,
+  );
 }
 
-/// Premium High-Tech Unified Authentication Screen for AUDIRA
-/// Blends sleek Apple/Linear utility minimalism with AUDIRA Cyberpunk-Fintech flair
+/// Unified Authentication Screen for AUDIRA
+/// Adheres strictly to AUDIRA Neo-Brutalism + Cyberpunk Design System
 class UnifiedLoginPage extends StatefulWidget {
   const UnifiedLoginPage({super.key});
 
@@ -99,34 +129,12 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
       String role = _selectedPreset.name;
       if (userData != null && userData['role'] != null) {
         role = userData['role'].toString().toLowerCase();
-        await AuthService.instance.setCurrentUserData(userData);
-      } else {
-        if (email.contains('admin') || email.contains('noc')) {
-          role = 'admin';
-        } else if (email.contains('teknisi') || email.contains('tech')) {
-          role = 'teknisi';
-        } else {
-          role = 'customer';
-        }
-
-        final displayName = role == 'admin'
-            ? 'ADMIN NOC AUDIRA'
-            : role == 'teknisi'
-                ? 'BUDI TEKNISI'
-                : 'BUDI PELANGGAN';
-
-        await AuthService.instance.setCurrentUserData({
-          'id': 'usr-${DateTime.now().millisecondsSinceEpoch}',
-          'name': displayName,
-          'email': email,
-          'role': role,
-        });
       }
-
-      if (!mounted) return;
 
       switch (role) {
         case 'admin':
+        case 'superadmin':
+        case 'noc':
           Navigator.pushReplacementNamed(context, Routes.adminHome);
           break;
         case 'teknisi':
@@ -144,7 +152,11 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login Gagal: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Login Gagal: $e'),
+            backgroundColor: const Color(0xFFFF2A5F),
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     } finally {
@@ -155,21 +167,22 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF030712) : const Color(0xFFF8FAFC);
-    final cardBg = isDark ? const Color(0xFF0A0F1D) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+
+    final bg = isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9);
+    final cardBg = isDark ? const Color(0xFF0A0E1A) : Colors.white;
+    final borderColor = isDark
+        ? const Color(0xFF00F0FF).withValues(alpha: 0.4)
+        : const Color(0xFF0F172A);
     final textPrimary = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
     final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-    final primaryCyan = isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7);
-    final accentSignal = const Color(0xFF0070F3);
 
     return Scaffold(
       backgroundColor: bg,
       body: Stack(
         children: [
-          // Ambient Gradient Orbs (Depth & High-Tech Atmosphere)
+          // Cyber Ambient Aurora Orbs
           Positioned(
-            top: -100,
+            top: -80,
             right: -60,
             child: Container(
               width: 320,
@@ -178,7 +191,7 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    primaryCyan.withValues(alpha: isDark ? 0.15 : 0.08),
+                    _selectedPreset.roleColor.withValues(alpha: isDark ? 0.18 : 0.08),
                     Colors.transparent,
                   ],
                 ),
@@ -195,7 +208,7 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    accentSignal.withValues(alpha: isDark ? 0.12 : 0.06),
+                    AppTheme.signalBlue.withValues(alpha: isDark ? 0.15 : 0.06),
                     Colors.transparent,
                   ],
                 ),
@@ -206,37 +219,38 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 430),
+                  constraints: const BoxConstraints(maxWidth: 440),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Brand Logo Aura & Header
+                      // Holographic Brand Logo
                       Container(
-                        width: 80,
-                        height: 80,
+                        width: 82,
+                        height: 82,
                         decoration: BoxDecoration(
                           color: isDark ? const Color(0xFF0F172A) : Colors.white,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: primaryCyan.withValues(alpha: isDark ? 0.4 : 0.3),
-                            width: 2,
+                            color: _selectedPreset.roleColor,
+                            width: 2.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: primaryCyan.withValues(alpha: isDark ? 0.25 : 0.12),
-                              blurRadius: 20,
+                              color: _selectedPreset.roleColor.withValues(alpha: 0.3),
+                              blurRadius: 18,
                               spreadRadius: 2,
                             ),
                           ],
                         ),
                         padding: const EdgeInsets.all(14),
-                        child: const AppLogo(width: 52, height: 52),
+                        child: const AppLogo(width: 54, height: 54),
                       ),
+
                       const SizedBox(height: 16),
 
-                      // Brand Title
+                      // Brand Header
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -244,52 +258,59 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
                             'AUDIRA',
                             style: TextStyle(
                               fontSize: 26,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w900,
                               color: textPrimary,
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [primaryCyan, accentSignal],
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF00F0FF), Color(0xFF0070F3)],
                               ),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: const Text(
-                              'NET',
+                              'NET-OS',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
-                                letterSpacing: 0.5,
+                                letterSpacing: 0.8,
                               ),
                             ),
                           ),
                         ],
                       ),
+
                       const SizedBox(height: 6),
                       Text(
-                        'Enterprise Operating System & Fiber Connectivity',
-                        style: TextStyle(fontSize: 12, color: textSecondary, fontWeight: FontWeight.w500),
+                        'Pusat Kendali Operasi & Layanan Fiber Optik',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
+
                       const SizedBox(height: 12),
 
-                      // Live Telemetry Chip
+                      // Live Gateway Telemetry Pill
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                          color: isDark ? const Color(0xFF0A0F1D) : Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                            color: const Color(0xFF00FF9D).withValues(alpha: 0.5),
+                            width: 1.2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.12 : 0.05),
-                              blurRadius: 10,
+                              color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
+                              blurRadius: 8,
                             ),
                           ],
                         ),
@@ -297,61 +318,64 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
-                              width: 7,
-                              height: 7,
+                              width: 6,
+                              height: 6,
                               decoration: const BoxDecoration(
-                                color: Color(0xFF10B981),
                                 shape: BoxShape.circle,
+                                color: Color(0xFF00FF9D),
                               ),
                             ),
                             const SizedBox(width: 8),
                             const Text(
-                              'GATEWAY • 12ms • OPERATIONAL',
+                              'GATEWAY • 12ms • ALL SYSTEMS OPERATIONAL',
                               style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.5,
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.8,
+                                color: Color(0xFF00FF9D),
                                 fontFamily: 'monospace',
-                                color: Color(0xFF10B981),
                               ),
                             ),
                           ],
                         ),
                       ),
+
                       const SizedBox(height: 22),
 
-                      // Role Segmented Controller
+                      // 1-Tap Quick Persona Selector (Crucial for Instant Switch & Demo)
                       Container(
                         padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF080D1A) : const Color(0xFFE2E8F0),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: borderColor),
+                          color: isDark ? const Color(0xFF070B14) : const Color(0xFFE2E8F0),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                            width: 1.2,
+                          ),
                         ),
                         child: Row(
                           children: LoginRolePreset.values.map((preset) {
-                            final isSel = _selectedPreset == preset;
+                            final isSelected = _selectedPreset == preset;
                             return Expanded(
-                              child: GestureDetector(
+                              child: InkWell(
                                 onTap: () => _applyPreset(preset),
+                                borderRadius: BorderRadius.circular(12),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
                                   padding: const EdgeInsets.symmetric(vertical: 10),
                                   decoration: BoxDecoration(
-                                    color: isSel ? cardBg : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: isSel
-                                        ? Border.all(
-                                            color: primaryCyan.withValues(alpha: isDark ? 0.4 : 0.3),
-                                            width: 1.2,
-                                          )
+                                    color: isSelected
+                                        ? (isDark ? const Color(0xFF0A0E1A) : Colors.white)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: isSelected
+                                        ? Border.all(color: preset.roleColor, width: 1.5)
                                         : null,
-                                    boxShadow: isSel
+                                    boxShadow: isSelected
                                         ? [
                                             BoxShadow(
-                                              color: primaryCyan.withValues(alpha: isDark ? 0.15 : 0.05),
+                                              color: preset.roleColor.withValues(alpha: 0.2),
                                               blurRadius: 8,
-                                              offset: const Offset(0, 2),
                                             ),
                                           ]
                                         : null,
@@ -361,17 +385,20 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
                                     children: [
                                       Icon(
                                         preset.icon,
-                                        size: 16,
-                                        color: isSel ? primaryCyan : textSecondary,
+                                        size: 18,
+                                        color: isSelected ? preset.roleColor : textSecondary,
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         preset.label,
                                         style: TextStyle(
                                           fontSize: 11,
-                                          fontWeight: isSel ? FontWeight.w700 : FontWeight.w500,
-                                          color: isSel ? textPrimary : textSecondary,
+                                          fontWeight:
+                                              isSelected ? FontWeight.w800 : FontWeight.w600,
+                                          color: isSelected ? textPrimary : textSecondary,
                                         ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
                                   ),
@@ -381,129 +408,222 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
                           }).toList(),
                         ),
                       ),
+
                       const SizedBox(height: 18),
 
-                      // Main Login Card with Glass Accent
+                      // Neo-Brutalism Main Card
                       Container(
-                        padding: const EdgeInsets.all(22),
                         decoration: BoxDecoration(
                           color: cardBg,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: borderColor,
-                            width: 1.2,
-                          ),
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(color: borderColor, width: 2.0),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.05),
-                              blurRadius: 20,
-                              offset: const Offset(0, 6),
+                              color: isDark
+                                  ? _selectedPreset.roleColor.withValues(alpha: 0.15)
+                                  : const Color(0xFF0F172A).withValues(alpha: 0.1),
+                              offset: const Offset(6, 6),
+                              blurRadius: 0, // Neo-Brutalism signature hard shadow
                             ),
                           ],
                         ),
+                        padding: const EdgeInsets.all(22),
                         child: Form(
                           key: _formKey,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Role Header Ribbon
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Masuk Akun',
+                                    'AKSES ${_selectedPreset.label.toUpperCase()}',
                                     style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.8,
                                       color: textPrimary,
+                                      fontFamily: 'monospace',
                                     ),
                                   ),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: primaryCyan.withValues(alpha: 0.1),
+                                      color: _selectedPreset.roleColor.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: _selectedPreset.roleColor.withValues(alpha: 0.4),
+                                      ),
                                     ),
                                     child: Text(
                                       _selectedPreset.description,
                                       style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: primaryCyan,
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: _selectedPreset.roleColor,
+                                        letterSpacing: 0.4,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 16),
 
-                              // Email Field
+                              const SizedBox(height: 18),
+
+                              // Email Input
                               Text(
-                                'Email Terdaftar',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textPrimary),
+                                '// IDENTITAS_AKUN',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: textSecondary,
+                                  fontFamily: 'monospace',
+                                  letterSpacing: 0.6,
+                                ),
                               ),
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
-                                style: TextStyle(fontSize: 14, color: textPrimary),
+                                style: TextStyle(
+                                  color: textPrimary,
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'monospace',
+                                ),
                                 decoration: InputDecoration(
-                                  hintText: 'nama@audiranet.id',
-                                  hintStyle: TextStyle(fontSize: 13, color: textSecondary),
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? const Color(0xFF070B14)
+                                      : const Color(0xFFF8FAFC),
                                   prefixIcon: Container(
                                     margin: const EdgeInsets.all(8),
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: primaryCyan.withValues(alpha: 0.1),
+                                      color: _selectedPreset.roleColor.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(LucideIcons.mail, size: 16, color: primaryCyan),
+                                    child: Icon(
+                                      LucideIcons.mail,
+                                      size: 16,
+                                      color: _selectedPreset.roleColor,
+                                    ),
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                                  filled: true,
-                                  fillColor: isDark ? const Color(0xFF050811) : const Color(0xFFF8FAFC),
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: borderColor)),
-                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: borderColor)),
-                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: primaryCyan, width: 1.5)),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 14,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: _selectedPreset.roleColor,
+                                      width: 2.0,
+                                    ),
+                                  ),
                                 ),
-                                validator: (v) => v == null || v.isEmpty ? 'Email wajib diisi' : null,
+                                validator: (val) {
+                                  if (val == null || val.isEmpty) return 'Email wajib diisi';
+                                  return null;
+                                },
                               ),
+
                               const SizedBox(height: 14),
 
-                              // Password Field
+                              // Password Input
                               Text(
-                                'Kata Sandi',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: textPrimary),
+                                '// KATA_SANDI',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: textSecondary,
+                                  fontFamily: 'monospace',
+                                  letterSpacing: 0.6,
+                                ),
                               ),
                               const SizedBox(height: 6),
                               TextFormField(
                                 controller: _passwordController,
                                 obscureText: !_isPasswordVisible,
-                                style: TextStyle(fontSize: 14, color: textPrimary),
+                                style: TextStyle(
+                                  color: textPrimary,
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'monospace',
+                                ),
                                 decoration: InputDecoration(
-                                  hintText: '••••••••',
-                                  hintStyle: TextStyle(fontSize: 13, color: textSecondary),
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? const Color(0xFF070B14)
+                                      : const Color(0xFFF8FAFC),
                                   prefixIcon: Container(
                                     margin: const EdgeInsets.all(8),
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color: primaryCyan.withValues(alpha: 0.1),
+                                      color: _selectedPreset.roleColor.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: Icon(LucideIcons.lock, size: 16, color: primaryCyan),
+                                    child: Icon(
+                                      LucideIcons.lock,
+                                      size: 16,
+                                      color: _selectedPreset.roleColor,
+                                    ),
                                   ),
                                   suffixIcon: IconButton(
-                                    icon: Icon(_isPasswordVisible ? LucideIcons.eyeOff : LucideIcons.eye, size: 16, color: textSecondary),
-                                    onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
+                                    icon: Icon(
+                                      _isPasswordVisible ? LucideIcons.eyeOff : LucideIcons.eye,
+                                      size: 18,
+                                      color: textSecondary,
+                                    ),
+                                    onPressed: () =>
+                                        setState(() => _isPasswordVisible = !_isPasswordVisible),
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                                  filled: true,
-                                  fillColor: isDark ? const Color(0xFF050811) : const Color(0xFFF8FAFC),
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: borderColor)),
-                                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: borderColor)),
-                                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: primaryCyan, width: 1.5)),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 14,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: _selectedPreset.roleColor,
+                                      width: 2.0,
+                                    ),
+                                  ),
                                 ),
-                                validator: (v) => v == null || v.isEmpty ? 'Kata sandi wajib diisi' : null,
+                                validator: (val) {
+                                  if (val == null || val.isEmpty) return 'Kata sandi wajib diisi';
+                                  return null;
+                                },
                               ),
+
                               const SizedBox(height: 14),
 
                               // Remember & Forgot
@@ -517,68 +637,96 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
                                         height: 20,
                                         child: Checkbox(
                                           value: _rememberMe,
-                                          activeColor: primaryCyan,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                          activeColor: _selectedPreset.roleColor,
+                                          checkColor: Colors.black,
+                                          side: BorderSide(color: borderColor, width: 1.5),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
                                           onChanged: (v) => setState(() => _rememberMe = v ?? true),
                                         ),
                                       ),
                                       const SizedBox(width: 8),
-                                      Text('Ingat kredensial', style: TextStyle(fontSize: 12, color: textSecondary)),
+                                      Text(
+                                        'Simpan Sesi',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: textSecondary,
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                  GestureDetector(
-                                    onTap: _showForgotPasswordDialog,
+                                  TextButton(
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Silakan hubungi Helpdesk NOC untuk reset.'),
+                                        ),
+                                      );
+                                    },
                                     child: Text(
-                                      'Lupa sandi?',
-                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: primaryCyan),
+                                      'Lupa Sandi?',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        color: isDark ? _selectedPreset.roleColor : AppTheme.signalBlue,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 20),
 
-                              // Submit Button with Vibrant Gradient
-                              Container(
+                              const SizedBox(height: 18),
+
+                              // Bold Neo-Brutalism Action CTA
+                              SizedBox(
                                 width: double.infinity,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: isDark
-                                        ? [const Color(0xFF0070F3), const Color(0xFF00F0FF)]
-                                        : [const Color(0xFF0284C7), const Color(0xFF0070F3)],
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: primaryCyan.withValues(alpha: isDark ? 0.35 : 0.25),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
+                                height: 52,
                                 child: ElevatedButton(
                                   onPressed: _isLoading ? null : _executeLogin,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
+                                    backgroundColor: isDark
+                                        ? _selectedPreset.roleColor
+                                        : const Color(0xFF0F172A),
+                                    foregroundColor: isDark ? Colors.black : Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side: BorderSide(
+                                        color: isDark ? Colors.white : Colors.black,
+                                        width: 1.5,
+                                      ),
+                                    ),
                                     shadowColor: Colors.transparent,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   ),
                                   child: _isLoading
                                       ? const SizedBox(
-                                          width: 22,
-                                          height: 22,
-                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          ),
                                         )
-                                      : const Row(
+                                      : Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              'Masuk ke Sistem',
-                                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, letterSpacing: 0.3),
+                                              'MASUK KE SISTEM',
+                                              style: TextStyle(
+                                                fontSize: 13.5,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 0.8,
+                                                color: isDark ? Colors.black : Colors.white,
+                                              ),
                                             ),
-                                            SizedBox(width: 8),
-                                            Icon(LucideIcons.arrowRight, size: 16),
+                                            const SizedBox(width: 8),
+                                            Icon(
+                                              LucideIcons.arrowRight,
+                                              size: 18,
+                                              color: isDark ? Colors.black : Colors.white,
+                                            ),
                                           ],
                                         ),
                                 ),
@@ -587,104 +735,74 @@ class _UnifiedLoginPageState extends State<UnifiedLoginPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 18),
 
-                      // Biometric Fast Pass
+                      const SizedBox(height: 20),
+
+                      // Biometric Fast-Pass Capsule
                       Container(
-                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
-                          color: cardBg.withValues(alpha: 0.7),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: borderColor),
-                        ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                            _applyPreset(_selectedPreset);
-                            _executeLogin();
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: primaryCyan.withValues(alpha: 0.12),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(LucideIcons.fingerprint, size: 16, color: primaryCyan),
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Autentikasi Cepat Biometrik',
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textPrimary),
-                                ),
-                              ],
+                          color: cardBg,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: borderColor, width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDark
+                                  ? const Color(0xFF00F0FF).withValues(alpha: 0.06)
+                                  : const Color(0xFF0F172A).withValues(alpha: 0.04),
+                              offset: const Offset(3, 3),
+                              blurRadius: 0,
                             ),
-                          ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              LucideIcons.fingerprint,
+                              size: 20,
+                              color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Autentikasi Cepat Biometrik (Passkey)',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: textPrimary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 26),
 
-                      // Brand Footer
+                      const SizedBox(height: 20),
+
+                      // Footer Brand Notice
                       Text(
                         'AUDIRA • PT Audira Multimedia Digital / Audira Sukses Mandiri',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 11, color: textSecondary, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: textSecondary,
+                          letterSpacing: 0.2,
+                        ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Text(
                         'https://audira.my.id',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: primaryCyan),
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? const Color(0xFF00F0FF) : AppTheme.signalBlue,
+                          fontFamily: 'monospace',
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showForgotPasswordDialog() {
-    final emailResetCtrl = TextEditingController(text: _emailController.text);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Reset Kata Sandi'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Tautan reset kata sandi akan dikirim ke alamat email resmi terdaftar:'),
-            const SizedBox(height: 12),
-            TextField(controller: emailResetCtrl, decoration: const InputDecoration(labelText: 'Email Terdaftar')),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
-          FilledButton(
-            onPressed: () async {
-              final email = emailResetCtrl.text.trim();
-              if (email.isNotEmpty) {
-                final nav = Navigator.of(ctx);
-                final messenger = ScaffoldMessenger.of(context);
-                try {
-                  await AuthService.instance.resetPassword(email);
-                  if (!mounted) return;
-                  nav.pop();
-                  messenger.showSnackBar(const SnackBar(content: Text('Tautan reset kata sandi telah dikirim!')));
-                } catch (e) {
-                  if (!mounted) return;
-                  messenger.showSnackBar(SnackBar(content: Text('Error: $e')));
-                }
-              }
-            },
-            child: const Text('Kirim'),
           ),
         ],
       ),

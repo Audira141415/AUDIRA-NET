@@ -9,6 +9,7 @@ import '../../../config/routes.dart';
 import '../../about_page.dart';
 import '../package_upgrade_page.dart';
 
+/// Neo-Brutalist Cyber Profile & Device Hub for AUDIRA Customers
 class CustomerProfilTab extends StatefulWidget {
   const CustomerProfilTab({super.key});
 
@@ -20,6 +21,7 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
   Map<String, dynamic>? _userData;
   Map<String, dynamic>? _customerData;
   bool _isLoading = true;
+  bool _biometricEnabled = true;
 
   @override
   void initState() {
@@ -53,9 +55,7 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -63,8 +63,55 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$label disalin ke papan klip'),
+        content: Text('$label berhasil disalin ke clipboard'),
+        behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _confirmLogout() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: isDark ? const Color(0xFFEF4444) : Colors.black,
+            width: 2,
+          ),
+        ),
+        title: const Text(
+          'Konfirmasi Keluar',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
+        content: const Text(
+          'Apakah Anda yakin ingin mengakhiri sesi dan keluar dari aplikasi AUDIRA?',
+          style: TextStyle(fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final nav = Navigator.of(context);
+              nav.pop();
+              await AuthService.instance.logout();
+              if (!mounted) return;
+              nav.pushNamedAndRemoveUntil(Routes.unifiedLogin, (route) => false);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Ya, Keluar'),
+          ),
+        ],
       ),
     );
   }
@@ -72,15 +119,16 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     final textPrimary = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
     final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-    final cardBg = isDark ? const Color(0xFF0F172A) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final cardBg = isDark ? const Color(0xFF0A0E1A) : Colors.white;
 
     final name = _userData?['name'] ?? 'Budi Pelanggan';
     final email = _userData?['email'] ?? 'budi@audira.my.id';
     final customerId = _customerData?['customerId'] ?? 'ADN-2026-0889';
-    final packageName = _customerData?['packageName'] ?? 'Fiber Home 50 Mbps';
+    final packageName = _customerData?['packageName'] ?? 'Fiber Ultra 50 Mbps';
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF030712) : const Color(0xFFF1F5F9),
@@ -88,170 +136,403 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
             : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 95),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title
-                    Text(
-                      'Akun & Pengaturan',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w700,
-                        color: textPrimary,
-                        letterSpacing: -0.4,
-                      ),
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'AKUN & IDENTITAS',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: textPrimary,
+                                letterSpacing: -0.4,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '// PROFILE_HARDWARE_SYSTEM',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: textSecondary,
+                                fontFamily: 'monospace',
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF00F0FF).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFF00F0FF), width: 1),
+                          ),
+                          child: const Text(
+                            'TIER 1 USER',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF00F0FF),
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 16),
 
-                    // User Identity Card
+                    // Cyber Persona Digital ID Card (Hero)
                     Container(
-                      padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         color: cardBg,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: borderColor),
-                        boxShadow: isDark
-                            ? null
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.04),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 28,
-                                backgroundColor: const Color(0xFF0284C7).withValues(alpha: 0.15),
-                                child: Text(
-                                  name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w800,
-                                    color: Color(0xFF0284C7),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      name,
-                                      style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w700,
-                                        color: textPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      email,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: textSecondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF00F0FF).withValues(alpha: 0.5) : const Color(0xFF0F172A),
+                          width: 2.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? const Color(0xFF00F0FF).withValues(alpha: 0.15)
+                                : const Color(0xFF0F172A).withValues(alpha: 0.1),
+                            offset: const Offset(5, 5),
+                            blurRadius: 0,
                           ),
-                          const SizedBox(height: 16),
-                          Divider(height: 1, color: borderColor),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: Column(
+                          children: [
+                            // Card Top Header
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              color: isDark ? const Color(0xFF05070D) : const Color(0xFFF8FAFC),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    'ID Pelanggan',
-                                    style: TextStyle(fontSize: 11, color: textSecondary),
+                                  Row(
+                                    children: [
+                                      const Icon(LucideIcons.fingerprint, size: 16, color: Color(0xFF00F0FF)),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'AUDIRA DIGITAL PASS',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w900,
+                                          color: textPrimary,
+                                          fontFamily: 'monospace',
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    customerId,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: textPrimary,
-                                      fontFamily: 'monospace',
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      'VERIFIED',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w900,
+                                        color: Color(0xFF00FF9D),
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                              IconButton(
-                                icon: const Icon(LucideIcons.copy, size: 16),
-                                color: textSecondary,
-                                tooltip: 'Salin ID',
-                                onPressed: () => _copyToClipboard(customerId, 'ID Pelanggan'),
+                            ),
+
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  // Avatar
+                                  Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: const LinearGradient(
+                                        colors: [Color(0xFF00F0FF), Color(0xFF0070F3), Color(0xFF7928CA)],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      border: Border.all(color: Colors.white, width: 2),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        name.isNotEmpty ? name[0].toUpperCase() : 'B',
+                                        style: const TextStyle(
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          name,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w900,
+                                            color: textPrimary,
+                                            letterSpacing: -0.3,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          email,
+                                          style: TextStyle(fontSize: 12, color: textSecondary),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        GestureDetector(
+                                          onTap: () => _copyToClipboard(customerId, 'ID Pelanggan'),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                            decoration: BoxDecoration(
+                                              color: isDark ? const Color(0xFF162032) : const Color(0xFFE2E8F0),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  customerId,
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: textPrimary,
+                                                    fontFamily: 'monospace',
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Icon(LucideIcons.copy, size: 12, color: textSecondary),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+
+                            // Plan Upgrade Strip
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'PAKET LANGGANAN',
+                                        style: TextStyle(
+                                          fontSize: 9.5,
+                                          fontWeight: FontWeight.w700,
+                                          color: textSecondary,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        packageName,
+                                        style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w900,
+                                          color: textPrimary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => const PackageUpgradePage()),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0F172A),
+                                      foregroundColor: isDark ? const Color(0xFF05070D) : Colors.white,
+                                      elevation: 0,
+                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                    child: const Text('Upgrade ➔', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
                     const SizedBox(height: 18),
 
-                    // Subscription Card
+                    // Hardware & Network Bento
+                    Text(
+                      'PERANGKAT ROUTER ONT & JARINGAN',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        color: textSecondary,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: cardBg,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: borderColor),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                          width: 1.5,
+                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      child: Column(
                         children: [
+                          _buildDeviceRow('Model Perangkat', 'Huawei Wi-Fi 6 ONT (HG8245H5)', LucideIcons.router, textPrimary, textSecondary),
+                          const Divider(height: 16, color: Color(0xFF1E293B)),
+                          _buildDeviceRow('MAC Address', '70:2E:22:A9:1B:4F', LucideIcons.cpu, textPrimary, textSecondary, isMono: true),
+                          const Divider(height: 16, color: Color(0xFF1E293B)),
+                          _buildDeviceRow('Gateway Lokal', '192.168.1.1', LucideIcons.network, textPrimary, textSecondary, isMono: true),
+                          const Divider(height: 16, color: Color(0xFF1E293B)),
+                          _buildDeviceRow('Redaman Optik', '-19.4 dBm (Sangat Baik)', LucideIcons.activity, textPrimary, const Color(0xFF00FF9D)),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Preferences & Security Bento
+                    Text(
+                      'PREFERENSI & KEAMANAN',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        color: textSecondary,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: cardBg,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          // Dark Mode Switch
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF10B981).withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(LucideIcons.wifi, color: Color(0xFF10B981), size: 20),
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              Row(
                                 children: [
-                                  Text(
-                                    packageName,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: textPrimary,
-                                    ),
+                                  Icon(
+                                    isDark ? LucideIcons.moon : LucideIcons.sun,
+                                    size: 18,
+                                    color: const Color(0xFF00F0FF),
                                   ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Aktif • Kecepatan 50 Mbps Unlimited',
-                                    style: TextStyle(fontSize: 11, color: textSecondary),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Mode OLED Midnight',
+                                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: textPrimary),
+                                      ),
+                                      Text(
+                                        isDark ? 'Tema gelap kontras tinggi aktif' : 'Tema terang aktif',
+                                        style: TextStyle(fontSize: 11, color: textSecondary),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
+                              Switch(
+                                value: isDark,
+                                activeThumbColor: const Color(0xFF00F0FF),
+                                onChanged: (val) => themeProvider.toggleTheme(context),
+                              ),
                             ],
                           ),
-                          TextButton(
-                            onPressed: () {
+                          const Divider(height: 16, color: Color(0xFF1E293B)),
+
+                          // Biometric Switch
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(LucideIcons.fingerprint, size: 18, color: Color(0xFF00FF9D)),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Login Biometrik / Passkey',
+                                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: textPrimary),
+                                      ),
+                                      Text(
+                                        'Sidik jari & Face ID instan',
+                                        style: TextStyle(fontSize: 11, color: textSecondary),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Switch(
+                                value: _biometricEnabled,
+                                activeThumbColor: const Color(0xFF00FF9D),
+                                onChanged: (val) => setState(() => _biometricEnabled = val),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 16, color: Color(0xFF1E293B)),
+
+                          // About AUDIRA
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(LucideIcons.info, size: 18, color: Color(0xFF7928CA)),
+                            title: Text('Tentang AUDIRA', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: textPrimary)),
+                            subtitle: Text('Versi 2.4.0 • PT Audira Multimedia Digital', style: TextStyle(fontSize: 11, color: textSecondary)),
+                            trailing: const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
+                            onTap: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const PackageUpgradePage()),
+                                MaterialPageRoute(builder: (context) => const AboutPage()),
                               );
                             },
-                            child: const Text('Upgrade', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                           ),
                         ],
                       ),
@@ -259,162 +540,59 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
 
                     const SizedBox(height: 24),
 
-                    // Settings Group
-                    Text(
-                      'Preferensi & Info',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textPrimary),
-                    ),
-                    const SizedBox(height: 12),
-
-                    Material(
-                      color: cardBg,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: BorderSide(color: borderColor),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Column(
-                        children: [
-                          // Theme switch
-                          Consumer<ThemeProvider>(
-                            builder: (context, themeProvider, _) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      themeProvider.isDarkMode ? LucideIcons.moon : LucideIcons.sun,
-                                      color: const Color(0xFF0284C7),
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 14),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Mode Gelap',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: textPrimary,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            themeProvider.isDarkMode
-                                                ? 'Tema OLED Midnight aktif'
-                                                : 'Tema Slate Canvas aktif',
-                                            style: TextStyle(fontSize: 12, color: textSecondary),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Switch.adaptive(
-                                      value: themeProvider.isDarkMode,
-                                      activeTrackColor: const Color(0xFF0284C7),
-                                      onChanged: (val) => themeProvider.toggleTheme(),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                          Divider(height: 1, color: borderColor),
-                          InkWell(
-                            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(14)),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const AboutPage()),
-                              );
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                              child: Row(
-                                children: [
-                                  const Icon(LucideIcons.info, color: Color(0xFF0284C7), size: 20),
-                                  const SizedBox(width: 14),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Tentang AUDIRA',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: textPrimary,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Versi 2.4.0 • Audira Digital Network',
-                                          style: TextStyle(fontSize: 12, color: textSecondary),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(LucideIcons.chevronRight, size: 16, color: textSecondary),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 28),
-
-                    // Logout Button
+                    // Brutalist Logout Button
                     SizedBox(
                       width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Keluar dari Akun?'),
-                              content: const Text('Anda perlu masuk kembali untuk mengakses informasi tagihan dan layanan.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Batal'),
-                                ),
-                                FilledButton(
-                                  onPressed: () async {
-                                    Navigator.pop(context);
-                                    await AuthService.instance.logout();
-                                    if (context.mounted) {
-                                      Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        Routes.unifiedLogin,
-                                        (route) => false,
-                                      );
-                                    }
-                                  },
-                                  style: FilledButton.styleFrom(backgroundColor: Colors.red),
-                                  child: const Text('Keluar'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        icon: const Icon(LucideIcons.logOut, size: 16, color: Colors.red),
-                        label: const Text('Keluar dari Akun', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.red),
+                      child: ElevatedButton.icon(
+                        onPressed: _confirmLogout,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEF4444).withValues(alpha: 0.15),
+                          foregroundColor: const Color(0xFFEF4444),
+                          elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: Color(0xFFEF4444), width: 1.8),
+                          ),
+                        ),
+                        icon: const Icon(LucideIcons.logOut, size: 18),
+                        label: const Text(
+                          'KELUAR DARI AKUN',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.6,
+                          ),
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 32),
                   ],
                 ),
               ),
       ),
+    );
+  }
+
+  Widget _buildDeviceRow(String label, String value, IconData icon, Color textPrimary, Color textSecondary, {bool isMono = false}) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: const Color(0xFF00F0FF)),
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: textSecondary),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: textPrimary,
+            fontFamily: isMono ? 'monospace' : null,
+          ),
+        ),
+      ],
     );
   }
 }

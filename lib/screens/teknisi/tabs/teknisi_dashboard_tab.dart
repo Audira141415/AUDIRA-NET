@@ -448,7 +448,7 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                             ],
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 100),
                         ],
                       ),
                     ),
