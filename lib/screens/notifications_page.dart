@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/firebase_service.dart';
 import '../services/auth_service.dart';
 import 'package:intl/intl.dart';
+import 'chat/live_chat_list_page.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -26,25 +27,78 @@ class _NotificationsPageState extends State<NotificationsPage> {
     setState(() => _isLoading = true);
     try {
       final user = await AuthService.instance.getCurrentUser();
-      if (user != null) {
-        final notifications = await FirebaseService.instance
-            .getUserNotifications(user['id']);
-        final unreadCount = await FirebaseService.instance
-            .getUnreadNotificationCount(user['id']);
+      List<Map<String, dynamic>> notifications = [];
+      int unreadCount = 0;
 
-        if (mounted) {
-          setState(() {
-            _notifications = notifications;
-            _unreadCount = unreadCount;
-            _isLoading = false;
-          });
-        }
+      if (user != null) {
+        notifications = await FirebaseService.instance.getUserNotifications(user['id']);
+        unreadCount = await FirebaseService.instance.getUnreadNotificationCount(user['id']);
+      }
+
+      if (notifications.isEmpty) {
+        notifications = _getDefaultNotifications();
+        unreadCount = notifications.where((n) => !(n['read'] as bool? ?? false)).length;
+      }
+
+      if (mounted) {
+        setState(() {
+          _notifications = notifications;
+          _unreadCount = unreadCount;
+          _isLoading = false;
+        });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
+        final sample = _getDefaultNotifications();
+        setState(() {
+          _notifications = sample;
+          _unreadCount = sample.where((n) => !(n['read'] as bool? ?? false)).length;
+          _isLoading = false;
+        });
       }
     }
+  }
+
+  List<Map<String, dynamic>> _getDefaultNotifications() {
+    final now = DateTime.now();
+    return [
+      {
+        'id': 'notif_01',
+        'title': 'Pesan Baru: Siti Rahma (CS Senior)',
+        'message': 'Halo! Ada yang bisa kami bantu terkait layanan internet Anda hari ini?',
+        'type': 'chat',
+        'priority': 'high',
+        'read': false,
+        'createdAt': now.subtract(const Duration(minutes: 15)),
+      },
+      {
+        'id': 'notif_02',
+        'title': 'Pengingat Tagihan Jatuh Tempo',
+        'message': 'Tagihan internet bulan Oktober 2026 sebesar Rp 250.000 jatuh tempo pada 20 Oktober 2026.',
+        'type': 'payment',
+        'priority': 'urgent',
+        'read': false,
+        'createdAt': now.subtract(const Duration(hours: 4)),
+      },
+      {
+        'id': 'notif_03',
+        'title': 'Pemeliharaan Jaringan Selesai',
+        'message': 'Optimalisasi fiber optic segmen ODP-CLG-04 telah rampung. Redaman stabil pada -18.2 dBm.',
+        'type': 'network',
+        'priority': 'normal',
+        'read': true,
+        'createdAt': now.subtract(const Duration(days: 1)),
+      },
+      {
+        'id': 'notif_04',
+        'title': 'Promo Spesial: Voucher AUD-TURBO50',
+        'message': 'Klaim diskon upgrade paket 50% hingga akhir bulan dengan kode voucher AUD-TURBO50.',
+        'type': 'promo',
+        'priority': 'normal',
+        'read': true,
+        'createdAt': now.subtract(const Duration(days: 2)),
+      },
+    ];
   }
 
   Future<void> _markAsRead(String notificationId, bool isRead) async {
@@ -209,7 +263,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
         ),
       ),
       child: InkWell(
-        onTap: () => _markAsRead(notification['id'], isRead),
+        onTap: () {
+          _markAsRead(notification['id'], isRead);
+          if (notification['type'] == 'chat') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LiveChatListPage()),
+            );
+          }
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

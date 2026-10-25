@@ -20,12 +20,14 @@ class RealtimeService {
   final _ticketEventController = StreamController<Map<String, dynamic>>.broadcast();
   final _alertEventController = StreamController<Map<String, dynamic>>.broadcast();
   final _invoiceEventController = StreamController<Map<String, dynamic>>.broadcast();
+  final _chatEventController = StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<bool> get onConnectionChange => _connectionStateController.stream;
   Stream<Map<String, dynamic>> get onPaymentReceived => _paymentEventController.stream;
   Stream<Map<String, dynamic>> get onTicketUpdated => _ticketEventController.stream;
   Stream<Map<String, dynamic>> get onNetworkAlert => _alertEventController.stream;
   Stream<Map<String, dynamic>> get onInvoiceCreated => _invoiceEventController.stream;
+  Stream<Map<String, dynamic>> get chatStream => _chatEventController.stream;
 
   /// Connect to the Realtime Gateway
   void connect({String role = 'TECHNICIAN', String? userId}) {
@@ -105,6 +107,14 @@ class RealtimeService {
           final eventData = Map<String, dynamic>.from(data);
           LoggerService.info('📄 Realtime: Invoice created: ${eventData['invoiceNumber']}');
           _invoiceEventController.add(eventData);
+        }
+      });
+
+      _socket!.on('chat_message', (data) {
+        if (data is Map) {
+          final eventData = Map<String, dynamic>.from(data);
+          LoggerService.info('💬 Realtime: Chat message from ${eventData['senderName']}');
+          _chatEventController.add(eventData);
         }
       });
     } catch (e) {
@@ -190,5 +200,6 @@ class RealtimeService {
     _ticketEventController.close();
     _alertEventController.close();
     _invoiceEventController.close();
+    _chatEventController.close();
   }
 }

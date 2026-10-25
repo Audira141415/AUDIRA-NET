@@ -4,6 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../services/firebase_service.dart';
 import '../../../services/auth_service.dart';
 import '../chatbot_page.dart';
+import '../../chat/live_chat_list_page.dart';
+import '../../chat/live_chat_room_page.dart';
+import '../../../models/chat_model.dart';
+import '../../../services/live_chat_service.dart';
 
 /// Neo-Brutalist Cyber NOC Support & Incident Command for AUDIRA Customers
 class CustomerBantuanTab extends StatefulWidget {
@@ -412,6 +416,11 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
                   ),
                 ),
 
+                const SizedBox(height: 16),
+
+                // Live Chat Siaga (CS & Teknisi) Banner Card
+                _buildLiveChatBanner(isDark, cardBg, textPrimary, textSecondary),
+
                 const SizedBox(height: 20),
 
                 // Quick Contact Channels Bento
@@ -754,8 +763,183 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
               ],
             ),
           ),
-          const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
+          const SizedBox(width: 8),
+          // Direct Action to Chat with Technician
+          InkWell(
+            onTap: () {
+              final techRoom = ChatRoom(
+                id: 'room_tech_tkt9921',
+                title: 'Teknisi Lapangan - Rian Pratama',
+                type: 'customer_teknisi',
+                participants: ['customer', 'technician_01'],
+                lastMessage: 'Pengecekan ODP sedang berlangsung',
+                lastMessageTime: DateTime.now(),
+                ticketId: id,
+                status: 'in_field',
+              );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LiveChatRoomPage(room: techRoom),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF00FF9D).withValues(alpha: 0.15) : const Color(0xFF059669).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.messageSquare,
+                    size: 13,
+                    color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Chat Teknisi',
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLiveChatBanner(
+    bool isDark,
+    Color cardBg,
+    Color textPrimary,
+    Color textSecondary,
+  ) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LiveChatListPage()),
+        );
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0D1527) : const Color(0xFFEFF6FF),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0070F3),
+            width: 1.8,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? const Color(0xFF00F0FF).withValues(alpha: 0.18)
+                  : const Color(0xFF0070F3).withValues(alpha: 0.12),
+              offset: const Offset(4, 4),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF00F0FF), Color(0xFF0070F3)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white, width: 1.5),
+              ),
+              child: const Icon(LucideIcons.messagesSquare, color: Colors.white, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00FF9D).withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: const Color(0xFF00FF9D), width: 0.8),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(LucideIcons.circleDot, size: 10, color: Color(0xFF00FF9D)),
+                            SizedBox(width: 4),
+                            Text(
+                              'CS & TEKNISI SIAGA',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF00FF9D),
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Pusat Live Chat Real-Time',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: textPrimary,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Chat langsung dengan tim CS Siaga 24/7 & Teknisi penanganan tiket Anda.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0070F3),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: isDark ? Colors.white : Colors.black, width: 1.2),
+              ),
+              child: Icon(
+                LucideIcons.arrowRight,
+                size: 16,
+                color: isDark ? Colors.black : Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

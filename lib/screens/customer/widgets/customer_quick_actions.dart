@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../speed_test_page.dart';
 import '../wifi_management_page.dart';
 import '../bandwidth_usage_page.dart';
+import '../../chat/live_chat_list_page.dart';
 
 /// Bento Grid Akses Cepat Layanan Pelanggan berstandar Neo-Brutalism + Cyberpunk
 /// Menggunakan tata letak Bento asimetris dengan hard shadow dan visual card dinamis
@@ -59,7 +60,7 @@ class CustomerQuickActions extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                '4 MODUL ONLINE',
+                '5 MODUL ONLINE',
                 style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
@@ -323,6 +324,87 @@ class CustomerQuickActions extends StatelessWidget {
               ),
             ),
           ],
+        ),
+
+        const SizedBox(height: 12),
+
+        // Bento Card: Live Chat Siaga (CS & Teknisi Realtime)
+        _buildBentoCard(
+          isDark: isDark,
+          cardBg: cardBg,
+          borderColor: isDark ? const Color(0xFF00F0FF).withValues(alpha: 0.5) : const Color(0xFF0070F3),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const LiveChatListPage()),
+            );
+          },
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF00F0FF), Color(0xFF0070F3)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(LucideIcons.messagesSquare, size: 22, color: Colors.white),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Live Chat CS & Teknisi',
+                          style: TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'SIAGA',
+                            style: TextStyle(
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF00FF9D),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Respon langsung 24/7 & koordinasi teknisi tiket',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                LucideIcons.chevronRight,
+                size: 18,
+                color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0F172A),
+              ),
+            ],
+          ),
         ),
 
         const SizedBox(height: 12),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/dialogs.dart';
+import '../../services/notification_service.dart';
+import '../../services/live_chat_service.dart';
 import 'tabs/customer_beranda_tab.dart';
 import 'tabs/customer_tagihan_tab.dart';
 import 'tabs/customer_bantuan_tab.dart';
@@ -18,6 +20,15 @@ class CustomerHomePage extends StatefulWidget {
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    LiveChatService.instance.initialize();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService().checkAndTriggerScheduledAlerts();
+    });
+  }
 
   void navigateToIndex(int index) {
     setState(() {

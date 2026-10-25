@@ -14,6 +14,9 @@ import '../screens/teknisi/jadwal_teknisi_page.dart';
 import '../screens/teknisi/inventory_management_page.dart';
 import '../screens/teknisi/teknisi_home.dart';
 import '../screens/backend_integration_test.dart';
+import '../screens/chat/live_chat_list_page.dart';
+import '../screens/chat/live_chat_room_page.dart';
+import '../models/chat_model.dart';
 
 /// Arguments class for Payment page
 class PaymentArguments {
@@ -42,6 +45,8 @@ class Routes {
   static const String speedTest = '/customer/speed-test';
   static const String payment = '/customer/payment';
   static const String loyaltyRewards = '/customer/loyalty-rewards';
+  static const String liveChatList = '/chat/list';
+  static const String liveChatRoom = '/chat/room';
 
   // Admin routes
   static const String adminHome = '/admin';
@@ -109,7 +114,16 @@ class RouteGenerator {
       case Routes.loyaltyRewards:
         return MaterialPageRoute(builder: (_) => const LoyaltyRewardsPage());
 
-      // Admin routesRoute('Payment arguments required');
+      case Routes.liveChatList:
+        return MaterialPageRoute(builder: (_) => const LiveChatListPage());
+
+      case Routes.liveChatRoom:
+        if (args is ChatRoom) {
+          return MaterialPageRoute(
+            builder: (_) => LiveChatRoomPage(room: args),
+          );
+        }
+        return _errorRoute('ChatRoom arguments required');
 
       // Admin routes
       case Routes.adminHome:

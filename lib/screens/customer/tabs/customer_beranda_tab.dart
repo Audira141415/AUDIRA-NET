@@ -4,6 +4,7 @@ import '../../../services/firebase_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../utils/theme_provider.dart';
 import '../../notifications_page.dart';
+import '../../chat/live_chat_list_page.dart';
 import '../widgets/customer_hero_service_card.dart';
 import '../widgets/customer_quick_actions.dart';
 import '../widgets/customer_maintenance_card.dart';
@@ -231,7 +232,44 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const ThemeToggleIconButton(),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: 2),
+                          // Live Chat Button with Green Online Badge
+                          Stack(
+                            children: [
+                              IconButton(
+                                icon: const Icon(LucideIcons.messageSquare, size: 20),
+                                color: textPrimary,
+                                tooltip: 'Live Chat Siaga 24/7',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LiveChatListPage(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              Positioned(
+                                top: 9,
+                                right: 9,
+                                child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: const Color(0xFF00FF9D),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF00FF9D).withValues(alpha: 0.8),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 2),
                           Stack(
                             children: [
                               IconButton(

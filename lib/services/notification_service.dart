@@ -200,6 +200,107 @@ class NotificationService {
     );
   }
 
+  /// Tampilkan notifikasi pesan live chat baru (Customer / Teknisi / CS)
+  Future<void> showChatNotification({
+    required String senderName,
+    required String message,
+    required String roomId,
+    String? senderRole,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'chat_messages',
+      'Pesan Obrolan Langsung',
+      channelDescription: 'Notifikasi pesan chat langsung Customer, CS, dan Teknisi',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    final roleLabel = senderRole == 'technician'
+        ? '[Teknisi Lapangan]'
+        : senderRole == 'cs'
+            ? '[Customer Support]'
+            : '';
+
+    await _notifications.show(
+      DateTime.now().millisecond,
+      'Pesan Baru: $senderName $roleLabel',
+      message,
+      details,
+      payload: 'chat:$roomId',
+    );
+  }
+
+  /// Tampilkan notifikasi promo khusus dan penawaran
+  Future<void> showPromoAlertNotification({
+    required String title,
+    required String promoCode,
+    required String discount,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'promo_alerts',
+      'Promo & Penawaran',
+      channelDescription: 'Notifikasi promo dan upgrade bandwidth internet',
+      importance: Importance.defaultImportance,
+      priority: Priority.defaultPriority,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _notifications.show(
+      4,
+      '🎉 $title',
+      'Gunakan kode $promoCode untuk diskon $discount. Berlaku hari ini!',
+      details,
+      payload: 'promo:$promoCode',
+    );
+  }
+
+  /// Routine otomatis mengecek tagihan, jadwal maintenance & broadcast aktif
+  Future<void> checkAndTriggerScheduledAlerts() async {
+    // 1. Tagihan aktif simulasi jatuh tempo bulan berjalan
+    final now = DateTime.now();
+    final dueDate = DateTime(now.year, now.month, 20);
+    final daysUntilDue = dueDate.difference(now).inDays;
+
+    if (daysUntilDue <= 3 && daysUntilDue >= 0) {
+      await showBillReminderNotification(
+        month: _getMonthName(now.month),
+        dueDate: '${dueDate.day} ${_getMonthName(now.month)} ${dueDate.year}',
+        amount: 250000,
+      );
+    }
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+    ];
+    return (month >= 1 && month <= 12) ? months[month - 1] : 'Bulan Ini';
+  }
+
   Future<void> cancelAllNotifications() async {
     await _notifications.cancelAll();
   }
