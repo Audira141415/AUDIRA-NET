@@ -40,17 +40,33 @@ Aplikasi AUDIRA NET mengadopsi standar desain mutakhir berkarakter **Neo-Brutali
 - **Bento Box Grid Layout** dengan bayangan taktil tegas (`offset: Offset(4, 4)`, `blurRadius: 0`).
 - **Floating Cyber-Capsule Navigation Dock** melayang di seluruh portal pengguna.
 
-| 01. Cyber Login | 02. Beranda HUD & Arc | 03. Bento Invoicing |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/01_login_cyberpunk_dark.png" width="230"/> | <img src="docs/screenshots/02_customer_beranda_hud.png" width="230"/> | <img src="docs/screenshots/03_customer_tagihan_bento.png" width="230"/> |
+### 🔹 Kategori 1: Autentikasi Terpadu & Multi-Role Gateway
 
-| 04. NOC Incident Center | 05. Profil & Hardware Bento | 06. Floating Teknisi Dock |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/04_customer_bantuan_noc.png" width="230"/> | <img src="docs/screenshots/05_customer_profil_hardware.png" width="230"/> | <img src="docs/screenshots/08_teknisi_dashboard_capsule.png" width="230"/> |
+| 01. Unified Cyber Login Portal | 06. Neo-Brutalist Logout Modal |
+| :---: | :---: |
+| <img src="docs/screenshots/01_login_cyberpunk_dark.png" alt="Unified Cyber Login" width="360"/> | <img src="docs/screenshots/06_customer_logout_dialog.png" alt="Logout Modal" width="360"/> |
+| **Multi-Role Selector (Pelanggan / Teknisi / Admin)**<br/>Status telemetri gateway online, Passkey auth, dan quick login. | **Konfirmasi Keamanan Berkontras Tinggi**<br/>Pemberian peringatan sesi berakhir dengan pencegahan klik tidak disengaja. |
 
-| 07. Live Chat Center | 08. Live Chat CS Dialogue | 09. Push Notification Center |
+### 🔹 Kategori 2: Portal Pelanggan & Pengalaman Penagihan (Bento Invoicing)
+
+| 02. Beranda HUD & Arc Gauge | 03. Bento Invoicing & QRIS Rails | 05. Profil Akun & ONT Hardware | 07. Beranda Daytime (Light Mode) |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/02_customer_beranda_hud.png" alt="Customer Beranda HUD" width="230"/> | <img src="docs/screenshots/03_customer_tagihan_bento.png" alt="Customer Tagihan Bento" width="230"/> | <img src="docs/screenshots/05_customer_profil_hardware.png" alt="Customer Profil Hardware" width="230"/> | <img src="docs/screenshots/07_customer_beranda_light.png" alt="Customer Beranda Light" width="230"/> |
+| **Cyber Command HUD**<br/>Speedometer Arc, Live RX/TX bandwith, GPON Core telemetry, dan shortcut bento. | **Manajemen Tagihan Transparan**<br/>Rincian biaya itemized, integrasi QRIS Instan, BCA VA, Mandiri VA, dan e-wallet. | **Diagnostik Perangkat Pelanggan**<br/>ID digital verified, spesifikasi ONT Wi-Fi 6, pemantauan redaman optik (-19.4 dBm). | **Mode Terang Neo-Brutalism**<br/>Tampilan kontras tinggi untuk penggunaan di bawah sinar matahari langsung. |
+
+### 🔹 Kategori 3: Pusat Komunikasi Live Chat 24/7 & Notifikasi Cerdas
+
+| 10. Pusat Live Chat Center | 11. Live Chat CS Siaga 24/7 | 12. Live Chat Teknisi Lapangan | 13. Push Notification & Alert Center |
+| :---: | :---: | :---: | :---: |
+| <img src="docs/screenshots/10_live_chat_center.png" alt="Live Chat Center" width="230"/> | <img src="docs/screenshots/11_live_chat_cs_dialogue.png" alt="Live Chat CS Dialogue" width="230"/> | <img src="docs/screenshots/12_live_chat_teknisi_field.png" alt="Live Chat Teknisi Field" width="230"/> | <img src="docs/screenshots/13_push_notifications_center.png" alt="Push Notification Center" width="230"/> |
+| **Kotak Masuk Multi-Kanal**<br/>Pemisahan ruang Customer Support vs Teknisi Lapangan, unread badge pill, enkripsi E2E. | **Dialog Interaktif Real-Time**<br/>Balasan pintar otomatis CS Senior, chip aksi instan (*quick replies*), dan nomor hotline darurat. | **Koordinasi Tiket Gangguan ODP**<br/>Pembaruan langsung estimasi kedatangan (ETA) teknisi & nilai redaman optik lapangan. | **Pusat Peringatan Terjadwal**<br/>Pengingat jatuh tempo H-3 otomatis, pesan chat masuk, notifikasi ODP maintenance, dan promo loyalitas. |
+
+### 🔹 Kategori 4: Teknisi Lapangan & Network Operation Center (NOC)
+
+| 04. Customer Bantuan & NOC Telemetry | 08. Floating Capsule Dock Teknisi | 09. Profil Teknisi & Evaluasi KPI |
 | :---: | :---: | :---: |
-| <img src="docs/screenshots/10_live_chat_center.png" width="230"/> | <img src="docs/screenshots/11_live_chat_cs_dialogue.png" width="230"/> | <img src="docs/screenshots/13_push_notifications_center.png" width="230"/> |
+| <img src="docs/screenshots/04_customer_bantuan_noc.png" alt="Customer Bantuan NOC" width="240"/> | <img src="docs/screenshots/08_teknisi_dashboard_capsule.png" alt="Teknisi Dashboard Capsule" width="240"/> | <img src="docs/screenshots/09_teknisi_profil_dark.png" alt="Teknisi Profil Dark" width="240"/> |
+| **NOC Health & Hotline 24/7**<br/>Status Core Backbone 100%, latensi core 11ms, SLA 99.98%, akses AI *"Tanya Audi"*, dan tombol cepat chat teknisi tiket. | **Operasional Lapangan Digital**<br/>Floating Capsule Dock (Tugas, Absen, Peta, Profil), GPS selfie check-in, dan daftar penugasan SPK live. | **Evaluasi Kinerja & Inventori**<br/>Metrik KPI real-time (Tiket Selesai, Instalasi Baru, Rating Pelanggan, Speed Response), scanner barcode ONT. |
 
 👉 *Dokumentasi visual lengkap 13 tangkapan layar resolusi penuh dapat dilihat di [docs/screenshots/README.md](docs/screenshots/README.md).*
 
