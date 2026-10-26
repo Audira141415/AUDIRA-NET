@@ -7,7 +7,6 @@ import '../chatbot_page.dart';
 import '../../chat/live_chat_list_page.dart';
 import '../../chat/live_chat_room_page.dart';
 import '../../../models/chat_model.dart';
-import '../../../services/live_chat_service.dart';
 
 /// Neo-Brutalist Cyber NOC Support & Incident Command for AUDIRA Customers
 class CustomerBantuanTab extends StatefulWidget {
@@ -70,6 +69,16 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
 
   List<Map<String, dynamic>> _getSampleTickets() {
     return [
+      {
+        'id': 'TKT-2026-1042',
+        'title': 'Optimasi Redaman Sinyal ONT Drop Cable',
+        'status': 'in_progress',
+        'category': 'Sinyal & Kabel',
+        'createdAt': '26 Okt 2026, 06:40 WIB',
+        'technician': 'Ahmad Fauzi (NOC-FIELD-02)',
+        'slaRemaining': '35 Menit',
+        'step': 2,
+      },
       {
         'id': 'TKT-2026-9921',
         'title': 'Pemeriksaan Rutin Redaman Optik ODP',
@@ -717,105 +726,169 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
           width: 1.2,
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      id,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF00F0FF),
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: (isClosed ? const Color(0xFF00FF9D) : const Color(0xFFFFB800)).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        isClosed ? 'SELESAI' : 'PROSES NOC',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w900,
-                          color: isClosed ? const Color(0xFF00FF9D) : const Color(0xFFFFB800),
+                    Row(
+                      children: [
+                        Text(
+                          id,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF00F0FF),
+                            fontFamily: 'monospace',
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: (isClosed ? const Color(0xFF00FF9D) : const Color(0xFFFFB800)).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            isClosed ? 'SELESAI' : 'PROSES NOC',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                              color: isClosed ? const Color(0xFF00FF9D) : const Color(0xFFFFB800),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      title,
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textPrimary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: textPrimary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Direct Action to Chat with Technician
-          InkWell(
-            onTap: () {
-              final techRoom = ChatRoom(
-                id: 'room_tech_tkt9921',
-                title: 'Teknisi Lapangan - Rian Pratama',
-                type: 'customer_teknisi',
-                participants: ['customer', 'technician_01'],
-                lastMessage: 'Pengecekan ODP sedang berlangsung',
-                lastMessageTime: DateTime.now(),
-                ticketId: id,
-                status: 'in_field',
-              );
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LiveChatRoomPage(room: techRoom),
-                ),
-              );
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF00FF9D).withValues(alpha: 0.15) : const Color(0xFF059669).withValues(alpha: 0.1),
+              ),
+              const SizedBox(width: 8),
+              // Direct Action to Chat with Technician
+              InkWell(
+                onTap: () {
+                  final techRoom = ChatRoom(
+                    id: 'room_tech_tkt9921',
+                    title: 'Teknisi Lapangan - Rian Pratama',
+                    type: 'customer_teknisi',
+                    participants: ['customer', 'technician_01'],
+                    lastMessage: 'Pengecekan ODP sedang berlangsung',
+                    lastMessageTime: DateTime.now(),
+                    ticketId: id,
+                    status: 'in_field',
+                  );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LiveChatRoomPage(room: techRoom),
+                    ),
+                  );
+                },
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
-                  width: 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF00FF9D).withValues(alpha: 0.15) : const Color(0xFF059669).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        LucideIcons.messageSquare,
+                        size: 13,
+                        color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Chat Teknisi',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            ],
+          ),
+          if (!isClosed) ...[
+            const SizedBox(height: 10),
+            // SLA Progress Tracker Bar (Full width across card)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    LucideIcons.messageSquare,
-                    size: 13,
-                    color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(LucideIcons.timer, size: 12, color: Color(0xFFFFB800)),
+                          const SizedBox(width: 5),
+                          Text(
+                            'SLA ESTIMASI: ${ticket['slaRemaining'] ?? '45 Menit'}',
+                            style: const TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFFFFB800),
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        ticket['technician'] ?? 'Tim Lapangan',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: textSecondary,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Chat Teknisi',
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w800,
-                      color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
-                    ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      _buildSlaStepDot('Diterima', true, isDark),
+                      _buildSlaConnector(true),
+                      _buildSlaStepDot('NOC', true, isDark),
+                      _buildSlaConnector(true),
+                      _buildSlaStepDot('Teknisi', true, isDark),
+                      _buildSlaConnector(false),
+                      _buildSlaStepDot('Selesai', false, isDark),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -940,6 +1013,62 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSlaStepDot(String label, bool isDone, bool isDark) {
+    final activeColor = const Color(0xFF00FF9D);
+    final inactiveColor = isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1);
+
+    return Column(
+      children: [
+        Container(
+          width: 14,
+          height: 14,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isDone ? activeColor : inactiveColor,
+            border: Border.all(
+              color: isDone ? activeColor : inactiveColor,
+              width: 1.5,
+            ),
+            boxShadow: isDone
+                ? [
+                    BoxShadow(
+                      color: activeColor.withValues(alpha: 0.5),
+                      blurRadius: 4,
+                    ),
+                  ]
+                : null,
+          ),
+          child: isDone
+              ? const Icon(LucideIcons.check, size: 9, color: Colors.black)
+              : null,
+        ),
+        const SizedBox(height: 3),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 8.5,
+            fontWeight: isDone ? FontWeight.w800 : FontWeight.w500,
+            color: isDone
+                ? (isDark ? Colors.white : const Color(0xFF0F172A))
+                : (isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSlaConnector(bool isDone) {
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.only(bottom: 12),
+        color: isDone
+            ? const Color(0xFF00FF9D)
+            : const Color(0xFF334155).withValues(alpha: 0.4),
       ),
     );
   }

@@ -8,6 +8,7 @@ import '../../../utils/theme_provider.dart';
 import '../../../config/routes.dart';
 import '../../about_page.dart';
 import '../package_upgrade_page.dart';
+import '../loyalty_rewards_page.dart';
 
 /// Neo-Brutalist Cyber Profile & Device Hub for AUDIRA Customers
 class CustomerProfilTab extends StatefulWidget {
@@ -391,6 +392,117 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                       ),
                     ),
 
+                    const SizedBox(height: 16),
+
+                    // Loyalty Rewards Card
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isDark
+                              ? [const Color(0xFF1E1435), const Color(0xFF0F172A)]
+                              : [const Color(0xFFF3E8FF), Colors.white],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFA855F7).withValues(alpha: 0.12),
+                            offset: const Offset(4, 4),
+                            blurRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFFA855F7).withValues(alpha: 0.2),
+                              border: Border.all(color: const Color(0xFFA855F7), width: 1.5),
+                            ),
+                            child: const Icon(LucideIcons.award, size: 22, color: Color(0xFFA855F7)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      'AUDIRA LOYALTY',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w900,
+                                        color: isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED),
+                                        fontFamily: 'monospace',
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFFB800).withValues(alpha: 0.18),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Text(
+                                        'GOLD VIP',
+                                        style: TextStyle(
+                                          fontSize: 8.5,
+                                          fontWeight: FontWeight.w900,
+                                          color: Color(0xFFFFB800),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '1.250 Poin Terkumpul',
+                                  style: TextStyle(
+                                    fontSize: 14.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: textPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  'Tukar diskon tagihan & booster kecepatan',
+                                  style: TextStyle(fontSize: 10.5, color: textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoyaltyRewardsPage()),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFA855F7),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Redeem ➔',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                     const SizedBox(height: 18),
 
                     // Hardware & Network Bento
@@ -517,6 +629,44 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                                 onChanged: (val) => setState(() => _biometricEnabled = val),
                               ),
                             ],
+                          ),
+                          const Divider(height: 16, color: Color(0xFF1E293B)),
+
+                          // E-Contract Viewer
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(LucideIcons.fileText, size: 18, color: Color(0xFF00F0FF)),
+                            title: Text('Kontrak Layanan Digital (E-Contract)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: textPrimary)),
+                            subtitle: Text('No: CTR-2026-0889-FIBER • Ditandatangani Digital', style: TextStyle(fontSize: 11, color: textSecondary)),
+                            trailing: const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Kontrak digital resmi tersimpan aman & terenkripsi.'),
+                                  backgroundColor: Color(0xFF0284C7),
+                                ),
+                              );
+                            },
+                          ),
+                          const Divider(height: 16, color: Color(0xFF1E293B)),
+
+                          // Active Sessions Manager
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(LucideIcons.shieldCheck, size: 18, color: Color(0xFF00FF9D)),
+                            title: Text('Sesi Perangkat Aktif', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: textPrimary)),
+                            subtitle: Text('2 Perangkat Aktif • Android 14 (Sesi Ini)', style: TextStyle(fontSize: 11, color: textSecondary)),
+                            trailing: TextButton(
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Sesi di perangkat lain berhasil diputuskan.'),
+                                    backgroundColor: Color(0xFF059669),
+                                  ),
+                                );
+                              },
+                              child: const Text('Logout Lain', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFFEF4444))),
+                            ),
                           ),
                           const Divider(height: 16, color: Color(0xFF1E293B)),
 

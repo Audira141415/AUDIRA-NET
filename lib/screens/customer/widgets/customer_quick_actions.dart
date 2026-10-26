@@ -4,6 +4,7 @@ import '../speed_test_page.dart';
 import '../wifi_management_page.dart';
 import '../bandwidth_usage_page.dart';
 import '../../chat/live_chat_list_page.dart';
+import 'customer_network_doctor_dialog.dart';
 
 /// Bento Grid Akses Cepat Layanan Pelanggan berstandar Neo-Brutalism + Cyberpunk
 /// Menggunakan tata letak Bento asimetris dengan hard shadow dan visual card dinamis
@@ -60,7 +61,7 @@ class CustomerQuickActions extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
-                '5 MODUL ONLINE',
+                '6 MODUL ONLINE',
                 style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
@@ -71,6 +72,112 @@ class CustomerQuickActions extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
+
+        // Bento Card 0: Dokter Jaringan 1-Tap (Automated Self-Care Diagnostics)
+        _buildBentoCard(
+          isDark: isDark,
+          cardBg: cardBg,
+          borderColor: isDark
+              ? const Color(0xFF00F0FF).withValues(alpha: 0.6)
+              : const Color(0xFF0284C7),
+          onTap: () {
+            CustomerNetworkDoctorDialog.show(context);
+          },
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF00F0FF), Color(0xFF0284C7)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF00F0FF), width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF00F0FF).withValues(alpha: 0.3),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                child: const Icon(LucideIcons.stethoscope, size: 24, color: Colors.black87),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Dokter Jaringan 1-Tap',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF00F0FF).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: const Color(0xFF00F0FF).withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: const Text(
+                            'SELF-CARE',
+                            style: TextStyle(
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF00F0FF),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Uji redaman optik TR-069, PPPoE gateway & auto-healing',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF162032) : const Color(0xFFE0F2FE),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF00F0FF).withValues(alpha: 0.3) : const Color(0xFFBAE6FD),
+                  ),
+                ),
+                child: Text(
+                  'UJI ➔',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
         const SizedBox(height: 12),
 
         // Bento Card 1: Wide Router & Wi-Fi Management (2-col wide)

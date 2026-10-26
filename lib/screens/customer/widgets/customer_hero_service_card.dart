@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../utils/app_theme.dart';
+import '../package_upgrade_page.dart';
 
 /// Hero Card Layanan Utama berstandar Neo-Brutalism + Cyberpunk Studio
 /// Dilengkapi Speedometer Arc CustomPainter, telemetri fiber optik dBm, dan tagihan bulanan
@@ -294,6 +295,114 @@ class CustomerHeroServiceCard extends StatelessWidget {
 
             const SizedBox(height: 8),
 
+            // FUP Quota Telemetry Progress Indicator
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF05070D) : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              LucideIcons.activity,
+                              size: 13,
+                              color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'KONSUMSI KUOTA FUP',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w800,
+                                color: textSecondary,
+                                fontFamily: 'monospace',
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'FUP AMAN • 34.2%',
+                            style: TextStyle(
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF10B981),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 7),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Container(
+                        height: 6,
+                        width: double.infinity,
+                        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: FractionallySizedBox(
+                            widthFactor: 0.342,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Color(0xFF00F0FF), Color(0xFF0070F3)],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '342 GB Terpakai',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: textPrimary,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                        Text(
+                          'Total 1.000 GB (Sisa 658 GB)',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: textSecondary,
+                            fontFamily: 'monospace',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
             // Middle 3 Telemetry Metrics (Pills)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -389,26 +498,57 @@ class CustomerHeroServiceCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
-                    onPressed: onPayPressed,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? AppTheme.signalBlue : const Color(0xFF0F172A),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                          color: isDark ? AppTheme.neonCyan : Colors.black,
-                          width: 1.5,
+                  Row(
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PackageUpgradePage(),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                          side: BorderSide(
+                            color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                            width: 1.2,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        icon: const Icon(LucideIcons.zap, size: 13),
+                        label: const Text(
+                          'Booster',
+                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800),
                         ),
                       ),
-                    ),
-                    icon: const Icon(LucideIcons.creditCard, size: 15),
-                    label: const Text(
-                      'Bayar Tagihan',
-                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
-                    ),
+                      const SizedBox(width: 8),
+                      ElevatedButton.icon(
+                        onPressed: onPayPressed,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark ? AppTheme.signalBlue : const Color(0xFF0F172A),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                              color: isDark ? AppTheme.neonCyan : Colors.black,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                        icon: const Icon(LucideIcons.creditCard, size: 14),
+                        label: const Text(
+                          'Bayar Tagihan',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

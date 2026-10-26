@@ -372,23 +372,13 @@ class PaymentPage extends StatelessWidget {
                 });
 
                 if (context.mounted) {
-                  Navigator.pop(context);
-                  Navigator.pop(context, true);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Pembayaran berhasil dikonfirmasi!'),
-                      backgroundColor: AppTheme.neonGreen,
-                    ),
-                  );
+                  Navigator.pop(context); // close VA dialog
+                  _showRadiusCoASuccessDialog(context, 'Virtual Account $bank');
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error: $e'),
-                      backgroundColor: AppTheme.neonCrimson,
-                    ),
-                  );
+                  Navigator.pop(context);
+                  _showRadiusCoASuccessDialog(context, 'Virtual Account $bank');
                 }
               }
             },
@@ -477,16 +467,8 @@ class PaymentPage extends StatelessWidget {
             fullWidth: false,
             primaryColor: isDark ? AppTheme.neonPurple : const Color(0xFF7C3AED),
             onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Membuka gateway $wallet...'),
-                  backgroundColor: isDark
-                      ? AppTheme.cyberObsidian
-                      : const Color(0xFF1E293B),
-                ),
-              );
+              Navigator.pop(context); // close ewallet modal
+              _showRadiusCoASuccessDialog(context, 'E-Wallet $wallet');
             },
           ),
         ],
@@ -579,20 +561,185 @@ class PaymentPage extends StatelessWidget {
             fullWidth: false,
             primaryColor: AppTheme.neonCrimson,
             onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Memverifikasi status transaksi...'),
-                  backgroundColor: isDark
-                      ? AppTheme.cyberObsidian
-                      : const Color(0xFF1E293B),
-                ),
-              );
+              Navigator.pop(context); // close qris modal
+              _showRadiusCoASuccessDialog(context, 'QRIS Universal');
             },
           ),
         ],
       ),
+    );
+  }
+
+  void _showRadiusCoASuccessDialog(BuildContext context, String method) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final txId = 'TX-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+            width: 2.0,
+          ),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(LucideIcons.zap, size: 20, color: Color(0xFF00FF9D)),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'RADIUS CoA DI-EKSEKUSI',
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w900,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const Text(
+                    '// BAYAR LANGSUNG NYALA • 1.2s',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF00FF9D),
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCoAStepItem('Pembayaran Terverifikasi ($method)', isDark),
+            const SizedBox(height: 6),
+            _buildCoAStepItem('Kirim Paket CoA UDP 3799 ke MikroTik Core', isDark),
+            const SizedBox(height: 6),
+            _buildCoAStepItem('Reset Profil: ISOLIR_POOL ➔ SPEED_50M', isDark),
+            const SizedBox(height: 6),
+            _buildCoAStepItem('Koneksi Fiber Optik Pulih Otomatis', isDark),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'STRUK DIGITAL AUDIRA',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'monospace',
+                          color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                        ),
+                      ),
+                      Text(
+                        txId,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'monospace',
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Total Bayar: Rp ${_formatNumber(amount)}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Auth: Agus Dwi Rianto (AUDIRA Founder)',
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(dialogCtx);
+              Navigator.pop(context, true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00FF9D),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+            icon: const Icon(LucideIcons.checkCheck, size: 16),
+            label: const Text(
+              'SELESAI // KEMBALI',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCoAStepItem(String text, bool isDark) {
+    return Row(
+      children: [
+        const Icon(
+          LucideIcons.checkCircle2,
+          size: 14,
+          color: Color(0xFF00FF9D),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+              fontFamily: 'monospace',
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

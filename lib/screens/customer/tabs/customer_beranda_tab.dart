@@ -8,6 +8,7 @@ import '../../chat/live_chat_list_page.dart';
 import '../widgets/customer_hero_service_card.dart';
 import '../widgets/customer_quick_actions.dart';
 import '../widgets/customer_maintenance_card.dart';
+import '../widgets/customer_network_doctor_dialog.dart';
 
 class CustomerBerandaTab extends StatefulWidget {
   final Function(int) onNavigateToTab;
@@ -312,56 +313,78 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
 
                 const SizedBox(height: 12),
 
-                // Gateway Telemetry HUD Strip
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
+                // Interactive Gateway Telemetry HUD Strip (Tap to launch Network Doctor)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      CustomerNetworkDoctorDialog.show(context);
+                    },
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isDark
-                          ? const Color(0xFF1E293B)
-                          : const Color(0xFFCBD5E1),
-                      width: 1.2,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFF00F0FF),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF00F0FF).withValues(alpha: 0.8),
-                              blurRadius: 5,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF00F0FF).withValues(alpha: 0.3)
+                              : const Color(0xFFCBD5E1),
+                          width: 1.2,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFF00F0FF),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF00F0FF).withValues(alpha: 0.8),
+                                  blurRadius: 5,
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'GPON CORE',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                              fontFamily: 'monospace',
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              ' // -19.4 dBm // LATENSI 11ms // POP: JKT-01',
+                              style: TextStyle(
+                                fontSize: 9.5,
+                                fontWeight: FontWeight.w600,
+                                color: textSecondary,
+                                fontFamily: 'monospace',
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '[ DETAIL ➔ ]',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'GPON CORE',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w900,
-                          color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
-                          fontFamily: 'monospace',
-                          letterSpacing: 0.6,
-                        ),
-                      ),
-                      Text(
-                        ' // -19.4 dBm // LATENSI 11ms // POP: JKT-01',
-                        style: TextStyle(
-                          fontSize: 9.5,
-                          fontWeight: FontWeight.w600,
-                          color: textSecondary,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
 
