@@ -557,7 +557,7 @@ class CustomerHeroServiceCard extends StatelessWidget {
 
             // Bottom Billing Bar
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
                 border: Border(
@@ -567,23 +567,30 @@ class CustomerHeroServiceCard extends StatelessWidget {
                   ),
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isCompact = constraints.maxWidth < 355;
+
+                  final billInfoWidget = Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            hasUnpaid ? 'Tagihan Berjalan' : 'Status Tagihan',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: textSecondary,
+                          Flexible(
+                            child: Text(
+                              hasUnpaid ? 'Tagihan Berjalan' : 'Status Tagihan',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                color: textSecondary,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 5),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                             decoration: BoxDecoration(
@@ -599,7 +606,7 @@ class CustomerHeroServiceCard extends StatelessWidget {
                             child: Text(
                               hasUnpaid ? 'Sisa $remainingDays Hari' : 'LUNAS',
                               style: GoogleFonts.jetBrainsMono(
-                                fontSize: 9,
+                                fontSize: 8.5,
                                 fontWeight: FontWeight.w800,
                                 color: hasUnpaid ? const Color(0xFF10B981) : const Color(0xFF00FF9D),
                               ),
@@ -608,70 +615,108 @@ class CustomerHeroServiceCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        _formatCurrency(monthlyFee),
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w900,
-                          color: textPrimary,
-                          letterSpacing: -0.6,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _formatCurrency(monthlyFee),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: textPrimary,
+                            letterSpacing: -0.5,
+                          ),
                         ),
                       ),
                     ],
-                  ),
-                  Row(
+                  );
+
+                  final boosterButton = OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PackageUpgradePage(),
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                      side: BorderSide(
+                        color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                        width: 1.2,
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    icon: const Icon(LucideIcons.zap, size: 12),
+                    label: Text(
+                      'Booster',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 10.5, fontWeight: FontWeight.w800),
+                    ),
+                  );
+
+                  final payButton = ElevatedButton.icon(
+                    onPressed: onPayPressed,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark ? AppTheme.signalBlue : const Color(0xFF0F172A),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: BorderSide(
+                          color: isDark ? AppTheme.neonCyan : Colors.black,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    icon: const Icon(LucideIcons.creditCard, size: 13),
+                    label: Text(
+                      hasUnpaid ? 'Bayar' : 'Detail',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 11, fontWeight: FontWeight.w800),
+                    ),
+                  );
+
+                  if (isCompact) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        billInfoWidget,
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(child: boosterButton),
+                            const SizedBox(width: 8),
+                            Expanded(flex: 2, child: payButton),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const PackageUpgradePage(),
-                            ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
-                          side: BorderSide(
-                            color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
-                            width: 1.2,
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        icon: const Icon(LucideIcons.zap, size: 13),
-                        label: Text(
-                          'Booster',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 11.5, fontWeight: FontWeight.w800),
-                        ),
-                      ),
+                      Expanded(child: billInfoWidget),
                       const SizedBox(width: 8),
-                      ElevatedButton.icon(
-                        onPressed: onPayPressed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark ? AppTheme.signalBlue : const Color(0xFF0F172A),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(
-                              color: isDark ? AppTheme.neonCyan : Colors.black,
-                              width: 1.5,
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(LucideIcons.creditCard, size: 14),
-                        label: Text(
-                          hasUnpaid ? 'Bayar Tagihan' : 'Detail Tagihan',
-                          style: GoogleFonts.plusJakartaSans(fontSize: 12, fontWeight: FontWeight.w800),
-                        ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          boosterButton,
+                          const SizedBox(width: 6),
+                          payButton,
+                        ],
                       ),
                     ],
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ],
