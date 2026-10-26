@@ -1,3 +1,2 @@
 @echo off
-cd /d "%~dp0..\"
-call "%~dp0..\start_app.bat" %*
+call "%~dp0start_app.bat" %*
