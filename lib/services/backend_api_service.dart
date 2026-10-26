@@ -266,4 +266,13 @@ class BackendApiService {
 
     return await get(ApiConfig.revenue, queryParams: queryParams);
   }
+
+  /// Get real-time customer connection telemetry (optical signal, FUP, connection, maintenance)
+  Future<Map<String, dynamic>> getCustomerTelemetry({String? customerId}) async {
+    final queryParams = <String, String>{};
+    if (customerId != null && customerId.isNotEmpty) {
+      queryParams['customerId'] = customerId;
+    }
+    return await get(ApiConfig.customerTelemetry, queryParams: queryParams.isNotEmpty ? queryParams : null);
+  }
 }
