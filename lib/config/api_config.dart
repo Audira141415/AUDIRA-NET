@@ -36,9 +36,10 @@ class ApiConfig {
   // Settings
   static const String settings = '/settings';
 
-  // Timeouts
-  static const Duration connectionTimeout = Duration(seconds: 30);
-  static const Duration receiveTimeout = Duration(seconds: 30);
+  // Timeouts (Optimized for responsive mobile UX)
+  static const Duration connectionTimeout = Duration(seconds: 6);
+  static const Duration receiveTimeout = Duration(seconds: 6);
+
 
   // Headers
   static Map<String, String> get defaultHeaders => {

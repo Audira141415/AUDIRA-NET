@@ -102,8 +102,12 @@ class FirebaseService {
 
   Future<Map<String, dynamic>?> getCustomerById(String customerId) async {
     try {
-      final doc = await customersCollection.doc(customerId).get();
+      final doc = await customersCollection
+          .doc(customerId)
+          .get()
+          .timeout(const Duration(milliseconds: 2500));
       if (!doc.exists) return null;
+
 
       return {'id': doc.id, ...doc.data() as Map<String, dynamic>};
     } catch (e) {
@@ -173,7 +177,9 @@ class FirebaseService {
       final querySnapshot = await customersCollection
           .where('userId', isEqualTo: userId)
           .limit(1)
-          .get();
+          .get()
+          .timeout(const Duration(milliseconds: 2500));
+
 
       if (querySnapshot.docs.isEmpty) {
         return getDefaultCustomerData(userId: userId);
