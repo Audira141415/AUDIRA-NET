@@ -54,18 +54,17 @@ set "TARGET_EMU="
 set "ISP_FOUND=0"
 
 for /f "tokens=1" %%d in ('adb devices ^| findstr /R "emulator-[0-9]*"') do (
-    for /f "tokens=1" %%a in ('adb -s %%d emu avd name 2^>nul ^| findstr /V /I "^OK"') do (
-        if /I "%%a"=="ISP" (
-            set "TARGET_EMU=%%d"
-            set "ISP_FOUND=1"
-            echo  - [TERPILIH] Menemukan Emulator ISP aktif pada ID: %%d [AVD: ISP]
-        ) else (
-            echo  - [SKIP] Mengabaikan %%d [AVD: %%a - Proyek Lain, Jangan Digunakan]
-        )
+    adb -s %%d emu avd name 2>nul | findstr /I "^ISP" >nul 2>nul
+    if !ERRORLEVEL! EQU 0 (
+        set "TARGET_EMU=%%d"
+        set "ISP_FOUND=1"
+        echo  - [TERPILIH] Menemukan Emulator ISP aktif pada ID: %%d [AVD: ISP]
+    ) else (
+        echo  - [SKIP] Mengabaikan %%d [Bukan AVD ISP - Milik Proyek Lain, Jangan Digunakan]
     )
 )
 
-if "%ISP_FOUND%"=="0" (
+if "!ISP_FOUND!"=="0" (
     echo.
     echo  --------------------------------------------------------
     echo  [PERINGATAN] Emulator dengan AVD bernama 'ISP' TIDAK DITEMUKAN.
@@ -75,18 +74,17 @@ if "%ISP_FOUND%"=="0" (
     echo  --------------------------------------------------------
     echo.
     echo  Mencari AVD 'ISP' di daftar Android Studio...
-    emulator -list-avds 2>nul | findstr /I ISP >nul 2>nul
+    emulator -list-avds 2>nul | findstr /I "^ISP" >nul 2>nul
     if !ERRORLEVEL! EQU 0 (
         echo  - Menemukan AVD 'ISP'. Meluncurkan emulator ISP...
         start "" "%LOCALAPPDATA%\Android\Sdk\emulator\emulator.exe" -avd ISP
         echo  - Menunggu emulator ISP terhubung...
         adb wait-for-device
         for /f "tokens=1" %%d in ('adb devices ^| findstr /R "emulator-[0-9]*"') do (
-            for /f "tokens=1" %%a in ('adb -s %%d emu avd name 2^>nul ^| findstr /V /I "^OK"') do (
-                if /I "%%a"=="ISP" (
-                    set "TARGET_EMU=%%d"
-                    set "ISP_FOUND=1"
-                )
+            adb -s %%d emu avd name 2>nul | findstr /I "^ISP" >nul 2>nul
+            if !ERRORLEVEL! EQU 0 (
+                set "TARGET_EMU=%%d"
+                set "ISP_FOUND=1"
             )
         )
     ) else (
@@ -99,16 +97,16 @@ if "%ISP_FOUND%"=="0" (
 )
 echo.
 
-echo [3/4] Mengonfigurasi Reverse Port [Network ISP Bridge] ke %TARGET_EMU%...
+echo [3/4] Mengonfigurasi Reverse Port [Network ISP Bridge] ke !TARGET_EMU!...
 echo  - Reverse port TCP 3218 [Backend NestJS API]...
-adb -s %TARGET_EMU% reverse tcp:3218 tcp:3218 >nul 2>nul
+adb -s !TARGET_EMU! reverse tcp:3218 tcp:3218 >nul 2>nul
 echo  - Reverse port TCP 3217 [Admin Panel]...
-adb -s %TARGET_EMU% reverse tcp:3217 tcp:3217 >nul 2>nul
+adb -s !TARGET_EMU! reverse tcp:3217 tcp:3217 >nul 2>nul
 echo  - Reverse port TCP 3219 [Customer Portal]...
-adb -s %TARGET_EMU% reverse tcp:3219 tcp:3219 >nul 2>nul
+adb -s !TARGET_EMU! reverse tcp:3219 tcp:3219 >nul 2>nul
 echo  - Menyalakan layar emulator ISP...
-adb -s %TARGET_EMU% shell input keyevent 224 >nul 2>nul
-adb -s %TARGET_EMU% shell input keyevent 82 >nul 2>nul
+adb -s !TARGET_EMU! shell input keyevent 224 >nul 2>nul
+adb -s !TARGET_EMU! shell input keyevent 82 >nul 2>nul
 echo [OK] Reverse port aktif. Mobile app dapat mengakses API di http://localhost:3218
 echo.
 
@@ -125,7 +123,7 @@ if %ERRORLEVEL% EQU 0 (
 echo.
 
 echo ========================================================
-echo   MELUNCURKAN APLIKASI ISP FLUTTER KE EMULATOR ISP [%TARGET_EMU%]
+echo   MELUNCURKAN APLIKASI ISP FLUTTER KE EMULATOR ISP [!TARGET_EMU!]
 echo ========================================================
 echo   * Petunjuk Hotkey Interaktif di Konsol Ini:
 echo     - Tekan 'r' : Hot Reload [Pembaruan UI seketika]
@@ -137,10 +135,10 @@ echo ========================================================
 echo.
 
 cd /d "%FLUTTER_DIR%"
-flutter run -d %TARGET_EMU%
+flutter run -d !TARGET_EMU!
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo [ERROR] Gagal menjalankan aplikasi Flutter di emulator %TARGET_EMU%.
+    echo [ERROR] Gagal menjalankan aplikasi Flutter di emulator !TARGET_EMU!.
     pause
 )
