@@ -19,6 +19,8 @@ import '../../widgets/copy_clipboard.dart';
 import '../../widgets/share_widget.dart';
 import '../../utils/map_utils.dart';
 import '../notifications_page.dart';
+import 'widgets/optical_diagnostics_sheet.dart';
+import 'widgets/digital_proof_of_work_dialog.dart';
 
 // Quick Wins Integration Notes:
 // - ShimmerImage: Available via '../../widgets/shimmer_image.dart'
@@ -2533,6 +2535,54 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
     }
   }
 
+  void _openOpticalDiagnostics() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => OpticalDiagnosticsSheet(
+        customerName: widget.ticket['customerName'],
+        ontSerial: widget.ticket['ontSerial'] ?? 'HWTC-892401',
+        odpReference: widget.ticket['zone'] != null ? 'ODP-${widget.ticket["zone"]}' : 'ODP-AUDIRA-MDK-04/08',
+      ),
+    );
+  }
+
+  Future<void> _openBarcodeScannerForBinding() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BarcodeScannerPage(
+          ticketId: widget.ticket['ticketId'] ?? widget.ticket['id'],
+          customerName: widget.ticket['customerName'],
+        ),
+      ),
+    );
+    if (result != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Perangkat ${result["model"]} (SN: ${result["serialNumber"]}) berhasil diikat ke tiket ini!'),
+          backgroundColor: const Color(0xFF10B981),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _openDigitalProofOfWork() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => DigitalProofOfWorkDialog(
+        ticket: widget.ticket,
+        onCompleted: () {
+          widget.onTicketResolved();
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isResolved = widget.ticket['status']?.toLowerCase() == 'resolved';
@@ -3270,35 +3320,62 @@ class _TicketDetailPageState extends State<TicketDetailPage> {
                   ),
                 ),
               ] else ...[
-                // If already assigned, show resolve button
+                // Toolkit Teknisi Lapangan (Diagnostik & Barcode Binding)
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _openOpticalDiagnostics,
+                        icon: const Icon(Icons.speed_rounded, size: 18),
+                        label: const Text('Ukur Redaman', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF0284C7),
+                          side: const BorderSide(color: Color(0xFF0284C7), width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _openBarcodeScannerForBinding,
+                        icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+                        label: const Text('Scan ONT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFF59E0B),
+                          side: const BorderSide(color: Color(0xFFF59E0B), width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Primary Resolve Button with Digital Proof of Work (Berita Acara Digital)
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isResolving ? null : _resolveTicket,
+                  child: ElevatedButton.icon(
+                    onPressed: _openDigitalProofOfWork,
+                    icon: const Icon(Icons.verified_rounded, size: 20),
+                    label: const Text(
+                      'Sahkan Berita Acara & Selesaikan',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(14),
                       ),
+                      elevation: 3,
                     ),
-                    child: _isResolving
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Text(
-                            'Selesaikan Tiket',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                   ),
                 ),
               ],

@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class BarcodeScannerPage extends StatefulWidget {
-  const BarcodeScannerPage({super.key});
+  final String? ticketId;
+  final String? customerName;
+
+  const BarcodeScannerPage({
+    super.key,
+    this.ticketId,
+    this.customerName,
+  });
 
   @override
   State<BarcodeScannerPage> createState() => _BarcodeScannerPageState();
@@ -193,12 +200,19 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage> {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
+                        flex: widget.ticketId != null ? 2 : 1,
                         child: FilledButton.icon(
                           onPressed: () => Navigator.pop(context, data),
-                          icon: const Icon(Icons.check_circle),
-                          label: const Text('Selesai'),
+                          icon: const Icon(Icons.link_rounded),
+                          label: Text(
+                            widget.ticketId != null 
+                                ? 'Ikat ke #${widget.ticketId}' 
+                                : 'Gunakan Perangkat',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           style: FilledButton.styleFrom(
-                            backgroundColor: Colors.orange.shade700,
+                            backgroundColor: const Color(0xFF00F5FF),
+                            foregroundColor: Colors.black,
                             padding: const EdgeInsets.all(16),
                           ),
                         ),
