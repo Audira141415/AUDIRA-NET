@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../../services/auth_service.dart';
@@ -151,7 +152,7 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                           children: [
                             Text(
                               'AKUN & IDENTITAS',
-                              style: TextStyle(
+                              style: GoogleFonts.plusJakartaSans(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w900,
                                 color: textPrimary,
@@ -161,10 +162,9 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                             const SizedBox(height: 2),
                             Text(
                               '// PROFILE_HARDWARE_SYSTEM',
-                              style: TextStyle(
+                              style: GoogleFonts.jetBrainsMono(
                                 fontSize: 11,
                                 color: textSecondary,
-                                fontFamily: 'monospace',
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -177,13 +177,12 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(color: const Color(0xFF00F0FF), width: 1),
                           ),
-                          child: const Text(
+                          child: Text(
                             'TIER 1 USER',
-                            style: TextStyle(
+                            style: GoogleFonts.jetBrainsMono(
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF00F0FF),
-                              fontFamily: 'monospace',
+                              color: const Color(0xFF00F0FF),
                             ),
                           ),
                         ),
@@ -227,11 +226,10 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                                       const SizedBox(width: 8),
                                       Text(
                                         'AUDIRA DIGITAL PASS',
-                                        style: TextStyle(
+                                        style: GoogleFonts.jetBrainsMono(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w900,
                                           color: textPrimary,
-                                          fontFamily: 'monospace',
                                           letterSpacing: 0.5,
                                         ),
                                       ),
@@ -243,12 +241,12 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                                       color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'VERIFIED',
-                                      style: TextStyle(
+                                      style: GoogleFonts.jetBrainsMono(
                                         fontSize: 9,
                                         fontWeight: FontWeight.w900,
-                                        color: Color(0xFF00FF9D),
+                                        color: const Color(0xFF00FF9D),
                                       ),
                                     ),
                                   ),
@@ -318,11 +316,10 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                                               children: [
                                                 Text(
                                                   customerId,
-                                                  style: TextStyle(
+                                                  style: GoogleFonts.jetBrainsMono(
                                                     fontSize: 11,
                                                     fontWeight: FontWeight.w700,
                                                     color: textPrimary,
-                                                    fontFamily: 'monospace',
                                                   ),
                                                 ),
                                                 const SizedBox(width: 6),
@@ -350,17 +347,16 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                                     children: [
                                       Text(
                                         'PAKET LANGGANAN',
-                                        style: TextStyle(
+                                        style: GoogleFonts.jetBrainsMono(
                                           fontSize: 9.5,
                                           fontWeight: FontWeight.w700,
                                           color: textSecondary,
-                                          fontFamily: 'monospace',
                                         ),
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
                                         packageName,
-                                        style: TextStyle(
+                                        style: GoogleFonts.plusJakartaSans(
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w900,
                                           color: textPrimary,
@@ -438,11 +434,10 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                                   children: [
                                     Text(
                                       'AUDIRA LOYALTY',
-                                      style: TextStyle(
+                                      style: GoogleFonts.jetBrainsMono(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w900,
                                         color: isDark ? const Color(0xFFA855F7) : const Color(0xFF7C3AED),
-                                        fontFamily: 'monospace',
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -467,7 +462,7 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                                 const SizedBox(height: 2),
                                 Text(
                                   '1.250 Poin Terkumpul',
-                                  style: TextStyle(
+                                  style: GoogleFonts.plusJakartaSans(
                                     fontSize: 14.5,
                                     fontWeight: FontWeight.w900,
                                     color: textPrimary,
@@ -508,11 +503,10 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                     // Hardware & Network Bento
                     Text(
                       'PERANGKAT ROUTER ONT & JARINGAN',
-                      style: TextStyle(
+                      style: GoogleFonts.jetBrainsMono(
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
                         color: textSecondary,
-                        fontFamily: 'monospace',
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -730,17 +724,22 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
         const SizedBox(width: 10),
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: textSecondary),
+          style: GoogleFonts.plusJakartaSans(fontSize: 12, color: textSecondary),
         ),
         const Spacer(),
         Text(
           value,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: textPrimary,
-            fontFamily: isMono ? 'monospace' : null,
-          ),
+          style: isMono
+              ? GoogleFonts.jetBrainsMono(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
+                )
+              : GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: textPrimary,
+                ),
         ),
       ],
     );

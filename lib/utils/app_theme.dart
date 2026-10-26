@@ -1,8 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Modern Cyan-Blue Theme for Audira Network
 /// Professional, futuristic, and tech-oriented design
 class AppTheme {
+  /// Premium Sans Font (Plus Jakarta Sans) for Titles, Headers, and Content
+  static TextStyle fontJakarta({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+  }) {
+    return GoogleFonts.plusJakartaSans(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+    );
+  }
+
+  /// Developer / Cyber Monospace Font (JetBrains Mono) for Telemetry, Metrics, Badges, dBm, FUP, and IPs
+  static TextStyle fontMono({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+  }) {
+    return GoogleFonts.jetBrainsMono(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+      decoration: decoration,
+    );
+  }
+
   // Official AUDIRA Cyberpunk & Neo-Brutalism Design Tokens
   static const Color cyberOledBg = Color(0xFF05070D); // Pure Deep Midnight OLED Black
   static const Color cyberObsidian = Color(0xFF0A0E1A); // Tactical dark surface
@@ -125,130 +164,118 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  // Shared Typography Generator with inherit: false and alphabetic baseline for flawless Theme interpolation & ListTile safety
+  // Shared Typography Generator based on Plus Jakarta Sans with alphabetic baseline
   static TextTheme _buildTextTheme({
     required Color primaryColor,
     required Color secondaryColor,
   }) {
     return TextTheme(
-      displayLarge: TextStyle(
-        inherit: false,
+      displayLarge: GoogleFonts.plusJakartaSans(
         fontSize: 32,
+        fontWeight: FontWeight.w800,
+        color: primaryColor,
+        letterSpacing: -0.75,
+        textBaseline: TextBaseline.alphabetic,
+      ),
+      displayMedium: GoogleFonts.plusJakartaSans(
+        fontSize: 28,
         fontWeight: FontWeight.w700,
         color: primaryColor,
         letterSpacing: -0.5,
         textBaseline: TextBaseline.alphabetic,
       ),
-      displayMedium: TextStyle(
-        inherit: false,
-        fontSize: 28,
+      displaySmall: GoogleFonts.plusJakartaSans(
+        fontSize: 24,
         fontWeight: FontWeight.w700,
         color: primaryColor,
         letterSpacing: -0.25,
         textBaseline: TextBaseline.alphabetic,
       ),
-      displaySmall: TextStyle(
-        inherit: false,
-        fontSize: 24,
+      headlineLarge: GoogleFonts.plusJakartaSans(
+        fontSize: 22,
+        fontWeight: FontWeight.w700,
+        color: primaryColor,
+        letterSpacing: -0.2,
+        textBaseline: TextBaseline.alphabetic,
+      ),
+      headlineMedium: GoogleFonts.plusJakartaSans(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: primaryColor,
+        letterSpacing: -0.15,
+        textBaseline: TextBaseline.alphabetic,
+      ),
+      headlineSmall: GoogleFonts.plusJakartaSans(
+        fontSize: 18,
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0,
         textBaseline: TextBaseline.alphabetic,
       ),
-      headlineLarge: TextStyle(
-        inherit: false,
-        fontSize: 22,
-        fontWeight: FontWeight.w600,
-        color: primaryColor,
-        letterSpacing: 0.15,
-        textBaseline: TextBaseline.alphabetic,
-      ),
-      headlineMedium: TextStyle(
-        inherit: false,
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: primaryColor,
-        letterSpacing: 0.15,
-        textBaseline: TextBaseline.alphabetic,
-      ),
-      headlineSmall: TextStyle(
-        inherit: false,
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: primaryColor,
-        letterSpacing: 0.15,
-        textBaseline: TextBaseline.alphabetic,
-      ),
-      titleLarge: TextStyle(
-        inherit: false,
+      titleLarge: GoogleFonts.plusJakartaSans(
         fontSize: 16,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: primaryColor,
-        letterSpacing: 0.15,
+        letterSpacing: 0.1,
         textBaseline: TextBaseline.alphabetic,
       ),
-      titleMedium: TextStyle(
-        inherit: false,
+      titleMedium: GoogleFonts.plusJakartaSans(
         fontSize: 15,
         fontWeight: FontWeight.w600,
         color: primaryColor,
-        letterSpacing: 0.15,
+        letterSpacing: 0.1,
         textBaseline: TextBaseline.alphabetic,
       ),
-      titleSmall: TextStyle(
-        inherit: false,
+      titleSmall: GoogleFonts.plusJakartaSans(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: primaryColor,
         letterSpacing: 0.1,
         textBaseline: TextBaseline.alphabetic,
       ),
-      bodyLarge: TextStyle(
-        inherit: false,
+      bodyLarge: GoogleFonts.plusJakartaSans(
         fontSize: 15,
         fontWeight: FontWeight.w400,
         color: primaryColor,
-        letterSpacing: 0.25,
+        letterSpacing: 0.15,
+        height: 1.45,
         textBaseline: TextBaseline.alphabetic,
       ),
-      bodyMedium: TextStyle(
-        inherit: false,
+      bodyMedium: GoogleFonts.plusJakartaSans(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: primaryColor,
-        letterSpacing: 0.25,
+        letterSpacing: 0.15,
+        height: 1.4,
         textBaseline: TextBaseline.alphabetic,
       ),
-      bodySmall: TextStyle(
-        inherit: false,
+      bodySmall: GoogleFonts.plusJakartaSans(
         fontSize: 13,
         fontWeight: FontWeight.w400,
         color: secondaryColor,
-        letterSpacing: 0.25,
+        letterSpacing: 0.15,
+        height: 1.35,
         textBaseline: TextBaseline.alphabetic,
       ),
-      labelLarge: TextStyle(
-        inherit: false,
+      labelLarge: GoogleFonts.plusJakartaSans(
         fontSize: 14,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         color: primaryColor,
-        letterSpacing: 0.5,
+        letterSpacing: 0.3,
         textBaseline: TextBaseline.alphabetic,
       ),
-      labelMedium: TextStyle(
-        inherit: false,
+      labelMedium: GoogleFonts.plusJakartaSans(
         fontSize: 13,
         fontWeight: FontWeight.w600,
         color: primaryColor,
-        letterSpacing: 0.5,
+        letterSpacing: 0.3,
         textBaseline: TextBaseline.alphabetic,
       ),
-      labelSmall: TextStyle(
-        inherit: false,
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
+      labelSmall: GoogleFonts.plusJakartaSans(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
         color: secondaryColor,
-        letterSpacing: 0.5,
+        letterSpacing: 0.4,
         textBaseline: TextBaseline.alphabetic,
       ),
     );
@@ -277,18 +304,17 @@ class AppTheme {
       scaffoldBackgroundColor: lightScaffoldBg,
 
       // App Bar Theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: false,
         backgroundColor: lightSurfaceCard,
         foregroundColor: lightTextPrimary,
-        iconTheme: IconThemeData(color: lightTextPrimary),
-        titleTextStyle: TextStyle(
-          inherit: false,
+        iconTheme: const IconThemeData(color: lightTextPrimary),
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           color: lightTextPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w800,
-          letterSpacing: 0.15,
+          letterSpacing: -0.2,
         ),
       ),
 
@@ -699,19 +725,18 @@ class AppTheme {
       ),
 
       // AppBar Theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: darkSurface,
         foregroundColor: darkOnSurface,
         elevation: 0,
         centerTitle: false,
-        titleTextStyle: TextStyle(
-          inherit: false,
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           color: darkOnSurface,
           fontSize: 18,
           fontWeight: FontWeight.w800,
-          letterSpacing: 0.15,
+          letterSpacing: -0.2,
         ),
-        iconTheme: IconThemeData(color: darkOnSurface),
+        iconTheme: const IconThemeData(color: darkOnSurface),
       ),
 
       // Card Theme

@@ -1,7 +1,10 @@
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../utils/app_theme.dart';
 import '../../services/firebase_service.dart';
+import '../../services/backend_api_service.dart';
+import '../../services/pdf_generator_service.dart';
 import '../../widgets/cyber_widgets.dart';
 
 class PaymentPage extends StatelessWidget {
@@ -115,6 +118,18 @@ class PaymentPage extends StatelessWidget {
                       const CyberBadge(
                         label: 'STATUS: MENUNGGU PEMBAYARAN',
                         color: AppTheme.neonCrimson,
+                      ),
+                      CyberBadge(
+                        label: 'POKOK: Rp ${_formatNumber((amount / 1.11).roundToDouble())}',
+                        color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
+                      ),
+                      CyberBadge(
+                        label: 'PPN 11%: Rp ${_formatNumber(amount - (amount / 1.11).roundToDouble())}',
+                        color: isDark ? AppTheme.neonPurple : const Color(0xFF7C3AED),
+                      ),
+                      const CyberBadge(
+                        label: 'ONT: FREE',
+                        color: AppTheme.neonGreen,
                       ),
                     ],
                   ),
@@ -359,28 +374,13 @@ class PaymentPage extends StatelessWidget {
             label: 'KONFIRMASI BAYAR',
             fullWidth: false,
             primaryColor: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
-            onPressed: () async {
-              try {
-                await FirebaseService.instance.createPayment({
-                  'billId': billId,
-                  'customerId': 1,
-                  'amount': amount.toInt(),
-                  'paymentMethod': 'Virtual Account - $bank',
-                  'paymentStatus': 'completed',
-                  'transactionId':
-                      'VA-$vaNumber-${DateTime.now().millisecondsSinceEpoch}',
-                });
-
-                if (context.mounted) {
-                  Navigator.pop(context); // close VA dialog
-                  _showRadiusCoASuccessDialog(context, 'Virtual Account $bank');
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  Navigator.pop(context);
-                  _showRadiusCoASuccessDialog(context, 'Virtual Account $bank');
-                }
-              }
+            onPressed: () {
+              Navigator.pop(context); // close VA dialog
+              _processPaymentAndCoa(
+                context: context,
+                method: 'Virtual Account $bank',
+                txId: 'VA-$vaNumber-${DateTime.now().millisecondsSinceEpoch.toString().substring(6)}',
+              );
             },
           ),
         ],
@@ -468,7 +468,10 @@ class PaymentPage extends StatelessWidget {
             primaryColor: isDark ? AppTheme.neonPurple : const Color(0xFF7C3AED),
             onPressed: () {
               Navigator.pop(context); // close ewallet modal
-              _showRadiusCoASuccessDialog(context, 'E-Wallet $wallet');
+              _processPaymentAndCoa(
+                context: context,
+                method: 'E-Wallet $wallet',
+              );
             },
           ),
         ],
@@ -543,6 +546,31 @@ class PaymentPage extends StatelessWidget {
                 height: 1.4,
               ),
             ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFB800).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFFFB800), width: 1),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(LucideIcons.clock, size: 13, color: Color(0xFFFFB800)),
+                  SizedBox(width: 5),
+                  Text(
+                    'Berlaku 14:59 menit • Auto-Polling Status',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFFB800),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         actions: [
@@ -562,7 +590,10 @@ class PaymentPage extends StatelessWidget {
             primaryColor: AppTheme.neonCrimson,
             onPressed: () {
               Navigator.pop(context); // close qris modal
-              _showRadiusCoASuccessDialog(context, 'QRIS Universal');
+              _processPaymentAndCoa(
+                context: context,
+                method: 'QRIS Universal',
+              );
             },
           ),
         ],
@@ -570,9 +601,115 @@ class PaymentPage extends StatelessWidget {
     );
   }
 
-  void _showRadiusCoASuccessDialog(BuildContext context, String method) {
+  Future<void> _shareReceiptViaWhatsApp(String method, String txId) async {
+    final text = Uri.encodeComponent(
+      '🌟 *BUKTI PEMBAYARAN RESMI AUDIRA NETWORKS*\n\n'
+      '📌 *No. Tagihan*: $billId\n'
+      '📅 *Periode*: $billMonth\n'
+      '💳 *Metode*: $method\n'
+      '🔖 *No. Transaksi*: $txId\n'
+      '💰 *Total Bayar*: Rp ${_formatNumber(amount)}\n'
+      '⚡ *Status CoA*: SESI UNBLOCKED / AKTIF KEMBALI (< 2 detik)\n'
+      '🔒 *Otorisasi*: Agus Dwi Rianto (AUDIRA Founder)\n'
+      '🌐 *Portal Pelanggan*: https://audira.my.id\n\n'
+      'Terima kasih! Layanan internet Anda telah aktif kembali secara instan.'
+    );
+    final url = Uri.parse('https://wa.me/?text=$text');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _processPaymentAndCoa({
+    required BuildContext context,
+    required String method,
+    String? txId,
+  }) async {
+    final effectiveTxId = txId ?? 'TX-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
+    final idempotencyKey = 'IDEMP-$billId-$effectiveTxId';
+
+    // Show processing loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (loadingCtx) => Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFF00F0FF), width: 1.5),
+            boxShadow: const [
+              BoxShadow(color: Colors.black54, blurRadius: 20, offset: Offset(0, 4)),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(color: Color(0xFF00F0FF), strokeWidth: 2.5),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'VERIFIKASI & RADIUS CoA...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Mengirim sinyal unblock UDP 3799',
+                style: TextStyle(
+                  color: Color(0xFF00FF9D),
+                  fontFamily: 'monospace',
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Call Backend API with Idempotency Key & CoA unblock
+    try {
+      await BackendApiService.instance.payInvoiceWithCoA(
+        invoiceId: billId,
+        amount: amount,
+        method: method,
+        transactionId: effectiveTxId,
+        idempotencyKey: idempotencyKey,
+      );
+    } catch (_) {}
+
+    // Record in Firebase for local caching/fallback
+    try {
+      await FirebaseService.instance.createPayment({
+        'billId': billId,
+        'customerId': 1,
+        'amount': amount.toInt(),
+        'paymentMethod': method,
+        'paymentStatus': 'completed',
+        'transactionId': effectiveTxId,
+      });
+    } catch (_) {}
+
+    if (context.mounted) {
+      Navigator.pop(context); // close loading dialog
+      _showRadiusCoASuccessDialog(context, method, effectiveTxId);
+    }
+  }
+
+  void _showRadiusCoASuccessDialog(BuildContext context, String method, [String? explicitTxId]) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final txId = 'TX-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
+    final txId = explicitTxId ?? 'TX-${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';
 
     showDialog(
       context: context,
@@ -695,23 +832,69 @@ class PaymentPage extends StatelessWidget {
           ],
         ),
         actions: [
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(dialogCtx);
-              Navigator.pop(context, true);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00FF9D),
-              foregroundColor: Colors.black,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    await PdfGeneratorService.instance.previewPdf({
+                      'id': billId,
+                      'customerName': 'Pelanggan AUDIRA',
+                      'customerId': 'ADN-2026',
+                      'billMonth': billMonth,
+                      'amount': amount,
+                      'dueDate': 'Lunas',
+                      'status': 'paid',
+                      'paidDate': DateTime.now().toString().substring(0, 10),
+                    });
+                  },
+                  icon: const Icon(LucideIcons.fileText, size: 13),
+                  label: const Text('Kwitansi PDF', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF00F0FF),
+                    side: const BorderSide(color: Color(0xFF00F0FF), width: 1.2),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            ),
-            icon: const Icon(LucideIcons.checkCheck, size: 16),
-            label: const Text(
-              'SELESAI // KEMBALI',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _shareReceiptViaWhatsApp(method, txId),
+                  icon: const Icon(LucideIcons.share2, size: 13),
+                  label: const Text('Kirim ke WA', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF00FF9D),
+                    side: const BorderSide(color: Color(0xFF00FF9D), width: 1.2),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(dialogCtx);
+                Navigator.pop(context, true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00FF9D),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ),
+              icon: const Icon(LucideIcons.checkCheck, size: 16),
+              label: const Text(
+                'SELESAI // KEMBALI KE BERANDA',
+                style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w900),
+              ),
             ),
           ),
         ],

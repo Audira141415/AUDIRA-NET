@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../services/firebase_service.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/backend_api_service.dart';
 import '../../../services/pdf_generator_service.dart';
 import '../payment_page.dart';
 
@@ -18,6 +20,7 @@ class CustomerTagihanTab extends StatefulWidget {
 class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List<Map<String, dynamic>> _bills = [];
+  Map<String, dynamic>? _invoiceBreakdown;
   bool _isLoading = true;
   String _searchQuery = '';
 
@@ -34,6 +37,21 @@ class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTick
     super.dispose();
   }
 
+  Future<void> _fetchBreakdownForActiveBill() async {
+    final unpaid = _bills.where((b) => b['status'] == 'unpaid').toList();
+    if (unpaid.isNotEmpty) {
+      final bId = unpaid.first['id']?.toString() ?? '';
+      try {
+        final res = await BackendApiService.instance.getInvoiceBreakdown(bId);
+        if (res['success'] == true && res['data'] != null && mounted) {
+          setState(() {
+            _invoiceBreakdown = Map<String, dynamic>.from(res['data']);
+          });
+        }
+      } catch (_) {}
+    }
+  }
+
   Future<void> _loadBills() async {
     setState(() => _isLoading = true);
 
@@ -41,6 +59,7 @@ class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTick
       final currentUserData = AuthService.instance.currentUserData;
       if (currentUserData == null) {
         if (mounted) setState(() { _bills = _getSampleBills(); _isLoading = false; });
+        _fetchBreakdownForActiveBill();
         return;
       }
 
@@ -50,6 +69,7 @@ class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTick
 
       if (customerData == null) {
         if (mounted) setState(() { _bills = _getSampleBills(); _isLoading = false; });
+        _fetchBreakdownForActiveBill();
         return;
       }
 
@@ -62,6 +82,7 @@ class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTick
           _bills = bills.isEmpty ? _getSampleBills() : bills;
           _isLoading = false;
         });
+        _fetchBreakdownForActiveBill();
       }
     } catch (e) {
       if (mounted) {
@@ -69,6 +90,7 @@ class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTick
           _bills = _getSampleBills();
           _isLoading = false;
         });
+        _fetchBreakdownForActiveBill();
       }
     }
   }
@@ -550,45 +572,94 @@ class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTick
 
             const SizedBox(height: 18),
 
-            // Rincian Layanan Bento Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
-                  width: 1.5,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            // Rincian Layanan Bento Card (Dynamic Calculation with 11% PPN)
+            Builder(
+              builder: (context) {
+                final totalNum = (topAmount is num ? topAmount.toDouble() : 250000.0);
+                final dynamicBase = _invoiceBreakdown?['baseAmount'] != null
+                    ? (_invoiceBreakdown!['baseAmount'] as num).toDouble()
+                    : (totalNum / 1.11).roundToDouble();
+                final dynamicTax = _invoiceBreakdown?['taxPpn11'] != null
+                    ? (_invoiceBreakdown!['taxPpn11'] as num).toDouble()
+                    : (totalNum - dynamicBase);
+                final dynamicOnt = _invoiceBreakdown?['deviceRental'] != null
+                    ? (_invoiceBreakdown!['deviceRental'] as num).toDouble()
+                    : 0.0;
+                final dynamicDiscount = _invoiceBreakdown?['loyaltyDiscount'] != null
+                    ? (_invoiceBreakdown!['loyaltyDiscount'] as num).toDouble()
+                    : 0.0;
+
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF1E293B) : const Color(0xFFCBD5E1),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(LucideIcons.fileSpreadsheet, size: 16, color: Color(0xFF00F0FF)),
-                      const SizedBox(width: 8),
-                      Text(
-                        'RINCIAN ITEM TAGIHAN',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          color: textPrimary,
-                          fontFamily: 'monospace',
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(LucideIcons.fileSpreadsheet, size: 16, color: Color(0xFF00F0FF)),
+                              const SizedBox(width: 8),
+                              Text(
+                                'RINCIAN ITEM TAGIHAN',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                  color: textPrimary,
+                                  fontFamily: 'monospace',
+                                ),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () => _showBreakdownModal(
+                              context: context,
+                              billId: topBillId,
+                              month: topMonth,
+                              total: totalNum,
+                              base: dynamicBase,
+                              tax: dynamicTax,
+                              ont: dynamicOnt,
+                              discount: dynamicDiscount,
+                              isDark: isDark,
+                            ),
+                            child: const Text(
+                              'Detail ↗',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF00F0FF),
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 12),
+                      _buildInvoiceLine('Paket Internet (Biaya Pokok)', _formatCurrency(dynamicBase), textPrimary, textSecondary),
+                      const SizedBox(height: 6),
+                      _buildInvoiceLine('Sewa ONT Router Wi-Fi 6', dynamicOnt > 0 ? _formatCurrency(dynamicOnt) : 'Rp 0 (GRATIS)', textPrimary, const Color(0xFF00FF9D)),
+                      const SizedBox(height: 6),
+                      _buildInvoiceLine('PPN 11% (UU HPP)', _formatCurrency(dynamicTax), textPrimary, textSecondary),
+                      if (dynamicDiscount > 0) ...[
+                        const SizedBox(height: 6),
+                        _buildInvoiceLine('Diskon Poin Loyalitas', '- ${_formatCurrency(dynamicDiscount)}', textPrimary, const Color(0xFF00FF9D)),
+                      ],
+                      const Divider(height: 18, color: Color(0xFF1E293B)),
+                      _buildInvoiceLine('Total Pembayaran', _formatCurrency(topAmount), textPrimary, textPrimary, isBold: true),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  _buildInvoiceLine('Paket Fiber Ultra 50 Mbps', 'Rp 225.225', textPrimary, textSecondary),
-                  const SizedBox(height: 6),
-                  _buildInvoiceLine('Sewa ONT Router Wi-Fi 6', 'Rp 0 (FREE)', textPrimary, const Color(0xFF00FF9D)),
-                  const SizedBox(height: 6),
-                  _buildInvoiceLine('PPN 11%', 'Rp 24.775', textPrimary, textSecondary),
-                  const Divider(height: 18, color: Color(0xFF1E293B)),
-                  _buildInvoiceLine('Total Pembayaran', _formatCurrency(topAmount), textPrimary, textPrimary, isBold: true),
-                ],
-              ),
+                );
+              },
             ),
 
             const SizedBox(height: 18),
@@ -750,30 +821,52 @@ class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTick
                         ),
                       ],
                     ),
-                    OutlinedButton.icon(
-                      onPressed: () async {
-                        await PdfGeneratorService.instance.previewPdf({
-                          'id': billId,
-                          'customerName': 'Budi Pelanggan',
-                          'customerId': 'ADN-2026-0889',
-                          'billMonth': month,
-                          'amount': (amount is num ? amount.toDouble() : 250000.0),
-                          'dueDate': dueDate,
-                          'status': 'paid',
-                          'paidDate': paidAt,
-                        });
-                      },
-                      icon: const Icon(LucideIcons.fileText, size: 14),
-                      label: const Text('Unduh Bukti', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0F172A),
-                        side: BorderSide(
-                          color: isDark ? const Color(0xFF00F0FF).withValues(alpha: 0.5) : Colors.black,
-                          width: 1.2,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: 'Bagikan Bukti ke WhatsApp',
+                          icon: const Icon(LucideIcons.share2, size: 15, color: Color(0xFF00FF9D)),
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0xFF00FF9D).withValues(alpha: 0.1),
+                            padding: const EdgeInsets.all(7),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(
+                                color: const Color(0xFF00FF9D).withValues(alpha: 0.5),
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          onPressed: () => _shareReceiptViaWhatsApp(billId, month, amount),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
+                        const SizedBox(width: 8),
+                        OutlinedButton.icon(
+                          onPressed: () async {
+                            await PdfGeneratorService.instance.previewPdf({
+                              'id': billId,
+                              'customerName': 'Budi Pelanggan',
+                              'customerId': 'ADN-2026-0889',
+                              'billMonth': month,
+                              'amount': (amount is num ? amount.toDouble() : 250000.0),
+                              'dueDate': dueDate,
+                              'status': 'paid',
+                              'paidDate': paidAt,
+                            });
+                          },
+                          icon: const Icon(LucideIcons.fileText, size: 14),
+                          label: const Text('Kwitansi PDF', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0F172A),
+                            side: BorderSide(
+                              color: isDark ? const Color(0xFF00F0FF).withValues(alpha: 0.5) : Colors.black,
+                              width: 1.2,
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -841,6 +934,199 @@ class _CustomerTagihanTabState extends State<CustomerTagihanTab> with SingleTick
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _shareReceiptViaWhatsApp(String billId, String month, dynamic amount) async {
+    final formattedAmount = _formatCurrency(amount);
+    final text = Uri.encodeComponent(
+      '🌟 *BUKTI PEMBAYARAN RESMI AUDIRA NETWORKS*\n\n'
+      '📌 *No. Tagihan*: $billId\n'
+      '📅 *Periode*: $month\n'
+      '💰 *Total Lunas*: $formattedAmount\n'
+      '⚡ *Status RADIUS*: ACTIVE / UNBLOCKED (CoA Disconnect-Request UDP 3799 Success)\n'
+      '🔒 *Otorisasi*: Agus Dwi Rianto (AUDIRA Founder)\n'
+      '🌐 *Portal Pelanggan*: https://audira.my.id\n\n'
+      'Terima kasih atas kepercayaan Anda menggunakan layanan internet fiber AUDIRA!'
+    );
+    final url = Uri.parse('https://wa.me/?text=$text');
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {}
+  }
+
+  void _showBreakdownModal({
+    required BuildContext context,
+    required String billId,
+    required String month,
+    required double total,
+    required double base,
+    required double tax,
+    required double ont,
+    required double discount,
+    required bool isDark,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0F172A) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(
+            color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0F172A),
+            width: 2.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? const Color(0xFF00F0FF).withValues(alpha: 0.2) : Colors.black26,
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'RINCIAN ELEKTRONIK INVOICE',
+                      style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'No. $billId • $month',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFF00FF9D), width: 1),
+                  ),
+                  child: const Text(
+                    'PPN 11%',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF00FF9D),
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _buildInvoiceLine('1. Paket Internet Dedicated 50 Mbps', _formatCurrency(base), isDark ? Colors.white : const Color(0xFF0F172A), isDark ? Colors.white70 : const Color(0xFF475569)),
+            const SizedBox(height: 10),
+            _buildInvoiceLine('2. Sewa ONT GPON Gigabit Wi-Fi 6', ont > 0 ? _formatCurrency(ont) : 'Rp 0 (GRATIS)', isDark ? Colors.white : const Color(0xFF0F172A), const Color(0xFF00FF9D)),
+            const SizedBox(height: 10),
+            _buildInvoiceLine('3. PPN 11% (UU HPP No. 7/2021)', _formatCurrency(tax), isDark ? Colors.white : const Color(0xFF0F172A), isDark ? Colors.white70 : const Color(0xFF475569)),
+            if (discount > 0) ...[
+              const SizedBox(height: 10),
+              _buildInvoiceLine('4. Diskon Reward Loyalitas', '- ${_formatCurrency(discount)}', isDark ? Colors.white : const Color(0xFF0F172A), const Color(0xFF00FF9D)),
+            ],
+            const Divider(height: 24, color: Color(0xFF334155)),
+            _buildInvoiceLine('TOTAL PELUNASAN', _formatCurrency(total), isDark ? Colors.white : const Color(0xFF0F172A), isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669), isBold: true),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF05070D) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(LucideIcons.zap, size: 16, color: Color(0xFF00FF9D)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Bayar Langsung Nyala: Sinyal CoA UDP 3799 memulihkan sesi isolir dalam < 2 detik tanpa perlu reboot router.',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  final res = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentPage(
+                        billId: billId,
+                        billMonth: month,
+                        amount: total,
+                      ),
+                    ),
+                  );
+                  if (res == true) _loadBills();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0070F3),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: const BorderSide(color: Color(0xFF00F0FF), width: 1.5),
+                  ),
+                ),
+                icon: const Icon(LucideIcons.arrowRight, size: 16),
+                label: const Text(
+                  'LANJUTKAN KE CHECKOUT MULTI-RAIL',
+                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
           ],
         ),
       ),

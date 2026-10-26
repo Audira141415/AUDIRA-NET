@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../speed_test_page.dart';
 import '../wifi_management_page.dart';
@@ -45,7 +46,7 @@ class CustomerQuickActions extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'BENTO KENDALI LAYANAN',
-                  style: TextStyle(
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     fontWeight: FontWeight.w900,
                     color: textPrimary,
@@ -62,11 +63,10 @@ class CustomerQuickActions extends StatelessWidget {
               ),
               child: Text(
                 '6 MODUL ONLINE',
-                style: TextStyle(
+                style: GoogleFonts.jetBrainsMono(
                   fontSize: 9,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
-                  fontFamily: 'monospace',
                 ),
               ),
             ),
@@ -115,7 +115,7 @@ class CustomerQuickActions extends StatelessWidget {
                       children: [
                         Text(
                           'Dokter Jaringan 1-Tap',
-                          style: TextStyle(
+                          style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
                             color: textPrimary,
@@ -131,12 +131,12 @@ class CustomerQuickActions extends StatelessWidget {
                               color: const Color(0xFF00F0FF).withValues(alpha: 0.4),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'SELF-CARE',
-                            style: TextStyle(
+                            style: GoogleFonts.jetBrainsMono(
                               fontSize: 8.5,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF00F0FF),
+                              color: const Color(0xFF00F0FF),
                             ),
                           ),
                         ),
@@ -145,7 +145,7 @@ class CustomerQuickActions extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Uji redaman optik TR-069, PPPoE gateway & auto-healing',
-                      style: TextStyle(
+                      style: GoogleFonts.plusJakartaSans(
                         fontSize: 11,
                         color: textSecondary,
                       ),
@@ -166,11 +166,10 @@ class CustomerQuickActions extends StatelessWidget {
                 ),
                 child: Text(
                   'UJI ➔',
-                  style: TextStyle(
+                  style: GoogleFonts.jetBrainsMono(
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
-                    fontFamily: 'monospace',
                   ),
                 ),
               ),
@@ -216,7 +215,7 @@ class CustomerQuickActions extends StatelessWidget {
                       children: [
                         Text(
                           'Kelola Router & Wi-Fi 6',
-                          style: TextStyle(
+                          style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,
                             color: textPrimary,
@@ -229,12 +228,12 @@ class CustomerQuickActions extends StatelessWidget {
                             color: const Color(0xFF10B981).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          child: const Text(
+                          child: Text(
                             'ONLINE',
-                            style: TextStyle(
+                            style: GoogleFonts.jetBrainsMono(
                               fontSize: 8.5,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF10B981),
+                              color: const Color(0xFF10B981),
                             ),
                           ),
                         ),
@@ -243,10 +242,9 @@ class CustomerQuickActions extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'SSID: AUDIRA-FIBER-5G • 5 Perangkat Terhubung',
-                      style: TextStyle(
+                      style: GoogleFonts.jetBrainsMono(
                         fontSize: 11,
                         color: textSecondary,
-                        fontFamily: 'monospace',
                       ),
                     ),
                   ],

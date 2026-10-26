@@ -23,6 +23,10 @@ class ApiConfig {
   static const String payments = '/payments';
   static const String customers = '/customers';
   static const String customerTelemetry = '/customer/telemetry';
+  static String invoiceBreakdown(String id) => '/billing/invoices/$id/breakdown';
+  static String payInvoice(String id) => '/billing/invoices/$id/pay';
+  static String receiptPdf(String id) => '/billing/receipt/$id/pdf';
+
 
   // Analytics endpoints
   static const String analytics = '/analytics';

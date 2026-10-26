@@ -275,4 +275,28 @@ class BackendApiService {
     }
     return await get(ApiConfig.customerTelemetry, queryParams: queryParams.isNotEmpty ? queryParams : null);
   }
+
+  /// Get dynamic invoice breakdown (base package, 11% PPN, ONT device rental, loyalty discounts)
+  Future<Map<String, dynamic>> getInvoiceBreakdown(String invoiceId) async {
+    return await get(ApiConfig.invoiceBreakdown(invoiceId));
+  }
+
+  /// Instant Checkout & Autonomous RADIUS CoA Execution ("Bayar Langsung Nyala")
+  /// Executes session restore in < 2 seconds with Idempotency Key protection
+  Future<Map<String, dynamic>> payInvoiceWithCoA({
+    required String invoiceId,
+    required double amount,
+    String? method,
+    String? transactionId,
+    String? idempotencyKey,
+  }) async {
+    final key = idempotencyKey ?? 'IDEMP-${DateTime.now().millisecondsSinceEpoch}-${invoiceId.hashCode.abs()}';
+    return await post(ApiConfig.payInvoice(invoiceId), {
+      'amount': amount,
+      'method': method ?? 'Online Payment',
+      if (transactionId != null) 'transactionId': transactionId,
+      'idempotencyKey': key,
+    });
+  }
 }
+

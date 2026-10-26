@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../utils/app_theme.dart';
 
@@ -178,7 +179,7 @@ class _CustomerNetworkDoctorDialogState
                         children: [
                           Text(
                             'DOKTER JARINGAN 1-TAP',
-                            style: TextStyle(
+                            style: GoogleFonts.plusJakartaSans(
                               fontSize: 13.5,
                               fontWeight: FontWeight.w900,
                               color: textPrimary,
@@ -189,13 +190,12 @@ class _CustomerNetworkDoctorDialogState
                             _isRunning
                                 ? '// DIAGNOSA TAHAP ${_currentStep + 1}/4'
                                 : '// AUDIT STATUS KONEKSI MANDIRI',
-                            style: TextStyle(
+                            style: GoogleFonts.jetBrainsMono(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w700,
                               color: _isRunning
                                   ? const Color(0xFF00F0FF)
                                   : textSecondary,
-                              fontFamily: 'monospace',
                             ),
                           ),
                         ],
@@ -239,19 +239,18 @@ class _CustomerNetworkDoctorDialogState
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'MODEM SEDANG ME-REBOOT VIA TR-069',
-                              style: TextStyle(
+                              style: GoogleFonts.jetBrainsMono(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
-                                color: Color(0xFFF59E0B),
-                                fontFamily: 'monospace',
+                                color: const Color(0xFFF59E0B),
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               'Menunggu sinkronisasi ulang sinyal: $_rebootCountdown detik...',
-                              style: TextStyle(
+                              style: GoogleFonts.plusJakartaSans(
                                 fontSize: 10.5,
                                 color: textSecondary,
                               ),
@@ -330,7 +329,7 @@ class _CustomerNetworkDoctorDialogState
                           children: [
                             Text(
                               step['title'] as String,
-                              style: TextStyle(
+                              style: GoogleFonts.plusJakartaSans(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
                                 color: textPrimary,
@@ -341,16 +340,16 @@ class _CustomerNetworkDoctorDialogState
                               status == 'success'
                                   ? step['detail'] as String
                                   : step['desc'] as String,
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: status == 'success'
-                                    ? FontWeight.w700
-                                    : FontWeight.normal,
-                                color: status == 'success'
-                                    ? const Color(0xFF00FF9D)
-                                    : textSecondary,
-                                fontFamily: status == 'success' ? 'monospace' : null,
-                              ),
+                              style: status == 'success'
+                                  ? GoogleFonts.jetBrainsMono(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF00FF9D),
+                                    )
+                                  : GoogleFonts.plusJakartaSans(
+                                      fontSize: 10,
+                                      color: textSecondary,
+                                    ),
                             ),
                           ],
                         ),
