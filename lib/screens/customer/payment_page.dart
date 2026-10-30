@@ -169,21 +169,21 @@ class PaymentPage extends StatelessWidget {
                   icon: LucideIcons.landmark,
                   color: isDark ? AppTheme.neonCyan : AppTheme.signalBlue,
                   onTap: () =>
-                      _showVirtualAccountDialog(context, 'BCA', '1234567890'),
+                      _showVirtualAccountDialog(context, 'BCA', '8077708123456789'),
                 ),
                 _PaymentMethod(
                   name: 'Mandiri Virtual Account',
                   icon: LucideIcons.landmark,
                   color: isDark ? AppTheme.neonAmber : const Color(0xFFD97706),
                   onTap: () =>
-                      _showVirtualAccountDialog(context, 'Mandiri', '9876543210'),
+                      _showVirtualAccountDialog(context, 'Mandiri', '8801208123456789'),
                 ),
                 _PaymentMethod(
                   name: 'BNI Virtual Account',
                   icon: LucideIcons.landmark,
                   color: isDark ? AppTheme.neonPurple : const Color(0xFF7C3AED),
                   onTap: () =>
-                      _showVirtualAccountDialog(context, 'BNI', '5555666677'),
+                      _showVirtualAccountDialog(context, 'BNI', '8277081234567890'),
                 ),
               ],
             ),

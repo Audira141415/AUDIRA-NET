@@ -18,6 +18,8 @@ import '../screens/chat/live_chat_list_page.dart';
 import '../screens/chat/live_chat_room_page.dart';
 import '../models/chat_model.dart';
 
+import '../screens/auth/auth_gate.dart';
+
 /// Arguments class for Payment page
 class PaymentArguments {
   final String billId;
@@ -34,7 +36,8 @@ class PaymentArguments {
 /// Route names constants
 class Routes {
   // Auth routes
-  static const String unifiedLogin = '/'; // New default: Single login
+  static const String authGate = '/'; // Session verification & Splash Gate
+  static const String unifiedLogin = '/login'; // Single login
   static const String roleSelection = '/role-selection'; // Keep for fallback
   static const String loginCustomer = '/login-customer';
   static const String loginAdmin = '/login-admin';
@@ -71,7 +74,10 @@ class RouteGenerator {
     final args = settings.arguments;
 
     switch (settings.name) {
-      // Auth routes - NEW: Unified Login (Default)
+      // Auth routes - Auth Gate & Splash
+      case Routes.authGate:
+        return MaterialPageRoute(builder: (_) => const AuthGate());
+
       case Routes.unifiedLogin:
         return MaterialPageRoute(builder: (_) => const UnifiedLoginPage());
 

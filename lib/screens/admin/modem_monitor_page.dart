@@ -3,6 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:lucide_icons/lucide_icons.dart';
+import 'admin_alert_center_page.dart';
 
 /// Modem Live Monitor - Real-time Monitoring
 /// Real-time monitoring of modem status, signal strength, connection quality
@@ -98,7 +100,14 @@ class _ModemLiveMonitorPageState extends State<ModemLiveMonitorPage> {
                   action: SnackBarAction(
                     label: 'View',
                     textColor: Colors.white,
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AdminAlertCenterPage(),
+                        ),
+                      );
+                    },
                   ),
                 ),
               );
@@ -423,7 +432,19 @@ class _ModemLiveMonitorPageState extends State<ModemLiveMonitorPage> {
               leading: const Icon(Icons.signal_cellular_alt, color: Colors.red),
               title: const Text('Poor Signal Detected'),
               subtitle: const Text('Device: GPON456789123 - Signal: -28 dBm'),
-              trailing: TextButton(onPressed: () {}, child: const Text('View')),
+              trailing: TextButton(
+                onPressed: () {
+                  _showDeviceDetailDialog(
+                    context: context,
+                    deviceId: 'GPON456789123',
+                    title: 'Poor Signal Detected (-28 dBm)',
+                    severity: 'CRITICAL',
+                    detail:
+                        'Redaman optik melebihi batas batas toleransi (-27 dBm). Hal ini dapat menyebabkan packet loss dan RTO. Disarankan inspeksi konektor patchcord & ODP.',
+                  );
+                },
+                child: const Text('View'),
+              ),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -432,10 +453,100 @@ class _ModemLiveMonitorPageState extends State<ModemLiveMonitorPage> {
               subtitle: const Text(
                 'Device: GPON789123456 - Last seen: 2 days ago',
               ),
-              trailing: TextButton(onPressed: () {}, child: const Text('View')),
+              trailing: TextButton(
+                onPressed: () {
+                  _showDeviceDetailDialog(
+                    context: context,
+                    deviceId: 'GPON789123456',
+                    title: 'Device Offline (> 48 Jam)',
+                    severity: 'HIGH',
+                    detail:
+                        'Modem ONT tidak merespons poll TR-069 dan ICMP ping. Kemungkinan pemadaman listrik di rumah pelanggan atau kabel dropcore terputus.',
+                  );
+                },
+                child: const Text('View'),
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showDeviceDetailDialog({
+    required BuildContext context,
+    required String deviceId,
+    required String title,
+    required String severity,
+    required String detail,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(LucideIcons.router, color: Colors.indigo),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                deviceId,
+                style: const TextStyle(fontFamily: 'monospace', fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              ),
+              child: Text(
+                '$severity • $title',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Analisis Diagnostik NOC:',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              detail,
+              style: const TextStyle(fontSize: 13, height: 1.4),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Tiket investigasi NOC untuk $deviceId telah dibuat!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            icon: const Icon(LucideIcons.ticket, size: 16),
+            label: const Text('Buat Tiket'),
+            style: FilledButton.styleFrom(backgroundColor: Colors.indigo),
+          ),
+        ],
       ),
     );
   }

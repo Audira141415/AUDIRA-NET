@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../models/chat_model.dart';
 import '../../services/live_chat_service.dart';
-import '../../utils/app_theme.dart';
 import 'live_chat_room_page.dart';
 
 /// Cyberpunk Neo-Brutalist Live Chat Center for AUDIRA
@@ -149,6 +148,36 @@ class _LiveChatListPageState extends State<LiveChatListPage> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          final csRoom = ChatRoom(
+            id: 'room_cs_direct_${DateTime.now().millisecondsSinceEpoch}',
+            title: 'Customer Support Siaga (CS-01)',
+            type: 'customer_cs',
+            participants: ['customer', 'cs_siaga_01'],
+            lastMessage: 'Halo! Saya petugas CS Siaga 24/7. Ada yang bisa kami bantu?',
+            lastMessageTime: DateTime.now(),
+            ticketId: 'LIVE-SUPPORT',
+            status: 'online',
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LiveChatRoomPage(room: csRoom)),
+          );
+        },
+        backgroundColor: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+        foregroundColor: Colors.black,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: Colors.white, width: 1.5),
+        ),
+        icon: const Icon(LucideIcons.messageSquare, size: 18),
+        label: const Text(
+          'CHAT CS SIAGA BARU',
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
+        ),
+      ),
       body: Column(
         children: [
           // Filter & Search Controls Header
@@ -269,7 +298,7 @@ class _LiveChatListPageState extends State<LiveChatListPage> {
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: rooms.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final room = rooms[index];
                     return _buildRoomBentoCard(

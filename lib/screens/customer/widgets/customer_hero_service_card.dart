@@ -21,8 +21,8 @@ class CustomerHeroServiceCard extends StatelessWidget {
 
   String _formatCurrency(dynamic value) {
     if (value == null) return 'Rp 0';
-    final number = value is num ? value : (int.tryParse(value.toString()) ?? 0);
-    final formatted = number.toString().replaceAllMapped(
+    final intVal = (value is num ? value : (double.tryParse(value.toString()) ?? 0)).round();
+    final formatted = intVal.toString().replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (Match m) => '${m[1]}.',
     );

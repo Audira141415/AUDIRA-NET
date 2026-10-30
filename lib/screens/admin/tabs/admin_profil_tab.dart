@@ -3,7 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import '../../../config/routes.dart';
 import '../../../services/auth_service.dart';
-import '../../../services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../utils/constants.dart';
 import '../../../utils/theme_provider.dart';
 import '../audit_logs_page.dart';
@@ -31,23 +31,28 @@ class _AdminProfilTabState extends State<AdminProfilTab> {
 
   Future<void> _loadStats() async {
     try {
-      final db = await DatabaseService.instance.database;
+      final firestore = FirebaseFirestore.instance;
 
-      final custRes = await db.rawQuery('SELECT COUNT(*) as count FROM users WHERE role = ?', ['customer']);
-      final custCount = custRes.first['count'] as int? ?? 0;
+      final custSnap = await firestore
+          .collection('users')
+          .where('role', isEqualTo: 'customer')
+          .count()
+          .get();
 
-      final payRes = await db.rawQuery('SELECT COUNT(*) as count FROM payments');
-      final payCount = payRes.first['count'] as int? ?? 0;
+      final paySnap = await firestore.collection('payments').count().get();
 
-      final tekRes = await db.rawQuery('SELECT COUNT(*) as count FROM users WHERE role = ?', ['teknisi']);
-      final tekCount = tekRes.first['count'] as int? ?? 0;
+      final tekSnap = await firestore
+          .collection('users')
+          .where('role', isEqualTo: 'teknisi')
+          .count()
+          .get();
 
       if (mounted) {
         setState(() {
           _stats = {
-            'customers': custCount,
-            'payments': payCount,
-            'technicians': tekCount,
+            'customers': custSnap.count ?? 0,
+            'payments': paySnap.count ?? 0,
+            'technicians': tekSnap.count ?? 0,
           };
           _isLoading = false;
         });

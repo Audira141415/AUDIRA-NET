@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../../services/firebase_service.dart';
 import '../../widgets/enhanced_ui_components.dart';
 import 'dart:developer' as developer;
 
@@ -19,7 +18,6 @@ class CustomerDetailPage extends StatefulWidget {
 class _CustomerDetailPageState extends State<CustomerDetailPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final FirebaseService _firebaseService = FirebaseService();
 
   bool _isLoadingBills = false;
   bool _isLoadingTickets = false;
@@ -415,7 +413,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage>
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: statusColor.withOpacity(0.2),
+              backgroundColor: statusColor.withValues(alpha: 0.2),
               child: Icon(Icons.confirmation_number, color: statusColor),
             ),
             title: Text(
@@ -442,7 +440,7 @@ class _CustomerDetailPageState extends State<CustomerDetailPage>
                     status.toUpperCase(),
                     style: TextStyle(fontSize: 10, color: statusColor),
                   ),
-                  backgroundColor: statusColor.withOpacity(0.1),
+                  backgroundColor: statusColor.withValues(alpha: 0.1),
                 ),
                 if (priority == 'high')
                   Padding(

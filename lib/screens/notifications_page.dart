@@ -4,6 +4,7 @@ import '../services/firebase_service.dart';
 import '../services/auth_service.dart';
 import 'package:intl/intl.dart';
 import 'chat/live_chat_list_page.dart';
+import 'telegram_topics_screen.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -183,6 +184,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
               style: TextButton.styleFrom(foregroundColor: Colors.blue),
             ),
           IconButton(
+            icon: const Icon(LucideIcons.send, color: Colors.blue),
+            tooltip: 'Telegram Operations Hub',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TelegramTopicsScreen()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(LucideIcons.refreshCw),
             onPressed: _loadNotifications,
           ),
@@ -190,34 +201,94 @@ class _NotificationsPageState extends State<NotificationsPage> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    LucideIcons.bellOff,
-                    size: 80,
-                    color: Colors.grey.shade400,
+          : Column(
+              children: [
+                // Telegram Hub Quick Access Banner
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const TelegramTopicsScreen()),
+                    );
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.blue[900]!, Colors.lightBlue[800]!],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withValues(alpha: 0.25),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(LucideIcons.send, color: Colors.white, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Telegram Operations Hub (14 Topics)',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                'Saluran notifikasi resmi & telemetri supergroup',
+                                style: TextStyle(color: Colors.white70, fontSize: 11),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(LucideIcons.chevronRight, color: Colors.white70, size: 18),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Tidak ada notifikasi',
-                    style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: _loadNotifications,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _notifications.length,
-                itemBuilder: (context, index) {
-                  final notification = _notifications[index];
-                  return _buildNotificationCard(notification);
-                },
-              ),
+                ),
+                Expanded(
+                  child: _notifications.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                LucideIcons.bellOff,
+                                size: 80,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Tidak ada notifikasi',
+                                style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                              ),
+                            ],
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: _loadNotifications,
+                          child: ListView.builder(
+                            padding: const EdgeInsets.all(16),
+                            itemCount: _notifications.length,
+                            itemBuilder: (context, index) {
+                              final notification = _notifications[index];
+                              return _buildNotificationCard(notification);
+                            },
+                          ),
+                        ),
+                ),
+              ],
             ),
     );
   }

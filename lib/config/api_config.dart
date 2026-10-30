@@ -36,6 +36,19 @@ class ApiConfig {
   // Settings
   static const String settings = '/settings';
 
+  // Telegram Operations Hub
+  static const String telegramStatus = '/telegram/status';
+  static const String telegramTopics = '/telegram/topics';
+  static const String telegramBroadcast = '/telegram/broadcast';
+
+  // Speedtest & SLA Benchmarking
+  static const String speedtestServers = '/speedtest/servers';
+  static const String speedtestPing = '/speedtest/ping';
+  static const String speedtestDownload = '/speedtest/download';
+  static const String speedtestUpload = '/speedtest/upload';
+  static const String speedtestRun = '/speedtest/run';
+  static const String speedtestHistory = '/speedtest/history';
+
   // Timeouts (Optimized for responsive mobile UX)
   static const Duration connectionTimeout = Duration(seconds: 6);
   static const Duration receiveTimeout = Duration(seconds: 6);

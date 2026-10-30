@@ -40,7 +40,6 @@ class AuthService {
     try {
       LoggerService.authInfo('🔐 AuthService.login() called with:');
       LoggerService.authInfo('   Email: $email');
-      LoggerService.authInfo('   Password: $password');
       LoggerService.authInfo('   Expected Role: $role');
 
       // Authenticate with Firebase

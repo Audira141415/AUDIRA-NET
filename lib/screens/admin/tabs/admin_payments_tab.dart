@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Clean Apple/Linear Transactions & Network Monitoring Tab for AUDIRA Admin
 class AdminPaymentsTab extends StatefulWidget {
@@ -35,15 +35,23 @@ class _AdminPaymentsTabState extends State<AdminPaymentsTab>
   Future<void> _loadPayments() async {
     setState(() => _isLoadingPayments = true);
     try {
-      final db = await DatabaseService.instance.database;
-      final payments = await db.rawQuery('''
-        SELECT p.*, b.billMonth, c.customerId, u.name as customerName
-        FROM payments p
-        JOIN bills b ON p.billId = b.id
-        JOIN customers c ON p.customerId = c.id
-        JOIN users u ON c.userId = u.id
-        ORDER BY p.paidAt DESC
-      ''');
+      final snap = await FirebaseFirestore.instance
+          .collection('payments')
+          .limit(50)
+          .get();
+
+      final payments = snap.docs.map((doc) {
+        final data = doc.data();
+        return {
+          'id': doc.id,
+          ...data,
+          'customerName': data['customerName'] ?? data['name'] ?? 'Pelanggan',
+          'billMonth': data['billMonth'] ?? data['month'] ?? '-',
+          'paymentStatus': (data['paymentStatus'] ?? data['status'] ?? 'paid').toString().toLowerCase(),
+          'method': data['paymentMethod'] ?? data['method'] ?? 'Online',
+          'amount': data['amount'] ?? 0,
+        };
+      }).toList();
 
       if (mounted) {
         setState(() {
@@ -59,7 +67,12 @@ class _AdminPaymentsTabState extends State<AdminPaymentsTab>
   Future<void> _loadSpeedTests() async {
     setState(() => _isLoadingSpeedTests = true);
     try {
-      final tests = await DatabaseService.instance.getAllSpeedTests();
+      final snap = await FirebaseFirestore.instance
+          .collection('speed_tests')
+          .limit(30)
+          .get();
+
+      final tests = snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
       if (mounted) {
         setState(() {
           _speedTests = tests;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../services/database_service.dart';
+import '../../../services/firebase_service.dart';
 import '../../../widgets/map_picker.dart';
 
 /// Clean Apple/Linear Installation Management Tab for AUDIRA Admin
@@ -26,14 +26,14 @@ class _AdminInstallasiTabState extends State<AdminInstallasiTab> {
   Future<void> _loadInstallations() async {
     setState(() => _isLoading = true);
     try {
-      final installations = await DatabaseService.instance.getAllInstallations();
+      final installations = await FirebaseService.instance.getAllInstallations();
       if (mounted) {
         setState(() {
           if (_filterStatus == 'all') {
             _installations = installations;
           } else {
             _installations = installations
-                .where((i) => i['status'] == _filterStatus)
+                .where((i) => (i['status'] ?? '').toString().toLowerCase() == _filterStatus.toLowerCase())
                 .toList();
           }
           _isLoading = false;
@@ -193,16 +193,16 @@ class _AdminInstallasiTabState extends State<AdminInstallasiTab> {
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
                   try {
-                    await DatabaseService.instance.createInstallation({
-                      'customer_name': customerName,
+                    await FirebaseService.instance.createInstallation({
+                      'customerName': customerName,
                       'phone': phone,
                       'address': address,
-                      'package_name': packageName,
+                      'packageName': packageName,
                       'speed': speed,
                       'price': price,
-                      'scheduled_date':
+                      'scheduledDate':
                           '${scheduledDate.year}-${scheduledDate.month.toString().padLeft(2, '0')}-${scheduledDate.day.toString().padLeft(2, '0')}',
-                      'scheduled_time':
+                      'scheduledTime':
                           '${scheduledTime.hour.toString().padLeft(2, '0')}:${scheduledTime.minute.toString().padLeft(2, '0')}',
                       'notes': '',
                       'latitude': selectedLat,
@@ -233,7 +233,7 @@ class _AdminInstallasiTabState extends State<AdminInstallasiTab> {
     );
   }
 
-  Future<void> _deleteInstallation(int id) async {
+  Future<void> _deleteInstallation(dynamic id) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -255,7 +255,7 @@ class _AdminInstallasiTabState extends State<AdminInstallasiTab> {
 
     if (confirm == true) {
       try {
-        await DatabaseService.instance.deleteInstallation(id);
+        await FirebaseService.instance.deleteInstallation(id.toString());
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Instalasi berhasil dihapus')),
@@ -462,7 +462,7 @@ class _AdminInstallasiTabState extends State<AdminInstallasiTab> {
                                         children: [
                                           IconButton(
                                             icon: const Icon(LucideIcons.trash2, size: 16, color: Color(0xFFEF4444)),
-                                            onPressed: () => _deleteInstallation(item['id'] as int),
+                                            onPressed: () => _deleteInstallation(item['id']),
                                             tooltip: 'Hapus',
                                           ),
                                         ],

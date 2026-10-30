@@ -323,11 +323,12 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
           ],
         ),
         trailing: Chip(
+          avatar: Icon(statusIcon, size: 14, color: statusColor),
           label: Text(
             status.toUpperCase(),
             style: TextStyle(fontSize: 10, color: statusColor),
           ),
-          backgroundColor: statusColor.withOpacity(0.1),
+          backgroundColor: statusColor.withValues(alpha: 0.1),
         ),
         children: [
           Padding(
@@ -516,8 +517,8 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
           title: Text(isEdit ? 'Edit Employee' : 'Add New Employee'),
           content: SingleChildScrollView(
             child: Column(
@@ -676,38 +677,38 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
                         .collection('employees')
                         .doc(employee['id'])
                         .update(data);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Employee updated successfully'),
-                        ),
-                      );
-                    }
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Employee updated successfully'),
+                      ),
+                    );
                   } else {
                     data['createdAt'] = FieldValue.serverTimestamp();
                     await FirebaseFirestore.instance
                         .collection('employees')
                         .add(data);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Employee added successfully'),
-                        ),
-                      );
-                    }
-                  }
-                  Navigator.pop(context);
-                  _loadEmployees();
-                } catch (e) {
-                  developer.log('Error saving employee: $e');
-                  if (mounted) {
+                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Error saving employee'),
-                        backgroundColor: Colors.red,
+                        content: Text('Employee added successfully'),
                       ),
                     );
                   }
+                  if (!mounted) return;
+                  if (dialogContext.mounted) {
+                    Navigator.pop(dialogContext);
+                  }
+                  _loadEmployees();
+                } catch (e) {
+                  developer.log('Error saving employee: $e');
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Error saving employee'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               },
               child: Text(isEdit ? 'Update' : 'Add'),
@@ -721,14 +722,14 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
   void _confirmDelete(Map<String, dynamic> employee) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Employee'),
         content: Text(
           'Are you sure you want to delete ${employee['name']}? This action cannot be undone.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           FilledButton(
@@ -738,25 +739,25 @@ class _EmployeeManagementPageState extends State<EmployeeManagementPage> {
                     .collection('employees')
                     .doc(employee['id'])
                     .delete();
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Employee deleted successfully'),
-                    ),
-                  );
-                  _loadEmployees();
+                if (!mounted) return;
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
                 }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Employee deleted successfully'),
+                  ),
+                );
+                _loadEmployees();
               } catch (e) {
                 developer.log('Error deleting employee: $e');
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Error deleting employee'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Error deleting employee'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),

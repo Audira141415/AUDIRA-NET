@@ -1,5 +1,19 @@
+library;
+
 /// Chat Models for AUDIRA Real-time Live Chat System
 /// Supports Customer ↔ CS and Customer ↔ Teknisi communication
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+DateTime _parseDateTime(dynamic val) {
+  if (val == null) return DateTime.now();
+  if (val is Timestamp) return val.toDate();
+  if (val is DateTime) return val;
+  if (val is int) return DateTime.fromMillisecondsSinceEpoch(val);
+  if (val is String) {
+    return DateTime.tryParse(val) ?? DateTime.now();
+  }
+  return DateTime.now();
+}
 
 class ChatRoom {
   final String id;
@@ -33,11 +47,7 @@ class ChatRoom {
       type: map['type'] ?? 'customer_cs',
       participants: List<String>.from(map['participants'] ?? []),
       lastMessage: map['lastMessage'] ?? '',
-      lastMessageTime: map['lastMessageTime'] != null
-          ? (map['lastMessageTime'] is DateTime
-              ? map['lastMessageTime'] as DateTime
-              : DateTime.tryParse(map['lastMessageTime'].toString()) ?? DateTime.now())
-          : DateTime.now(),
+      lastMessageTime: _parseDateTime(map['lastMessageTime']),
       unreadCount: map['unreadCount'] ?? 0,
       status: map['status'] ?? 'online',
       ticketId: map['ticketId'],
@@ -94,11 +104,7 @@ class LiveChatMessage {
       senderName: map['senderName'] ?? 'Pengguna',
       senderRole: map['senderRole'] ?? 'customer',
       message: map['message'] ?? '',
-      timestamp: map['timestamp'] != null
-          ? (map['timestamp'] is DateTime
-              ? map['timestamp'] as DateTime
-              : DateTime.tryParse(map['timestamp'].toString()) ?? DateTime.now())
-          : DateTime.now(),
+      timestamp: _parseDateTime(map['timestamp']),
       isRead: map['isRead'] ?? false,
       type: map['type'] ?? 'text',
     );

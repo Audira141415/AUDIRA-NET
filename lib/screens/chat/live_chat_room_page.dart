@@ -27,6 +27,7 @@ class _LiveChatRoomPageState extends State<LiveChatRoomPage> {
 
   late final String _myId;
   late final String _myName;
+  late final String _myRole;
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _LiveChatRoomPageState extends State<LiveChatRoomPage> {
     final user = AuthService.instance.currentUserData;
     _myId = user?['id']?.toString() ?? 'customer_usr';
     _myName = user?['name']?.toString() ?? 'Pelanggan';
+    _myRole = user?['role']?.toString() ?? 'customer';
 
     LiveChatService.instance.markRoomAsRead(widget.room.id);
   }
@@ -73,7 +75,7 @@ class _LiveChatRoomPageState extends State<LiveChatRoomPage> {
         roomId: widget.room.id,
         senderId: _myId,
         senderName: _myName,
-        senderRole: 'customer',
+        senderRole: _myRole,
         message: text,
       );
       _scrollToBottom();
@@ -426,7 +428,7 @@ class _LiveChatRoomPageState extends State<LiveChatRoomPage> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         scrollDirection: Axis.horizontal,
         itemCount: chips.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final chipText = chips[index];
           return ActionChip(

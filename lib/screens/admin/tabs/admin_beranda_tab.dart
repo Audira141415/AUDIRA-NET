@@ -3,12 +3,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
-import '../../../services/database_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../utils/theme_provider.dart';
+import '../../../utils/app_theme.dart';
 import '../admin_alert_center_page.dart';
 import '../widgets/admin_kpi_card.dart';
 import '../widgets/admin_network_status_card.dart';
 import '../widgets/admin_quick_actions.dart';
+import '../widgets/odp_incident_broadcast_sheet.dart';
 
 /// Clean Apple/Linear Executive NOC Dashboard Tab for AUDIRA Admin
 class AdminBerandaTab extends StatefulWidget {
@@ -75,48 +77,44 @@ class _AdminBerandaTabState extends State<AdminBerandaTab> {
 
   Future<void> _loadISPStats() async {
     try {
-      final db = await DatabaseService.instance.database;
+      final firestore = FirebaseFirestore.instance;
 
-      final totalResult = await db.rawQuery(
-        'SELECT COUNT(*) as count FROM users WHERE role = ?',
-        ['customer'],
-      );
-      final totalCustomers = totalResult.first['count'] as int? ?? 0;
+      // 1. Total Customers
+      final usersSnap = await firestore
+          .collection('users')
+          .where('role', isEqualTo: 'customer')
+          .get();
+      final totalCustomers = usersSnap.docs.length;
 
-      final activeResult = await db.rawQuery('''
-        SELECT COUNT(DISTINCT customerId) as count 
-        FROM payments 
-        WHERE paymentStatus = 'paid'
-      ''');
-      final activeCustomers = activeResult.first['count'] as int? ?? 0;
+      // 2. Open Tickets
+      final ticketsSnap = await firestore
+          .collection('tickets')
+          .where('status', isNotEqualTo: 'closed')
+          .get();
+      final openTickets = ticketsSnap.docs.length;
 
-      final ticketResult = await db.rawQuery(
-        'SELECT COUNT(*) as count FROM tickets WHERE status != ?',
-        ['closed'],
-      );
-      final openTickets = ticketResult.first['count'] as int? ?? 0;
+      // 3. Payments and Revenue
+      final paymentsSnap = await firestore.collection('payments').get();
+      int revenue = 0;
+      int pendingPayments = 0;
+      int receivedPayments = 0;
+      final activeCustomerIds = <String>{};
 
-      final now = DateTime.now();
-      final firstDay = DateTime(now.year, now.month, 1).toIso8601String();
-      final revResult = await db.rawQuery('''
-        SELECT SUM(amount) as total 
-        FROM payments 
-        WHERE paymentStatus = 'paid' 
-        AND paidAt >= ?
-      ''', [firstDay]);
-      final revenue = revResult.first['total'] as int? ?? 0;
+      for (var doc in paymentsSnap.docs) {
+        final data = doc.data();
+        final status = (data['paymentStatus'] ?? data['status'] ?? '').toString().toLowerCase();
+        final amount = (data['amount'] as num?)?.toInt() ?? 0;
+        final cId = data['customerId']?.toString();
 
-      final pendingResult = await db.rawQuery(
-        'SELECT COUNT(*) as count FROM payments WHERE paymentStatus = ?',
-        ['pending'],
-      );
-      final pendingPayments = pendingResult.first['count'] as int? ?? 0;
-
-      final paidResult = await db.rawQuery(
-        'SELECT COUNT(*) as count FROM payments WHERE paymentStatus = ?',
-        ['paid'],
-      );
-      final receivedPayments = paidResult.first['count'] as int? ?? 0;
+        if (status == 'paid') {
+          revenue += amount;
+          receivedPayments++;
+          if (cId != null) activeCustomerIds.add(cId);
+        } else if (status == 'pending') {
+          pendingPayments++;
+        }
+      }
+      final activeCustomers = activeCustomerIds.isNotEmpty ? activeCustomerIds.length : totalCustomers;
 
       if (mounted) {
         setState(() {
@@ -137,52 +135,60 @@ class _AdminBerandaTabState extends State<AdminBerandaTab> {
 
   Future<void> _loadRecentActivities() async {
     try {
-      final db = await DatabaseService.instance.database;
+      final firestore = FirebaseFirestore.instance;
 
-      final customers = await db.query(
-        'users',
-        where: 'role = ?',
-        whereArgs: ['customer'],
-        orderBy: 'id DESC',
-        limit: 5,
-      );
+      final usersSnap = await firestore
+          .collection('users')
+          .where('role', isEqualTo: 'customer')
+          .limit(5)
+          .get();
 
-      final payments = await db.query('payments', orderBy: 'id DESC', limit: 5);
-      final tickets = await db.query('tickets', orderBy: 'createdAt DESC', limit: 5);
+      final paymentsSnap = await firestore
+          .collection('payments')
+          .limit(5)
+          .get();
+
+      final ticketsSnap = await firestore
+          .collection('tickets')
+          .limit(5)
+          .get();
 
       List<Map<String, dynamic>> activities = [];
 
-      for (var c in customers) {
+      for (var doc in usersSnap.docs) {
+        final c = doc.data();
         activities.add({
           'type': 'customer',
           'icon': LucideIcons.userPlus,
           'title': 'Pelanggan Baru',
-          'subtitle': '${c['name']} • ${c['email']}',
+          'subtitle': '${c['name'] ?? 'Pelanggan'} • ${c['email'] ?? '-'}',
           'time': 'Baru saja',
           'color': const Color(0xFF0284C7),
           'data': c,
         });
       }
 
-      for (var p in payments) {
+      for (var doc in paymentsSnap.docs) {
+        final p = doc.data();
         activities.add({
           'type': 'payment',
           'icon': LucideIcons.creditCard,
           'title': 'Pembayaran Diterima',
-          'subtitle': 'Rp ${p['amount']} • ${p['paymentMethod'] ?? 'Online'}',
-          'time': p['paidAt'] ?? 'Hari ini',
+          'subtitle': 'Rp ${p['amount'] ?? 0} • ${p['paymentMethod'] ?? 'Online'}',
+          'time': p['paidAt'] != null ? p['paidAt'].toString() : 'Hari ini',
           'color': const Color(0xFF10B981),
           'data': p,
         });
       }
 
-      for (var t in tickets) {
-        final isHigh = t['priority'] == 'high';
+      for (var doc in ticketsSnap.docs) {
+        final t = doc.data();
+        final isHigh = (t['priority'] ?? '').toString().toLowerCase() == 'high';
         activities.add({
           'type': 'ticket',
           'icon': LucideIcons.helpCircle,
           'title': 'Tiket Layanan',
-          'subtitle': '${t['subject'] ?? 'Laporan Kendala'}',
+          'subtitle': '${t['subject'] ?? t['title'] ?? 'Laporan Kendala'}',
           'time': t['createdAt'] ?? 'Baru saja',
           'color': isHigh ? const Color(0xFFEF4444) : const Color(0xFFF59E0B),
           'data': t,
@@ -514,7 +520,12 @@ class _AdminBerandaTabState extends State<AdminBerandaTab> {
                   status: _ispStats['networkStatus'] as String? ?? 'online',
                 ),
 
-                const SizedBox(height: 22),
+                const SizedBox(height: 16),
+
+                // Rapid Outage & ODP Incident Dispatch Banner
+                _buildEmergencyDispatchBanner(context, isDark),
+
+                const SizedBox(height: 20),
 
                 // Operational Quick Action Matrix
                 const AdminQuickActions(),
@@ -687,6 +698,141 @@ class _AdminBerandaTabState extends State<AdminBerandaTab> {
             fontSize: 11,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected ? selectedText : unselectedText,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmergencyDispatchBanner(BuildContext context, bool isDark) {
+    final cardBg = isDark ? const Color(0xFF0F172A) : Colors.white;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFFEF4444).withValues(alpha: 0.35)
+              : const Color(0xFFFCA5A5),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFEF4444).withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const OdpIncidentBroadcastSheet(),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withValues(alpha: isDark ? 0.2 : 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: const Icon(
+                      LucideIcons.radioTower,
+                      color: Color(0xFFEF4444),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'DISPATCH GANGGUAN ODP',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.3,
+                                color: isDark ? AppTheme.textPrimary : const Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF25D366).withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'WA BLAST',
+                                style: TextStyle(
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF25D366),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Kirim broadcast FO Cut / Maintenance per klaster ke WhatsApp',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0284C7).withValues(alpha: isDark ? 0.2 : 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: const Color(0xFF0284C7).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Buat',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0284C7),
+                          ),
+                        ),
+                        SizedBox(width: 4),
+                        Icon(LucideIcons.chevronRight, size: 14, color: Color(0xFF0284C7)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

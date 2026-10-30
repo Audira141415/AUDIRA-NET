@@ -66,7 +66,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
 
       _totalRevenue = revenueSnapshot.docs.fold<double>(
         0,
-        (sum, doc) => sum + ((doc.data()['amount'] as num?)?.toDouble() ?? 0),
+        (total, doc) => total + ((doc.data()['amount'] as num?)?.toDouble() ?? 0),
       );
 
       // Load pending payments
@@ -78,7 +78,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
       _pendingPayments = pendingSnapshot.docs.length;
       _pendingAmount = pendingSnapshot.docs.fold<double>(
         0,
-        (sum, doc) => sum + ((doc.data()['amount'] as num?)?.toDouble() ?? 0),
+        (total, doc) => total + ((doc.data()['amount'] as num?)?.toDouble() ?? 0),
       );
 
       // Load expenses
@@ -89,7 +89,7 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
 
       _totalExpenses = expenseSnapshot.docs.fold<double>(
         0,
-        (sum, doc) => sum + ((doc.data()['amount'] as num?)?.toDouble() ?? 0),
+        (total, doc) => total + ((doc.data()['amount'] as num?)?.toDouble() ?? 0),
       );
 
       // Calculate net profit
@@ -722,7 +722,10 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                   'Recent Transactions',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                TextButton(onPressed: () {}, child: const Text('View All')),
+                TextButton(
+                  onPressed: _showAllTransactionsSheet,
+                  child: const Text('View All'),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -803,6 +806,102 @@ class _FinancialDashboardPageState extends State<FinancialDashboardPage> {
                   ),
                 );
               }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAllTransactionsSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.75,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => Column(
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Semua Transaksi (${_recentTransactions.length})',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: _recentTransactions.isEmpty
+                  ? const Center(child: Text('Tidak ada transaksi tercatat'))
+                  : ListView.separated(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _recentTransactions.length,
+                      separatorBuilder: (context, index) => const Divider(),
+                      itemBuilder: (context, index) {
+                        final t = _recentTransactions[index];
+                        final amount =
+                            (t['amount'] as num?)?.toDouble() ?? 0;
+                        final status =
+                            (t['status'] ?? 'unknown').toString().toLowerCase();
+                        final customerName =
+                            t['customerName'] ?? 'Pelanggan';
+                        final isPaid = status == 'paid';
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: CircleAvatar(
+                            backgroundColor: (isPaid
+                                    ? Colors.green
+                                    : Colors.orange)
+                                .withValues(alpha: 0.1),
+                            child: Icon(
+                              isPaid ? Icons.check_circle : Icons.schedule,
+                              color: isPaid ? Colors.green : Colors.orange,
+                            ),
+                          ),
+                          title: Text(
+                            customerName,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text('Status: ${status.toUpperCase()}'),
+                          trailing: Text(
+                            'Rp ${NumberFormat('#,###').format(amount)}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isPaid
+                                  ? Colors.green.shade700
+                                  : Colors.orange.shade800,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
       ),

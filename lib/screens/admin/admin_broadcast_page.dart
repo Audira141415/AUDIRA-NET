@@ -3,6 +3,7 @@ import '../../services/broadcast_service.dart';
 import '../../services/auth_service.dart';
 import '../../models/broadcast_notification.dart';
 import 'package:intl/intl.dart';
+import 'widgets/odp_incident_broadcast_sheet.dart';
 
 class AdminBroadcastPage extends StatefulWidget {
   const AdminBroadcastPage({super.key});
@@ -91,17 +92,21 @@ class _AdminBroadcastPageState extends State<AdminBroadcastPage>
     if (confirmed == true && mounted) {
       try {
         await _broadcastService.cancelBroadcast(broadcast.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Broadcast dibatalkan'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        _loadData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Broadcast dibatalkan'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          _loadData();
+        }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
       }
     }
   }
@@ -113,6 +118,20 @@ class _AdminBroadcastPageState extends State<AdminBroadcastPage>
         title: const Text('Broadcast Notifikasi'),
         backgroundColor: Colors.purple,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.cell_tower),
+            tooltip: 'WhatsApp Blast Insiden ODP',
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const OdpIncidentBroadcastSheet(),
+              ).then((_) => _loadData());
+            },
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,

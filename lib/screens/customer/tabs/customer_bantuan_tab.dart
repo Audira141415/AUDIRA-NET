@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../services/firebase_service.dart';
@@ -90,11 +91,709 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
     ];
   }
 
-  Future<void> _launchUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+
+
+
+  void _showWhatsAppNocModal() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(
+            color: const Color(0xFF00FF9D),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 48,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00FF9D).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF00FF9D), width: 1.5),
+                  ),
+                  child: const Icon(LucideIcons.messageSquare, color: Color(0xFF00FF9D), size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'WHATSAPP NOC EMERGENCY',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const Text(
+                        '// FAST RESPONSE < 3 MENIT • 24/7 SIAGA',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: Color(0xFF00FF9D),
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(LucideIcons.x, color: isDark ? Colors.white70 : Colors.black54),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF05070D) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'HOTLINE WHATSAPP RESMI:',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF94A3B8), fontFamily: 'monospace'),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        '+62 821-1200-1600',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF00FF9D),
+                          fontFamily: 'monospace',
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(const ClipboardData(text: '+6282112001600'));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('✅ Nomor WhatsApp NOC disalin ke clipboard!'),
+                              backgroundColor: Color(0xFF059669),
+                              behavior: SnackBarBehavior.floating,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00FF9D),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        icon: const Icon(LucideIcons.copy, size: 14),
+                        label: const Text('Salin', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+              ),
+              child: const Row(
+                children: [
+                  Icon(LucideIcons.info, size: 16, color: Color(0xFF00F0FF)),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Pesan Otomatis: "Halo NOC AUDIRA, saya butuh bantuan darurat untuk kendala koneksi internet fiber."',
+                      style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  Navigator.pop(context);
+                  const url = 'https://wa.me/6282112001600?text=Halo%20NOC%20Audira,%20saya%20butuh%20bantuan%20darurat%20koneksi%20fiber';
+                  final uri = Uri.parse(url);
+                  try {
+                    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    if (!launched) {
+                      Clipboard.setData(const ClipboardData(text: '+6282112001600'));
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text('Nomor WA +6282112001600 disalin ke clipboard.'),
+                          backgroundColor: Color(0xFF059669),
+                        ),
+                      );
+                    }
+                  } catch (_) {
+                    Clipboard.setData(const ClipboardData(text: '+6282112001600'));
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Nomor WA +6282112001600 disalin ke clipboard.'),
+                        backgroundColor: Color(0xFF059669),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00FF9D),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.white, width: 1.5),
+                  ),
+                  elevation: 0,
+                ),
+                icon: const Icon(LucideIcons.externalLink, size: 18),
+                label: const Text(
+                  'BUKA CHAT WHATSAPP LANGSUNG ➔',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCallCenterModal() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(
+            color: const Color(0xFF00F0FF),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 48,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00F0FF).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFF00F0FF), width: 1.5),
+                  ),
+                  child: const Icon(LucideIcons.phoneCall, color: Color(0xFF00F0FF), size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'CALL CENTER BEBAS PULSA',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const Text(
+                        '// OPERATOR NOC ON-DUTY • 24 JAM SIAGA',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: Color(0xFF00F0FF),
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(LucideIcons.x, color: isDark ? Colors.white70 : Colors.black54),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF05070D) : const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('HOTLINE TOLL-FREE:', style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontFamily: 'monospace')),
+                          SizedBox(height: 2),
+                          Text(
+                            '1500-888',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF00F0FF), fontFamily: 'monospace'),
+                          ),
+                        ],
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(const ClipboardData(text: '1500888'));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('✅ Nomor 1500-888 disalin!'), backgroundColor: Color(0xFF0284C7)),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00F0FF),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        icon: const Icon(LucideIcons.copy, size: 14),
+                        label: const Text('Salin', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 20, color: Color(0xFF1E293B)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('LINE HUNTING PSTN:', style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8), fontFamily: 'monospace')),
+                          const SizedBox(height: 2),
+                          Text(
+                            '(021) 555-8900',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: isDark ? Colors.white : Colors.black, fontFamily: 'monospace'),
+                          ),
+                        ],
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(const ClipboardData(text: '0215558900'));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('✅ Nomor (021) 555-8900 disalin!'), backgroundColor: Color(0xFF0284C7)),
+                          );
+                        },
+                        icon: const Icon(LucideIcons.copy, size: 13, color: Color(0xFF94A3B8)),
+                        label: const Text('Salin', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final uri = Uri.parse('tel:1500888');
+                  try {
+                    await launchUrl(uri);
+                  } catch (_) {
+                    Clipboard.setData(const ClipboardData(text: '1500888'));
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF00F0FF),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.white, width: 1.5),
+                  ),
+                  elevation: 0,
+                ),
+                icon: const Icon(LucideIcons.phone, size: 18),
+                label: const Text(
+                  'HUBUNGI OPERATOR SEKARANG ➔',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTicketDetailModal(Map<String, dynamic> ticket) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final id = ticket['id'] ?? 'TKT-LIVE';
+    final title = ticket['title'] ?? 'Tiket Kendala Jaringan';
+    final status = ticket['status'] ?? 'open';
+    final isClosed = status == 'closed' || status == 'resolved' || status == 'selesai';
+    final tech = ticket['technician'] ?? 'Ahmad Fauzi (NOC-FIELD-02)';
+    final category = ticket['category'] ?? 'Kendala Fiber Optik';
+    final createdAt = ticket['createdAt'] ?? '29 Okt 2026, 14:10 WIB';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border.all(
+            color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0F172A),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 48,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      id,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF00F0FF),
+                        fontFamily: 'monospace',
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: (isClosed ? const Color(0xFF00FF9D) : const Color(0xFFFFB800)).withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: isClosed ? const Color(0xFF00FF9D) : const Color(0xFFFFB800),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        isClosed ? 'SELESAI // TUNTAS' : 'PROSES NOC // TEKNISI',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: isClosed ? const Color(0xFF00FF9D) : const Color(0xFFFFB800),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: Icon(LucideIcons.x, color: isDark ? Colors.white70 : Colors.black54),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '// Kategori: $category • Dilaporkan: $createdAt',
+              style: const TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8), fontFamily: 'monospace'),
+            ),
+            const SizedBox(height: 16),
+
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Technical Telemetry Box
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF05070D) : const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'TELEMETRI & TITIK FIBER OPTIK (TR-069):',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF00F0FF), fontFamily: 'monospace'),
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              _buildTelemetryCell('Redaman Optik Rx', '-18.4 dBm', const Color(0xFF00FF9D), isDark),
+                              const SizedBox(width: 8),
+                              _buildTelemetryCell('Titik ODP Distribusi', 'ODP-PLG-04/12', const Color(0xFF00F0FF), isDark),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _buildTelemetryCell('OLT Core Backbone', 'GPON-01/04', const Color(0xFF7928CA), isDark),
+                              const SizedBox(width: 8),
+                              _buildTelemetryCell('Model ONT Router', 'ZTE F670L Wi-Fi 6', Colors.amberAccent, isDark),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Multi-Step SLA Tracker
+                    const Text(
+                      'TIMELINE PENANGANAN SLA REALTIME:',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Color(0xFF94A3B8), fontFamily: 'monospace'),
+                    ),
+                    const SizedBox(height: 10),
+                    _buildTimelineStep(1, 'Laporan Tiket Diterima', 'Dispatched otomatis ke Sistem Pemantauan NOC', isClosed || true, isDark),
+                    _buildTimelineStep(2, 'Analisis Telemetri OLT', 'Pengecekan redaman laser & port optical core', isClosed || true, isDark),
+                    _buildTimelineStep(3, 'Penugasan Teknisi Lapangan', 'Teknisi ditugaskan: $tech', isClosed || !isClosed, isDark),
+                    _buildTimelineStep(4, 'Investigasi & Splicing Optik', 'Penyambungan core kabel drop di lokasi', isClosed, isDark),
+                    _buildTimelineStep(5, 'Verifikasi & Tiket Tuntas', 'Redaman optimal terpantau stabil, layanan normal', isClosed, isDark),
+                    const SizedBox(height: 18),
+
+                    // Assigned Technician Contact Card
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF0D1527) : const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFF0070F3), width: 1.2),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF0070F3),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(LucideIcons.userCheck, color: Colors.white, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tech,
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                                ),
+                                const Text(
+                                  'Petugas Reaksi Cepat • URC Fiber Team',
+                                  style: TextStyle(fontSize: 10.5, color: Color(0xFF94A3B8)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Action Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      final techRoom = ChatRoom(
+                        id: 'room_${id.replaceAll('-', '_').toLowerCase()}',
+                        title: 'Teknisi Lapangan - $tech',
+                        type: 'customer_teknisi',
+                        participants: ['customer', 'technician_01'],
+                        lastMessage: 'Halo, saya sedang menangani tiket $id.',
+                        lastMessageTime: DateTime.now(),
+                        ticketId: id,
+                        status: 'in_field',
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LiveChatRoomPage(room: techRoom)),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00FF9D),
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Colors.white, width: 1.5),
+                      ),
+                    ),
+                    icon: const Icon(LucideIcons.messageSquare, size: 18),
+                    label: const Text('CHAT TEKNISI ➔', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    side: BorderSide(color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1), width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text('Tutup', style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.w800)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTelemetryCell(String label, String value, Color color, bool isDark) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(fontSize: 9.5, color: Color(0xFF94A3B8))),
+            const SizedBox(height: 2),
+            Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: color, fontFamily: 'monospace')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineStep(int stepNum, String title, String desc, bool isDone, bool isDark) {
+    final color = isDone ? const Color(0xFF00FF9D) : (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1));
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isDone ? const Color(0xFF00FF9D).withValues(alpha: 0.2) : Colors.transparent,
+              border: Border.all(color: color, width: 2),
+            ),
+            child: Center(
+              child: isDone
+                  ? const Icon(LucideIcons.check, size: 12, color: Color(0xFF00FF9D))
+                  : Text('$stepNum', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: color)),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: isDone ? (isDark ? Colors.white : const Color(0xFF0F172A)) : const Color(0xFF94A3B8),
+                  ),
+                ),
+                Text(desc, style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showCreateTicketDialog() {
@@ -221,16 +920,30 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
             ),
             ElevatedButton(
               onPressed: () async {
-                if (subjectController.text.trim().isNotEmpty) {
+                final title = subjectController.text.trim();
+                if (title.isNotEmpty) {
+                  final now = DateTime.now();
+                  final ticketNo = 'TKT-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${(1000 + now.millisecond).toString()}';
                   Navigator.pop(context);
+                  setState(() {
+                    _tickets.insert(0, {
+                      'id': ticketNo,
+                      'title': title,
+                      'status': 'open',
+                      'category': selectedCategory,
+                      'createdAt': 'Baru saja',
+                      'technician': 'Ahmad Fauzi (NOC-FIELD-02)',
+                      'slaRemaining': '35 Menit',
+                      'step': 2,
+                    });
+                  });
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Tiket gangguan TKT-2026-LIVE berhasil diteruskan ke NOC'),
-                      backgroundColor: Color(0xFF00FF9D),
+                    SnackBar(
+                      content: Text('Tiket $ticketNo berhasil diteruskan ke NOC & Teknisi Siaga!'),
+                      backgroundColor: const Color(0xFF00FF9D),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
-                  _loadTickets();
                 }
               },
               style: ElevatedButton.styleFrom(
@@ -454,7 +1167,7 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
                         icon: LucideIcons.messageSquare,
                         accentColor: const Color(0xFF00FF9D),
                         isDark: isDark,
-                        onTap: () => _launchUrl('https://wa.me/6282112001600?text=Halo%20NOC%20Audira,%20saya%20butuh%20bantuan%20koneksi'),
+                        onTap: _showWhatsAppNocModal,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -467,7 +1180,7 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
                         icon: LucideIcons.phoneCall,
                         accentColor: const Color(0xFF00F0FF),
                         isDark: isDark,
-                        onTap: () => _launchUrl('tel:1500888'),
+                        onTap: _showCallCenterModal,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -715,7 +1428,10 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
     final status = ticket['status'] ?? 'open';
     final isClosed = status == 'closed' || status == 'resolved';
 
-    return Container(
+    return InkWell(
+      onTap: () => _showTicketDetailModal(ticket),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -891,7 +1607,8 @@ class _CustomerBantuanTabState extends State<CustomerBantuanTab> {
           ],
         ],
       ),
-    );
+    ),
+  );
   }
 
   Widget _buildLiveChatBanner(

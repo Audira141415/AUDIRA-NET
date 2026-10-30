@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../config/routes.dart';
 import '../../../services/firebase_service.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/backend_api_service.dart';
 import '../../../utils/app_theme.dart';
 import '../../../utils/theme_provider.dart';
 import '../barcode_scanner_page.dart';
@@ -11,17 +12,15 @@ import '../../notifications_page.dart';
 import '../widgets/teknisi_duty_card.dart';
 import '../widgets/teknisi_metric_bar.dart';
 import '../widgets/teknisi_ticket_item.dart';
+import '../widgets/optical_diagnostics_sheet.dart';
+import '../widgets/otdr_break_calculator_sheet.dart';
 
 /// Dashboard Teknisi berstandar High-Utility & Anti-Slop (Minimalis, Fungsional, Cepat)
 class TeknisiDashboardTab extends StatefulWidget {
   final Function(int tabIndex)? onNavigateTab;
   final Function(Map<String, dynamic> ticket)? onOpenTicket;
 
-  const TeknisiDashboardTab({
-    super.key,
-    this.onNavigateTab,
-    this.onOpenTicket,
-  });
+  const TeknisiDashboardTab({super.key, this.onNavigateTab, this.onOpenTicket});
 
   @override
   State<TeknisiDashboardTab> createState() => _TeknisiDashboardTabState();
@@ -47,10 +46,7 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
 
   Future<void> _loadAllData() async {
     setState(() => _isLoading = true);
-    await Future.wait([
-      _checkCheckInStatus(),
-      _loadMetricsAndTickets(),
-    ]);
+    await Future.wait([_checkCheckInStatus(), _loadMetricsAndTickets()]);
     if (mounted) {
       setState(() => _isLoading = false);
     }
@@ -61,8 +57,12 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
       final userId = AuthService.instance.currentUser?.id;
       if (userId == null) return;
 
-      final hasCheckedIn = await FirebaseService.instance.hasCheckedInToday(userId);
-      final rewards = await FirebaseService.instance.getRewardsByTeknisiId(userId);
+      final hasCheckedIn = await FirebaseService.instance.hasCheckedInToday(
+        userId,
+      );
+      final rewards = await FirebaseService.instance.getRewardsByTeknisiId(
+        userId,
+      );
 
       if (mounted) {
         setState(() {
@@ -82,16 +82,82 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
       final String? zone = user?['zone'] as String?;
       final String? name = user?['name'] as String? ?? currentUser?.name;
 
+      if (name != null && name.isNotEmpty) _teknisiName = name;
+      if (zone != null && zone.isNotEmpty) _teknisiZone = zone;
+
+      // 1. Fetch real work orders from NestJS Backend API
+      List<Map<String, dynamic>> realWorkOrders = [];
+      try {
+        final res = await BackendApiService.instance.get('/field-service/jobs');
+        if (res['success'] == true && res['data'] is List) {
+          final List jobs = res['data'] as List;
+          for (final j in jobs) {
+            if (j is Map<String, dynamic>) {
+              final idStr = j['id']?.toString() ?? '';
+              final shortId = idStr.length > 8 ? idStr.substring(0, 8).toUpperCase() : idStr.toUpperCase();
+              realWorkOrders.add({
+                'id': idStr,
+                'ticketId': '#WO-$shortId',
+                'subject': j['title'] ?? 'Pekerjaan Lapangan',
+                'description': j['description'] ?? '',
+                'priority': j['priority'] ?? 'medium',
+                'status': j['status'] == 'in-progress' ? 'in_progress' : (j['status'] == 'completed' ? 'resolved' : 'open'),
+                'customerName': j['customer']?['name'] ?? 'Pelanggan Umum',
+                'phone': j['customer']?['phone'] ?? '0821-1200-1600',
+                'address': j['location'] ?? j['customer']?['address'] ?? '',
+                'scheduledAt': j['scheduledAt'],
+                'workOrderRaw': j,
+              });
+            }
+          }
+        }
+      } catch (_) {}
+
+      // 2. If realWorkOrders found from PostgreSQL database, use them!
+      if (realWorkOrders.isNotEmpty) {
+        final activeJobs = realWorkOrders.where((t) {
+          final s = (t['status'] ?? '').toString().toLowerCase();
+          return s == 'open' || s == 'in_progress' || s == 'assigned';
+        }).toList();
+
+        final completedJobs = realWorkOrders.where((t) {
+          final s = (t['status'] ?? '').toString().toLowerCase();
+          return s == 'resolved' || s == 'completed';
+        }).length;
+
+        // Sort Critical / Urgent on top
+        activeJobs.sort((a, b) {
+          final pA = (a['priority'] ?? '').toString().toLowerCase();
+          final pB = (b['priority'] ?? '').toString().toLowerCase();
+          int score(String p) => (p == 'urgent' || p == 'critical' || p == 'high') ? 2 : (p == 'medium' ? 1 : 0);
+          return score(pB).compareTo(score(pA));
+        });
+
+        if (mounted) {
+          setState(() {
+            _activeTicketCount = activeJobs.length;
+            _pendingInstallCount = realWorkOrders.where((t) => (t['subject'] as String).toLowerCase().contains('instalasi')).length;
+            _completedTodayCount = completedJobs;
+            _priorityTickets = activeJobs.take(3).toList();
+          });
+          return;
+        }
+      }
+
+      // Fallback to Firebase if backend has 0 jobs
       final allTickets = zone != null
           ? await FirebaseService.instance.getTicketsByZone(zone)
           : await FirebaseService.instance.getAllTickets();
 
-      final installStats = await FirebaseService.instance.getInstallationStats();
+      final installStats = await FirebaseService.instance
+          .getInstallationStats();
       final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
       final activeTickets = allTickets.where((t) {
         final status = (t['status'] ?? '').toString().toLowerCase();
-        return status == 'open' || status == 'in_progress' || status == 'assigned';
+        return status == 'open' ||
+            status == 'in_progress' ||
+            status == 'assigned';
       }).toList();
 
       final completedToday = allTickets.where((t) {
@@ -104,14 +170,13 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
       activeTickets.sort((a, b) {
         final pA = (a['priority'] ?? '').toString().toLowerCase();
         final pB = (b['priority'] ?? '').toString().toLowerCase();
-        int score(String p) => (p == 'critical' || p == 'high') ? 2 : (p == 'medium' ? 1 : 0);
+        int score(String p) =>
+            (p == 'critical' || p == 'high') ? 2 : (p == 'medium' ? 1 : 0);
         return score(pB).compareTo(score(pA));
       });
 
       if (mounted) {
         setState(() {
-          if (name != null && name.isNotEmpty) _teknisiName = name;
-          if (zone != null && zone.isNotEmpty) _teknisiZone = zone;
           _activeTicketCount = activeTickets.length;
           _pendingInstallCount = installStats['scheduled'] ?? 0;
           _completedTodayCount = completedToday;
@@ -123,10 +188,28 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
 
   String _formatCurrentDate() {
     final now = DateTime.now();
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const days = [
+      'Minggu',
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat',
+      'Sabtu',
+    ];
     const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
     ];
     final dayName = days[now.weekday % 7];
     final monthName = months[now.month - 1];
@@ -136,8 +219,12 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final scaffoldBg = isDark ? const Color(0xFF030712) : AppTheme.lightScaffoldBg;
-    final titleColor = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
+    final scaffoldBg = isDark
+        ? const Color(0xFF030712)
+        : AppTheme.lightScaffoldBg;
+    final titleColor = isDark
+        ? const Color(0xFFF8FAFC)
+        : const Color(0xFF0F172A);
     final subColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     return Scaffold(
@@ -156,7 +243,9 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                     pinned: true,
                     floating: false,
                     elevation: 0,
-                    backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+                    backgroundColor: isDark
+                        ? const Color(0xFF0F172A)
+                        : Colors.white,
                     scrolledUnderElevation: 1,
                     title: Row(
                       children: [
@@ -219,7 +308,10 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                   // Isi Konten Dashboard
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -255,15 +347,22 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
 
                           // Field Ops Telemetry Pill
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4.5,
+                            ),
                             decoration: BoxDecoration(
                               color: isDark
-                                  ? const Color(0xFF0284C7).withValues(alpha: 0.1)
+                                  ? const Color(
+                                      0xFF0284C7,
+                                    ).withValues(alpha: 0.1)
                                   : const Color(0xFFE0F2FE),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: isDark
-                                    ? const Color(0xFF0284C7).withValues(alpha: 0.3)
+                                    ? const Color(
+                                        0xFF0284C7,
+                                      ).withValues(alpha: 0.3)
                                     : const Color(0xFFBAE6FD),
                                 width: 1,
                               ),
@@ -279,7 +378,9 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                                     color: const Color(0xFF10B981),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF10B981).withValues(alpha: 0.6),
+                                        color: const Color(
+                                          0xFF10B981,
+                                        ).withValues(alpha: 0.6),
                                         blurRadius: 4,
                                       ),
                                     ],
@@ -292,7 +393,9 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                                     fontSize: 10,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 0.5,
-                                    color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0369A1),
+                                    color: isDark
+                                        ? const Color(0xFF38BDF8)
+                                        : const Color(0xFF0369A1),
                                   ),
                                 ),
                               ],
@@ -337,11 +440,13 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                               ),
                               if (_activeTicketCount > 0)
                                 TextButton(
-                                  onPressed: () => widget.onNavigateTab?.call(1),
+                                  onPressed: () =>
+                                      widget.onNavigateTab?.call(1),
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,
                                     minimumSize: const Size(60, 30),
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                   child: const Text(
                                     'Lihat Semua',
@@ -394,7 +499,8 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (_) => const BarcodeScannerPage(),
+                                        builder: (_) =>
+                                            const BarcodeScannerPage(),
                                       ),
                                     );
                                   },
@@ -407,12 +513,16 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                                   label: 'Peta Lokasi',
                                   color: const Color(0xFF059669),
                                   onTap: () async {
-                                    final installations = await FirebaseService.instance.getAllInstallations();
+                                    final installations = await FirebaseService
+                                        .instance
+                                        .getAllInstallations();
                                     if (context.mounted) {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => InstallationMapView(installations: installations),
+                                          builder: (_) => InstallationMapView(
+                                            installations: installations,
+                                          ),
                                         ),
                                       );
                                     }
@@ -430,7 +540,10 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                                   label: 'Jadwal Dinas',
                                   color: const Color(0xFF6366F1),
                                   onTap: () {
-                                    Navigator.pushNamed(context, Routes.jadwalTeknisi);
+                                    Navigator.pushNamed(
+                                      context,
+                                      Routes.jadwalTeknisi,
+                                    );
                                   },
                                 ),
                               ),
@@ -441,7 +554,48 @@ class _TeknisiDashboardTabState extends State<TeknisiDashboardTab> {
                                   label: 'Stok Alat & ODP',
                                   color: const Color(0xFFD97706),
                                   onTap: () {
-                                    Navigator.pushNamed(context, Routes.inventoryManagement);
+                                    Navigator.pushNamed(
+                                      context,
+                                      Routes.inventoryManagement,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _FieldToolCard(
+                                  icon: Icons.alt_route_rounded,
+                                  label: 'Kalkulator OTDR',
+                                  color: const Color(0xFFEC4899),
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) =>
+                                          const OtdrBreakCalculatorSheet(),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _FieldToolCard(
+                                  icon: Icons.settings_input_composite_rounded,
+                                  label: 'Diagnostik Optik',
+                                  color: const Color(0xFF10B981),
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (_) =>
+                                          const OpticalDiagnosticsSheet(),
+                                    );
                                   },
                                 ),
                               ),

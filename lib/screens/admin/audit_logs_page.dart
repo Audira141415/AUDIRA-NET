@@ -212,7 +212,7 @@ class _AuditLogsPageState extends State<AuditLogsPage> {
       margin: const EdgeInsets.only(bottom: 12),
       child: ExpansionTile(
         leading: CircleAvatar(
-          backgroundColor: statusColor.withOpacity(0.2),
+          backgroundColor: statusColor.withValues(alpha: 0.2),
           child: Icon(statusIcon, color: statusColor),
         ),
         title: Text(
@@ -236,7 +236,7 @@ class _AuditLogsPageState extends State<AuditLogsPage> {
             status.toUpperCase(),
             style: TextStyle(fontSize: 10, color: statusColor),
           ),
-          backgroundColor: statusColor.withOpacity(0.1),
+          backgroundColor: statusColor.withValues(alpha: 0.1),
         ),
         children: [
           Padding(

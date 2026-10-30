@@ -40,9 +40,7 @@ class LiveChatService {
     // Listen to RealtimeService socket messages if available
     try {
       RealtimeService.instance.chatStream.listen((event) {
-        if (event is Map<String, dynamic>) {
-          _handleIncomingSocketMessage(event);
-        }
+        _handleIncomingSocketMessage(event);
       });
     } catch (_) {}
   }
@@ -224,14 +222,14 @@ class LiveChatService {
     // 4. Persist to Firestore if available
     if (_firestore != null) {
       try {
-        await _firestore!
+        await _firestore
             .collection('chat_rooms')
             .doc(roomId)
             .collection('messages')
             .doc(messageId)
             .set(newMessage.toMap());
 
-        await _firestore!.collection('chat_rooms').doc(roomId).set({
+        await _firestore.collection('chat_rooms').doc(roomId).set({
           'lastMessage': message,
           'lastMessageTime': now.toIso8601String(),
         }, SetOptions(merge: true));

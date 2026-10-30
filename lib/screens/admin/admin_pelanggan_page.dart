@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/database_service.dart';
 import '../../widgets/enhanced_ui_components.dart';
 import '../../utils/excel_exporter.dart';
@@ -284,9 +285,7 @@ class _AdminPelangganPageEnhancedState
           FilledButton.icon(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Fitur edit akan segera hadir')),
-              );
+              _showEditCustomerForm(customer);
             },
             icon: const Icon(Icons.edit),
             label: const Text('Edit'),
@@ -294,6 +293,305 @@ class _AdminPelangganPageEnhancedState
         ],
       ),
     );
+  }
+
+  void _showEditCustomerForm(Map<String, dynamic> customer) {
+    final formKey = GlobalKey<FormState>();
+    final nameController =
+        TextEditingController(text: customer['name']?.toString() ?? '');
+    final emailController =
+        TextEditingController(text: customer['email']?.toString() ?? '');
+    final phoneController =
+        TextEditingController(text: customer['phone']?.toString() ?? '');
+    final addressController =
+        TextEditingController(text: customer['address']?.toString() ?? '');
+    String selectedPackage = customer['packageName']?.toString() ??
+        customer['package']?.toString() ??
+        '20 Mbps';
+    if (!['20 Mbps', '50 Mbps', '100 Mbps'].contains(selectedPackage)) {
+      selectedPackage = '20 Mbps';
+    }
+    String selectedStatus =
+        (customer['status']?.toString() ?? 'active').toLowerCase();
+    if (!['active', 'suspended', 'inactive'].contains(selectedStatus)) {
+      selectedStatus = 'active';
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.edit, color: Colors.blue),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Edit: ${customer['name'] ?? 'Pelanggan'}',
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama Lengkap',
+                      prefixIcon: Icon(Icons.person),
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Nama harus diisi' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      prefixIcon: Icon(Icons.email),
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (v) =>
+                        v == null || !v.contains('@') ? 'Email tidak valid' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: phoneController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nomor Telepon',
+                      prefixIcon: Icon(Icons.phone),
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.phone,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Nomor telepon harus diisi' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: addressController,
+                    decoration: const InputDecoration(
+                      labelText: 'Alamat Pemasangan',
+                      prefixIcon: Icon(Icons.home),
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 2,
+                    validator: (v) =>
+                        v == null || v.isEmpty ? 'Alamat harus diisi' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedPackage,
+                    decoration: const InputDecoration(
+                      labelText: 'Paket Layanan',
+                      prefixIcon: Icon(Icons.wifi),
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: '20 Mbps',
+                        child: Text('20 Mbps - Rp 150.000'),
+                      ),
+                      DropdownMenuItem(
+                        value: '50 Mbps',
+                        child: Text('50 Mbps - Rp 300.000'),
+                      ),
+                      DropdownMenuItem(
+                        value: '100 Mbps',
+                        child: Text('100 Mbps - Rp 500.000'),
+                      ),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => selectedPackage = val);
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: selectedStatus,
+                    decoration: const InputDecoration(
+                      labelText: 'Status Layanan',
+                      prefixIcon: Icon(Icons.toggle_on),
+                      border: OutlineInputBorder(),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'active', child: Text('Aktif')),
+                      DropdownMenuItem(
+                          value: 'suspended', child: Text('Terisolir (Suspended)')),
+                      DropdownMenuItem(
+                          value: 'inactive', child: Text('Non-Aktif')),
+                    ],
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => selectedStatus = val);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            FilledButton.icon(
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(context);
+                  await _updateCustomer(
+                    customer: customer,
+                    name: nameController.text.trim(),
+                    email: emailController.text.trim(),
+                    phone: phoneController.text.trim(),
+                    address: addressController.text.trim(),
+                    package: selectedPackage,
+                    status: selectedStatus,
+                  );
+                }
+              },
+              icon: const Icon(Icons.save),
+              label: const Text('Perbarui'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateCustomer({
+    required Map<String, dynamic> customer,
+    required String name,
+    required String email,
+    required String phone,
+    required String address,
+    required String package,
+    required String status,
+  }) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Memperbarui data pelanggan...'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final db = await DatabaseService.instance.database;
+
+      int speed;
+      int price;
+      switch (package) {
+        case '100 Mbps':
+          speed = 100;
+          price = 500000;
+          break;
+        case '50 Mbps':
+          speed = 50;
+          price = 300000;
+          break;
+        default:
+          speed = 20;
+          price = 150000;
+      }
+
+      final userId = customer['userId'];
+      final customerId = customer['customerId'] ?? customer['id'];
+
+      // 1. Update SQLite users & customers table
+      if (userId != null) {
+        await db.update(
+          'users',
+          {
+            'name': name,
+            'email': email,
+            'phone': phone,
+            'updatedAt': DateTime.now().toIso8601String(),
+          },
+          where: 'id = ?',
+          whereArgs: [userId],
+        );
+
+        await db.update(
+          'customers',
+          {
+            'address': address,
+            'packageName': package,
+            'speed': speed,
+            'price': price,
+            'status': status,
+          },
+          where: 'userId = ?',
+          whereArgs: [userId],
+        );
+      }
+
+      // 2. Sync to Firestore if online
+      try {
+        final firestore = FirebaseFirestore.instance;
+        if (customerId != null) {
+          final custDocs = await firestore
+              .collection('customers')
+              .where('customerId', isEqualTo: customerId.toString())
+              .get();
+
+          for (var doc in custDocs.docs) {
+            await doc.reference.update({
+              'name': name,
+              'email': email,
+              'phone': phone,
+              'address': address,
+              'packageName': package,
+              'speed': speed,
+              'price': price,
+              'status': status,
+              'updatedAt': Timestamp.now(),
+            });
+          }
+        }
+      } catch (_) {}
+
+      await _loadCustomers();
+
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading dialog
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✓ Data pelanggan "$name" berhasil diperbarui!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Close loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memperbarui: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _showAddCustomerForm() {
@@ -624,8 +922,9 @@ class _AdminPelangganPageEnhancedState
             icon: const Icon(Icons.download),
             tooltip: 'Export ke Excel',
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
               try {
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   const SnackBar(
                     content: Row(
                       children: [
@@ -649,43 +948,39 @@ class _AdminPelangganPageEnhancedState
                   _filteredCustomers,
                 );
 
-                if (mounted) {
-                  if (filePath != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Row(
-                          children: [
-                            const Icon(Icons.check_circle, color: Colors.white),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Export berhasil! ${_filteredCustomers.length} pelanggan',
-                              ),
-                            ),
-                          ],
-                        ),
-                        backgroundColor: Colors.green.shade600,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Gagal export data'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                if (filePath != null) {
+                  messenger.showSnackBar(
                     SnackBar(
-                      content: Text('Error: $e'),
+                      content: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: Colors.white),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Export berhasil! ${_filteredCustomers.length} pelanggan',
+                            ),
+                          ),
+                        ],
+                      ),
+                      backgroundColor: Colors.green.shade600,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                } else {
+                  messenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Gagal export data'),
                       backgroundColor: Colors.red,
                     ),
                   );
                 }
+              } catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text('Error: $e'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
           ),

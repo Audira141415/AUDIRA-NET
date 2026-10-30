@@ -169,7 +169,7 @@ class _BackupStatusPageState extends State<BackupStatusPage> {
 
     return Card(
       elevation: 4,
-      color: statusColor.withOpacity(0.1),
+      color: statusColor.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -177,7 +177,7 @@ class _BackupStatusPageState extends State<BackupStatusPage> {
             // Status Icon
             CircleAvatar(
               radius: 40,
-              backgroundColor: statusColor.withOpacity(0.2),
+              backgroundColor: statusColor.withValues(alpha: 0.2),
               child: Icon(statusIcon, size: 40, color: statusColor),
             ),
             const SizedBox(height: 16),
@@ -202,7 +202,7 @@ class _BackupStatusPageState extends State<BackupStatusPage> {
             const SizedBox(height: 16),
 
             // Details
-            Divider(color: statusColor.withOpacity(0.3)),
+            Divider(color: statusColor.withValues(alpha: 0.3)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -370,7 +370,7 @@ class _BackupStatusPageState extends State<BackupStatusPage> {
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: statusColor.withOpacity(0.2),
+              backgroundColor: statusColor.withValues(alpha: 0.2),
               child: Icon(statusIcon, color: statusColor, size: 20),
             ),
             title: Text(
@@ -386,7 +386,7 @@ class _BackupStatusPageState extends State<BackupStatusPage> {
                 status.toUpperCase(),
                 style: TextStyle(fontSize: 10, color: statusColor),
               ),
-              backgroundColor: statusColor.withOpacity(0.1),
+              backgroundColor: statusColor.withValues(alpha: 0.1),
             ),
           ),
         );

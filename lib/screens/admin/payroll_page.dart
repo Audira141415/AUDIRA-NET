@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'dart:developer' as developer;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import '../../utils/excel_exporter.dart';
 
 /// Payroll System - Admin
-/// Process employee salaries, deductions, allowances, and generate payslips
+/// Process employee salaries, deductions, allowances, and generate real payslips / reports
 class PayrollPage extends StatefulWidget {
   const PayrollPage({super.key});
 
@@ -38,24 +43,10 @@ class _PayrollPageState extends State<PayrollPage> {
           .map((doc) => {'id': doc.id, ...doc.data()})
           .toList();
 
-      // Load payroll records for selected month
-      final startOfMonth = DateTime(
-        _selectedMonth.year,
-        _selectedMonth.month,
-        1,
-      );
-      final endOfMonth = DateTime(
-        _selectedMonth.year,
-        _selectedMonth.month + 1,
-        0,
-      );
-
+      final monthKey = DateFormat('yyyy-MM').format(_selectedMonth);
       final payrollSnapshot = await FirebaseFirestore.instance
           .collection('payroll')
-          .where(
-            'month',
-            isEqualTo: DateFormat('yyyy-MM').format(_selectedMonth),
-          )
+          .where('month', isEqualTo: monthKey)
           .get();
 
       _payrollRecords = payrollSnapshot.docs
@@ -65,10 +56,10 @@ class _PayrollPageState extends State<PayrollPage> {
       // Calculate summary
       _calculateSummary();
 
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     } catch (e) {
       developer.log('Error loading payroll data: $e', name: 'PayrollPage');
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -100,26 +91,35 @@ class _PayrollPageState extends State<PayrollPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final textPrimary = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
+    final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF05070D) : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Payroll System'),
+        title: const Text('Payroll System (Penggajian)'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.calendar_month),
+            icon: const Icon(LucideIcons.calendar),
+            tooltip: 'Pilih Periode',
             onPressed: _selectMonth,
           ),
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(LucideIcons.refreshCw),
+            tooltip: 'Muat Ulang',
             onPressed: _loadPayrollData,
           ),
-          PopupMenuButton(
-            icon: const Icon(Icons.more_vert),
+          PopupMenuButton<String>(
+            icon: const Icon(LucideIcons.moreVertical),
             itemBuilder: (context) => [
               const PopupMenuItem(
                 value: 'generate',
                 child: Row(
                   children: [
-                    Icon(Icons.add_circle),
+                    Icon(LucideIcons.plusCircle, size: 18, color: Color(0xFF00F0FF)),
                     SizedBox(width: 8),
                     Text('Generate Payroll'),
                   ],
@@ -129,9 +129,9 @@ class _PayrollPageState extends State<PayrollPage> {
                 value: 'export',
                 child: Row(
                   children: [
-                    Icon(Icons.download),
+                    Icon(LucideIcons.download, size: 18, color: Color(0xFF00FF9D)),
                     SizedBox(width: 8),
-                    Text('Export Report'),
+                    Text('Export Laporan'),
                   ],
                 ),
               ),
@@ -150,10 +150,17 @@ class _PayrollPageState extends State<PayrollPage> {
         children: [
           // Month Selector Banner
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.blue.shade400, Colors.blue.shade600],
+                colors: isDark
+                    ? [const Color(0xFF0A0E1A), const Color(0xFF162032)]
+                    : [const Color(0xFF0070F3), const Color(0xFF0051B3)],
+              ),
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark ? const Color(0xFF1E293B) : Colors.transparent,
+                ),
               ),
             ),
             child: Row(
@@ -163,23 +170,38 @@ class _PayrollPageState extends State<PayrollPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Payroll Period',
-                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                      'PERIODE PENGGAJIAN',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.1,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       DateFormat('MMMM yyyy').format(_selectedMonth),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                IconButton(
+                ElevatedButton.icon(
                   onPressed: _selectMonth,
-                  icon: const Icon(Icons.edit_calendar, color: Colors.white),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white.withValues(alpha: 0.15),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: const BorderSide(color: Colors.white24),
+                    ),
+                  ),
+                  icon: const Icon(LucideIcons.calendarDays, size: 16),
+                  label: const Text('Ganti Bulan'),
                 ),
               ],
             ),
@@ -197,18 +219,26 @@ class _PayrollPageState extends State<PayrollPage> {
                         child: _buildSummaryCard(
                           'Total Payroll',
                           _payrollSummary['totalNet'],
-                          Icons.account_balance_wallet,
-                          Colors.green,
+                          LucideIcons.wallet,
+                          const Color(0xFF00FF9D),
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textPrimary: textPrimary,
+                          textMuted: textMuted,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildSummaryCard(
-                          'Employees',
+                          'Karyawan',
                           _payrollSummary['employeeCount'],
-                          Icons.people,
-                          Colors.blue,
+                          LucideIcons.users,
+                          const Color(0xFF00F0FF),
                           isAmount: false,
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textPrimary: textPrimary,
+                          textMuted: textMuted,
                         ),
                       ),
                     ],
@@ -218,11 +248,15 @@ class _PayrollPageState extends State<PayrollPage> {
                     children: [
                       Expanded(
                         child: _buildSummaryCard(
-                          'Paid',
+                          'Sudah Dibayar',
                           _payrollSummary['paidCount'],
-                          Icons.check_circle,
-                          Colors.green,
+                          LucideIcons.checkCircle2,
+                          const Color(0xFF10B981),
                           isAmount: false,
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textPrimary: textPrimary,
+                          textMuted: textMuted,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -230,9 +264,13 @@ class _PayrollPageState extends State<PayrollPage> {
                         child: _buildSummaryCard(
                           'Pending',
                           _payrollSummary['pendingCount'],
-                          Icons.pending,
-                          Colors.orange,
+                          LucideIcons.clock,
+                          const Color(0xFFFFB800),
                           isAmount: false,
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textPrimary: textPrimary,
+                          textMuted: textMuted,
                         ),
                       ),
                     ],
@@ -251,23 +289,31 @@ class _PayrollPageState extends State<PayrollPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.receipt_long,
+                          LucideIcons.receipt,
                           size: 64,
-                          color: Colors.grey.shade400,
+                          color: textMuted.withValues(alpha: 0.5),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No payroll records for this month',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey.shade600,
-                          ),
+                          'Belum ada data payroll untuk periode ini',
+                          style: TextStyle(fontSize: 16, color: textMuted),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 20),
                         ElevatedButton.icon(
                           onPressed: _generatePayroll,
-                          icon: const Icon(Icons.add_circle),
-                          label: const Text('Generate Payroll'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0070F3),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: const Icon(LucideIcons.plusCircle, size: 18),
+                          label: const Text('Generate Payroll Bulan Ini'),
                         ),
                       ],
                     ),
@@ -279,7 +325,14 @@ class _PayrollPageState extends State<PayrollPage> {
                       itemCount: _payrollRecords.length,
                       itemBuilder: (context, index) {
                         final record = _payrollRecords[index];
-                        return _buildPayrollCard(record);
+                        return _buildPayrollCard(
+                          record,
+                          cardBg: cardBg,
+                          borderColor: borderColor,
+                          textPrimary: textPrimary,
+                          textMuted: textMuted,
+                          isDark: isDark,
+                        );
                       },
                     ),
                   ),
@@ -293,40 +346,79 @@ class _PayrollPageState extends State<PayrollPage> {
     String label,
     dynamic value,
     IconData icon,
-    Color color, {
+    Color accentColor, {
     bool isAmount = true,
+    required Color cardBg,
+    required Color borderColor,
+    required Color textPrimary,
+    required Color textMuted,
   }) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              isAmount
-                  ? NumberFormat.currency(
-                      locale: 'id_ID',
-                      symbol: 'Rp ',
-                      decimalDigits: 0,
-                    ).format(value)
-                  : value.toString(),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: textMuted,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: accentColor, size: 18),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            isAmount
+                ? NumberFormat.currency(
+                    locale: 'id_ID',
+                    symbol: 'Rp ',
+                    decimalDigits: 0,
+                  ).format(value ?? 0)
+                : (value ?? 0).toString(),
+            style: TextStyle(
+              fontSize: isAmount ? 16 : 22,
+              fontWeight: FontWeight.bold,
+              color: textPrimary,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildPayrollCard(Map<String, dynamic> record) {
+  Widget _buildPayrollCard(
+    Map<String, dynamic> record, {
+    required Color cardBg,
+    required Color borderColor,
+    required Color textPrimary,
+    required Color textMuted,
+    required bool isDark,
+  }) {
     final employeeName = record['employeeName'] as String? ?? 'Unknown';
     final employeeId = record['employeeId'] as String? ?? '-';
     final baseSalary = (record['baseSalary'] as num?)?.toDouble() ?? 0;
@@ -339,129 +431,209 @@ class _PayrollPageState extends State<PayrollPage> {
     final allowances = record['allowances'] as Map<String, dynamic>? ?? {};
     final deductions = record['deductions'] as Map<String, dynamic>? ?? {};
 
-    Color statusColor = status == 'paid' ? Colors.green : Colors.orange;
-    IconData statusIcon = status == 'paid' ? Icons.check_circle : Icons.pending;
+    final isPaid = status == 'paid';
+    final Color statusColor = isPaid
+        ? const Color(0xFF10B981)
+        : const Color(0xFFFFB800);
+    final IconData statusIcon = isPaid
+        ? LucideIcons.checkCircle
+        : LucideIcons.clock;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ExpansionTile(
-        leading: CircleAvatar(
-          backgroundColor: statusColor.withValues(alpha: 0.1),
-          child: Text(
-            employeeName.isNotEmpty ? employeeName[0].toUpperCase() : '?',
-            style: TextStyle(fontWeight: FontWeight.bold, color: statusColor),
-          ),
-        ),
-        title: Text(
-          employeeName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text('ID: $employeeId'),
-            Text(
-              'Net Salary: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(netSalary)}',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          leading: CircleAvatar(
+            backgroundColor: statusColor.withValues(alpha: 0.15),
+            child: Text(
+              employeeName.isNotEmpty ? employeeName[0].toUpperCase() : '?',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: statusColor,
+              ),
             ),
-          ],
-        ),
-        trailing: Chip(
-          label: Text(
-            status.toUpperCase(),
-            style: TextStyle(fontSize: 10, color: statusColor),
           ),
-          backgroundColor: statusColor.withOpacity(0.1),
-          avatar: Icon(statusIcon, size: 16, color: statusColor),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          title: Text(
+            employeeName,
+            style: TextStyle(fontWeight: FontWeight.bold, color: textPrimary),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 3),
+              Text(
+                'ID: $employeeId',
+                style: TextStyle(fontSize: 12, color: textMuted),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'Net: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(netSalary)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? const Color(0xFF00FF9D) : const Color(0xFF059669),
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Salary Breakdown
-                const Text(
-                  'Salary Breakdown',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 12),
-                _buildAmountRow('Base Salary', baseSalary, Colors.blue),
-
-                // Allowances
-                if (allowances.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Allowances',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                Icon(statusIcon, size: 14, color: statusColor),
+                const SizedBox(width: 4),
+                Text(
+                  status.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: statusColor,
                   ),
-                  const SizedBox(height: 4),
-                  ...allowances.entries.map(
-                    (e) => _buildAmountRow('  ${e.key}', e.value, Colors.green),
-                  ),
-                  _buildAmountRow(
-                    'Total Allowances',
-                    totalAllowances,
-                    Colors.green.shade700,
-                    isBold: true,
-                  ),
-                ],
-
-                // Deductions
-                if (deductions.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Deductions',
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                  const SizedBox(height: 4),
-                  ...deductions.entries.map(
-                    (e) => _buildAmountRow('  ${e.key}', e.value, Colors.red),
-                  ),
-                  _buildAmountRow(
-                    'Total Deductions',
-                    totalDeductions,
-                    Colors.red.shade700,
-                    isBold: true,
-                  ),
-                ],
-
-                const Divider(height: 24),
-                _buildAmountRow(
-                  'NET SALARY',
-                  netSalary,
-                  Colors.purple,
-                  isBold: true,
-                  isLarge: true,
-                ),
-                const SizedBox(height: 16),
-
-                // Actions
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    if (status != 'paid')
-                      FilledButton.icon(
-                        onPressed: () => _processPayment(record),
-                        icon: const Icon(Icons.payment, size: 18),
-                        label: const Text('Process Payment'),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Colors.green,
-                        ),
-                      ),
-                    const SizedBox(width: 8),
-                    OutlinedButton.icon(
-                      onPressed: () => _generatePayslip(record),
-                      icon: const Icon(Icons.receipt, size: 18),
-                      label: const Text('Payslip'),
-                    ),
-                  ],
                 ),
               ],
             ),
           ),
-        ],
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'RINCIAN KOMPONEN GAJI',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      letterSpacing: 0.8,
+                      color: textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildAmountRow(
+                    'Gaji Pokok',
+                    baseSalary,
+                    isDark ? Colors.white : const Color(0xFF0F172A),
+                    textColor: textPrimary,
+                  ),
+
+                  // Allowances
+                  if (allowances.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Tunjangan (Allowances)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: const Color(0xFF10B981),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ...allowances.entries.map(
+                      (e) => _buildAmountRow(
+                        '  + ${e.key}',
+                        e.value,
+                        const Color(0xFF10B981),
+                        textColor: textMuted,
+                      ),
+                    ),
+                    _buildAmountRow(
+                      'Total Tunjangan',
+                      totalAllowances,
+                      const Color(0xFF10B981),
+                      isBold: true,
+                      textColor: textPrimary,
+                    ),
+                  ],
+
+                  // Deductions
+                  if (deductions.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Potongan (Deductions)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color: const Color(0xFFFF2A5F),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ...deductions.entries.map(
+                      (e) => _buildAmountRow(
+                        '  - ${e.key}',
+                        e.value,
+                        const Color(0xFFFF2A5F),
+                        textColor: textMuted,
+                      ),
+                    ),
+                    _buildAmountRow(
+                      'Total Potongan',
+                      totalDeductions,
+                      const Color(0xFFFF2A5F),
+                      isBold: true,
+                      textColor: textPrimary,
+                    ),
+                  ],
+
+                  Divider(height: 24, color: borderColor),
+                  _buildAmountRow(
+                    'TOTAL GAJI BERSIH (NET)',
+                    netSalary,
+                    const Color(0xFF00F0FF),
+                    isBold: true,
+                    isLarge: true,
+                    textColor: textPrimary,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Actions
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (status != 'paid')
+                        FilledButton.icon(
+                          onPressed: () => _processPayment(record),
+                          icon: const Icon(LucideIcons.creditCard, size: 16),
+                          label: const Text('Bayar Gaji'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF10B981),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      const SizedBox(width: 8),
+                      OutlinedButton.icon(
+                        onPressed: () => _generatePayslip(record),
+                        icon: const Icon(LucideIcons.fileText, size: 16),
+                        label: const Text('Cetak Slip Gaji'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF0070F3),
+                          side: const BorderSide(color: Color(0xFF0070F3)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -469,9 +641,10 @@ class _PayrollPageState extends State<PayrollPage> {
   Widget _buildAmountRow(
     String label,
     dynamic amount,
-    Color color, {
+    Color amountColor, {
     bool isBold = false,
     bool isLarge = false,
+    required Color textColor,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -482,8 +655,8 @@ class _PayrollPageState extends State<PayrollPage> {
             label,
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              fontSize: isLarge ? 16 : 13,
-              color: isBold ? color : Colors.black87,
+              fontSize: isLarge ? 14 : 13,
+              color: textColor,
             ),
           ),
           Text(
@@ -491,11 +664,11 @@ class _PayrollPageState extends State<PayrollPage> {
               locale: 'id_ID',
               symbol: 'Rp ',
               decimalDigits: 0,
-            ).format(amount),
+            ).format(amount ?? 0),
             style: TextStyle(
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              fontSize: isLarge ? 16 : 13,
-              color: color,
+              fontSize: isLarge ? 15 : 13,
+              color: amountColor,
             ),
           ),
         ],
@@ -518,23 +691,23 @@ class _PayrollPageState extends State<PayrollPage> {
   }
 
   Future<void> _generatePayroll() async {
-    // Show confirmation dialog
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Generate Payroll'),
         content: Text(
-          'Generate payroll for ${DateFormat('MMMM yyyy').format(_selectedMonth)}?\n\n'
-          'This will create payroll records for ${_employees.length} active employees.',
+          'Generate payroll untuk periode ${DateFormat('MMMM yyyy').format(_selectedMonth)}?\n\n'
+          'Sistem akan memproses ${_employees.length} karyawan aktif secara otomatis dengan deduplikasi ID.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Batal'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Generate'),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFF0070F3)),
+            child: const Text('Generate Sekarang'),
           ),
         ],
       ),
@@ -548,35 +721,40 @@ class _PayrollPageState extends State<PayrollPage> {
 
       for (var employee in _employees) {
         final baseSalary = (employee['salary'] as num?)?.toDouble() ?? 0;
+        final empId = employee['employeeId']?.toString() ?? employee['id']?.toString() ?? 'EMP';
+        final docId = '${empId}_$monthKey';
 
-        // Calculate allowances (example: 10% transport, 5% meal)
+        // Calculate allowances (10% transport, 5% meal)
         final allowances = {
           'Transport': baseSalary * 0.10,
           'Meal': baseSalary * 0.05,
         };
         final totalAllowances = allowances.values.fold<double>(
           0,
-          (sum, val) => sum + val,
+          (total, val) => total + val,
         );
 
-        // Calculate deductions (example: 5% tax, 2% pension)
+        // Calculate deductions (5% tax, 2% pension)
         final deductions = {
-          'Tax': baseSalary * 0.05,
-          'Pension': baseSalary * 0.02,
+          'Tax (PPh 21)': baseSalary * 0.05,
+          'BPJS / Pensiun': baseSalary * 0.02,
         };
         final totalDeductions = deductions.values.fold<double>(
           0,
-          (sum, val) => sum + val,
+          (total, val) => total + val,
         );
 
         final netSalary = baseSalary + totalAllowances - totalDeductions;
 
         final payrollDoc = FirebaseFirestore.instance
             .collection('payroll')
-            .doc();
+            .doc(docId);
+
         batch.set(payrollDoc, {
-          'employeeId': employee['employeeId'],
-          'employeeName': employee['name'],
+          'id': docId,
+          'employeeId': empId,
+          'employeeName': employee['name'] ?? 'Karyawan',
+          'department': employee['department'] ?? 'General',
           'month': monthKey,
           'baseSalary': baseSalary,
           'allowances': allowances,
@@ -586,7 +764,7 @@ class _PayrollPageState extends State<PayrollPage> {
           'netSalary': netSalary,
           'status': 'pending',
           'createdAt': FieldValue.serverTimestamp(),
-        });
+        }, SetOptions(merge: true));
       }
 
       await batch.commit();
@@ -595,19 +773,19 @@ class _PayrollPageState extends State<PayrollPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Payroll generated for ${_employees.length} employees',
+              '✅ Berhasil membuat payroll untuk ${_employees.length} karyawan (${DateFormat('MMMM yyyy').format(_selectedMonth)})',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: const Color(0xFF10B981),
           ),
         );
         _loadPayrollData();
       }
     } catch (e) {
-      developer.log('Error generating payroll: $e');
+      developer.log('Error generating payroll: $e', name: 'PayrollPage');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error generating payroll'),
+          SnackBar(
+            content: Text('❌ Gagal generate payroll: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -616,22 +794,24 @@ class _PayrollPageState extends State<PayrollPage> {
   }
 
   Future<void> _processPayment(Map<String, dynamic> record) async {
+    final netSalary = (record['netSalary'] as num?)?.toDouble() ?? 0;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Process Payment'),
+        title: const Text('Konfirmasi Pembayaran'),
         content: Text(
-          'Mark payment as processed for ${record['employeeName']}?\n\n'
-          'Amount: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(record['netSalary'])}',
+          'Tandai gaji untuk ${record['employeeName']} sebagai SUDAH DIBAYAR?\n\n'
+          'Nominal: ${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(netSalary)}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Batal'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Confirm'),
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+            child: const Text('Ya, Konfirmasi Bayar'),
           ),
         ],
       ),
@@ -648,18 +828,18 @@ class _PayrollPageState extends State<PayrollPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Payment processed successfully'),
-            backgroundColor: Colors.green,
+            content: Text('✅ Pembayaran gaji berhasil dicatat.'),
+            backgroundColor: Color(0xFF10B981),
           ),
         );
         _loadPayrollData();
       }
     } catch (e) {
-      developer.log('Error processing payment: $e');
+      developer.log('Error processing payment: $e', name: 'PayrollPage');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Error processing payment'),
+            content: Text('❌ Gagal memproses pembayaran'),
             backgroundColor: Colors.red,
           ),
         );
@@ -667,42 +847,457 @@ class _PayrollPageState extends State<PayrollPage> {
     }
   }
 
+  /// Generate real official PDF payslip and open print/save dialog
   Future<void> _generatePayslip(Map<String, dynamic> record) async {
-    // Mock PDF generation
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Generate Payslip'),
-        content: const Text(
-          'PDF payslip generation feature will be available soon.\n\n'
-          'This will generate a detailed payslip PDF with all salary components.',
+    try {
+      final doc = pw.Document();
+
+      final employeeName = record['employeeName']?.toString() ?? 'Karyawan';
+      final employeeId = record['employeeId']?.toString() ?? '-';
+      final department = record['department']?.toString() ?? 'Operasional';
+      final month = record['month']?.toString() ?? DateFormat('yyyy-MM').format(_selectedMonth);
+      final baseSalary = (record['baseSalary'] as num?)?.toDouble() ?? 0;
+      final allowances = record['allowances'] as Map<String, dynamic>? ?? {};
+      final deductions = record['deductions'] as Map<String, dynamic>? ?? {};
+      final totalAllowances = (record['totalAllowances'] as num?)?.toDouble() ?? 0;
+      final totalDeductions = (record['totalDeductions'] as num?)?.toDouble() ?? 0;
+      final netSalary = (record['netSalary'] as num?)?.toDouble() ?? 0;
+      final status = record['status']?.toString() ?? 'pending';
+
+      final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+      doc.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
+          build: (pw.Context context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                // Header
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          'PT AUDIRA MULTIMEDIA DIGITAL',
+                          style: pw.TextStyle(
+                            fontSize: 18,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColors.blue900,
+                          ),
+                        ),
+                        pw.Text(
+                          'AUDIRA DIGITAL NETWORK - ISP & TELECOMMUNICATIONS',
+                          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+                        ),
+                        pw.Text(
+                          'Jl. Raya Internet No. 14, Indonesia | https://audira.my.id',
+                          style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+                        ),
+                      ],
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(
+                          color: status == 'paid' ? PdfColors.green : PdfColors.orange,
+                          width: 1.5,
+                        ),
+                        borderRadius: pw.BorderRadius.circular(4),
+                      ),
+                      child: pw.Text(
+                        status == 'paid' ? 'LUNAS / PAID' : 'PENDING',
+                        style: pw.TextStyle(
+                          color: status == 'paid' ? PdfColors.green : PdfColors.orange,
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                pw.Divider(thickness: 1.5, color: PdfColors.blue800),
+                pw.SizedBox(height: 12),
+
+                // Title
+                pw.Center(
+                  child: pw.Text(
+                    'SLIP GAJI KARYAWAN (PAYSLIP)',
+                    style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+                  ),
+                ),
+                pw.Center(
+                  child: pw.Text(
+                    'Periode: $month',
+                    style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey800),
+                  ),
+                ),
+                pw.SizedBox(height: 20),
+
+                // Employee Metadata Box
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(12),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.grey100,
+                    borderRadius: pw.BorderRadius.circular(6),
+                    border: pw.Border.all(color: PdfColors.grey300),
+                  ),
+                  child: pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text('Nama Karyawan : $employeeName', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                          pw.SizedBox(height: 4),
+                          pw.Text('ID Karyawan      : $employeeId'),
+                        ],
+                      ),
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text('Departemen   : $department'),
+                          pw.SizedBox(height: 4),
+                          pw.Text('Tanggal Cetak : ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                pw.SizedBox(height: 20),
+
+                // Earnings & Deductions Tables
+                pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    // Earnings
+                    pw.Expanded(
+                      child: pw.Container(
+                        padding: const pw.EdgeInsets.all(10),
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border.all(color: PdfColors.grey300),
+                          borderRadius: pw.BorderRadius.circular(4),
+                        ),
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text('PENERIMAAN (EARNINGS)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
+                            pw.Divider(color: PdfColors.grey300),
+                            pw.Row(
+                              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                              children: [
+                                pw.Text('Gaji Pokok'),
+                                pw.Text(currency.format(baseSalary)),
+                              ],
+                            ),
+                            ...allowances.entries.map((e) => pw.Padding(
+                              padding: const pw.EdgeInsets.only(top: 4),
+                              child: pw.Row(
+                                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                                children: [
+                                  pw.Text(e.key),
+                                  pw.Text(currency.format(e.value)),
+                                ],
+                              ),
+                            )),
+                            pw.Divider(color: PdfColors.grey300),
+                            pw.Row(
+                              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                              children: [
+                                pw.Text('Total Penerimaan', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                                pw.Text(currency.format(baseSalary + totalAllowances), style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    pw.SizedBox(width: 16),
+                    // Deductions
+                    pw.Expanded(
+                      child: pw.Container(
+                        padding: const pw.EdgeInsets.all(10),
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border.all(color: PdfColors.grey300),
+                          borderRadius: pw.BorderRadius.circular(4),
+                        ),
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text('POTONGAN (DEDUCTIONS)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.red800)),
+                            pw.Divider(color: PdfColors.grey300),
+                            if (deductions.isEmpty)
+                              pw.Text('Tidak ada potongan', style: const pw.TextStyle(color: PdfColors.grey600)),
+                            ...deductions.entries.map((e) => pw.Padding(
+                              padding: const pw.EdgeInsets.only(top: 4),
+                              child: pw.Row(
+                                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                                children: [
+                                  pw.Text(e.key),
+                                  pw.Text(currency.format(e.value)),
+                                ],
+                              ),
+                            )),
+                            pw.Divider(color: PdfColors.grey300),
+                            pw.Row(
+                              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                              children: [
+                                pw.Text('Total Potongan', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                                pw.Text(currency.format(totalDeductions), style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                pw.SizedBox(height: 24),
+
+                // Net Salary Highlight Box
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.blue50,
+                    border: pw.Border.all(color: PdfColors.blue800, width: 1.5),
+                    borderRadius: pw.BorderRadius.circular(6),
+                  ),
+                  child: pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        'TOTAL GAJI BERSIH (TAKE-HOME PAY)',
+                        style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900),
+                      ),
+                      pw.Text(
+                        currency.format(netSalary),
+                        style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900),
+                      ),
+                    ],
+                  ),
+                ),
+                pw.SizedBox(height: 36),
+
+                // Signatures
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        pw.Text('Penerima,', style: const pw.TextStyle(fontSize: 10)),
+                        pw.SizedBox(height: 50),
+                        pw.Text('( $employeeName )', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                      ],
+                    ),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        pw.Text('Finance & HRD AUDIRA,', style: const pw.TextStyle(fontSize: 10)),
+                        pw.SizedBox(height: 12),
+                        pw.Container(
+                          padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: pw.BoxDecoration(
+                            border: pw.Border.all(color: PdfColors.blue700),
+                            borderRadius: pw.BorderRadius.circular(3),
+                          ),
+                          child: pw.Text('VERIFIED DIGITAL', style: pw.TextStyle(fontSize: 8, color: PdfColors.blue800, fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.SizedBox(height: 24),
+                        pw.Text('( Agus Dwi Rianto )', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                        pw.Text('Founder AUDIRA Digital', style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+                      ],
+                    ),
+                  ],
+                ),
+                pw.Spacer(),
+                pw.Divider(color: PdfColors.grey400),
+                pw.Center(
+                  child: pw.Text(
+                    'Slip gaji ini digenerate secara resmi dan terverifikasi oleh Sistem ERP AUDIRA-NET.',
+                    style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
+      );
+
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => doc.save(),
+        name: 'Slip_Gaji_${employeeName.replaceAll(' ', '_')}_$month.pdf',
+      );
+    } catch (e) {
+      developer.log('Error printing payslip: $e', name: 'PayrollPage');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Gagal membuat slip gaji: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  /// Export payroll report dialog (Excel or PDF)
+  Future<void> _exportPayrollReport() async {
+    final periodTitle = DateFormat('MMMM yyyy').format(_selectedMonth);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF0F172A) : Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Export Laporan Payroll ($periodTitle)',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Pilih format file untuk mengunduh atau membagikan rekap gaji karyawan:',
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(LucideIcons.sheet, color: Color(0xFF10B981)),
+                  ),
+                  title: const Text('Export ke Excel (.xlsx)', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Tabel komplit dengan rumus total, tunjangan, dan potongan'),
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+                    final path = await ExcelExporter.exportPayroll(_payrollRecords, periodTitle);
+                    if (!mounted) return;
+                    if (path != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('✅ Laporan Excel berhasil digenerate dan dishare.'),
+                          backgroundColor: Color(0xFF10B981),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0070F3).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(LucideIcons.fileText, color: Color(0xFF0070F3)),
+                  ),
+                  title: const Text('Cetak Rekap PDF', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Dokumen cetak A4 rekapitulasi gaji karyawan bulanan'),
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+                    await _printPayrollSummaryPdf(periodTitle);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Future<void> _exportPayrollReport() async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Export Report'),
-        content: const Text(
-          'Export payroll report feature will be available soon.\n\n'
-          'You will be able to export in PDF, Excel, or CSV format.',
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+  Future<void> _printPayrollSummaryPdf(String periodTitle) async {
+    try {
+      final doc = pw.Document();
+      final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+      doc.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4.landscape,
+          margin: const pw.EdgeInsets.all(28),
+          header: (pw.Context context) => pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text('PT AUDIRA MULTIMEDIA DIGITAL - REKAPITULASI PAYROLL', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                  pw.Text('Periode: $periodTitle', style: const pw.TextStyle(fontSize: 12)),
+                ],
+              ),
+              pw.Divider(thickness: 1, color: PdfColors.blue800),
+              pw.SizedBox(height: 8),
+            ],
           ),
-        ],
-      ),
-    );
+          build: (pw.Context context) => [
+            pw.TableHelper.fromTextArray(
+              context: context,
+              headers: ['No', 'ID', 'Nama Karyawan', 'Gaji Pokok', 'Tunjangan', 'Potongan', 'Gaji Bersih', 'Status'],
+              headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 9),
+              headerDecoration: const pw.BoxDecoration(color: PdfColors.blue800),
+              cellAlignment: pw.Alignment.centerLeft,
+              cellStyle: const pw.TextStyle(fontSize: 8),
+              data: List<List<String>>.generate(
+                _payrollRecords.length,
+                (index) {
+                  final r = _payrollRecords[index];
+                  final base = (r['baseSalary'] as num?)?.toDouble() ?? 0;
+                  final allow = (r['totalAllowances'] as num?)?.toDouble() ?? 0;
+                  final deduct = (r['totalDeductions'] as num?)?.toDouble() ?? 0;
+                  final net = (r['netSalary'] as num?)?.toDouble() ?? 0;
+                  return [
+                    '${index + 1}',
+                    r['employeeId']?.toString() ?? '-',
+                    r['employeeName']?.toString() ?? '-',
+                    currency.format(base),
+                    currency.format(allow),
+                    currency.format(deduct),
+                    currency.format(net),
+                    (r['status']?.toString() ?? 'pending').toUpperCase(),
+                  ];
+                },
+              ),
+            ),
+            pw.SizedBox(height: 14),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.end,
+              children: [
+                pw.Container(
+                  padding: const pw.EdgeInsets.all(8),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.grey100,
+                    border: pw.Border.all(color: PdfColors.grey300),
+                  ),
+                  child: pw.Text(
+                    'TOTAL BERSIH KESELURUHAN: ${currency.format(_payrollSummary['totalNet'] ?? 0)}',
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => doc.save(),
+        name: 'Rekap_Payroll_${periodTitle.replaceAll(' ', '_')}.pdf',
+      );
+    } catch (e) {
+      developer.log('Error printing payroll summary: $e', name: 'PayrollPage');
+    }
   }
 }

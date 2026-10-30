@@ -10,6 +10,7 @@ import '../../../config/routes.dart';
 import '../../about_page.dart';
 import '../package_upgrade_page.dart';
 import '../loyalty_rewards_page.dart';
+import '../widgets/esla_certificate_dialog.dart';
 
 /// Neo-Brutalist Cyber Profile & Device Hub for AUDIRA Customers
 class CustomerProfilTab extends StatefulWidget {
@@ -634,11 +635,17 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                             subtitle: Text('No: CTR-2026-0889-FIBER • Ditandatangani Digital', style: TextStyle(fontSize: 11, color: textSecondary)),
                             trailing: const Icon(LucideIcons.chevronRight, size: 16, color: Color(0xFF94A3B8)),
                             onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Kontrak digital resmi tersimpan aman & terenkripsi.'),
-                                  backgroundColor: Color(0xFF0284C7),
-                                ),
+                              EslaCertificateDialog.show(
+                                context,
+                                downloadSpeedMbps: 50.4,
+                                uploadSpeedMbps: 48.9,
+                                latencyMs: 11.2,
+                                jitterMs: 0.8,
+                                connectionType: 'GPON 1:1 Dedicated Fiber',
+                                customerName: name,
+                                customerId: customerId,
+                                packageName: packageName,
+                                serverNode: 'OpenIXP Jakarta (Core-01)',
                               );
                             },
                           ),
@@ -652,10 +659,36 @@ class _CustomerProfilTabState extends State<CustomerProfilTab> {
                             subtitle: Text('2 Perangkat Aktif • Android 14 (Sesi Ini)', style: TextStyle(fontSize: 11, color: textSecondary)),
                             trailing: TextButton(
                               onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Sesi di perangkat lain berhasil diputuskan.'),
-                                    backgroundColor: Color(0xFF059669),
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    backgroundColor: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      side: BorderSide(color: isDark ? const Color(0xFF00FF9D) : Colors.black, width: 2),
+                                    ),
+                                    title: const Text('PUTUSKAN SESI LAIN?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900)),
+                                    content: const Text(
+                                      'Seluruh sesi login selain perangkat ini (Android 14) akan otomatis dicabut hak aksesnya dan diwajibkan autentikasi ulang.',
+                                      style: TextStyle(fontSize: 13),
+                                    ),
+                                    actions: [
+                                      TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('✅ Sesi di perangkat lain berhasil diputuskan via Auth Server.'),
+                                              backgroundColor: Color(0xFF059669),
+                                              behavior: SnackBarBehavior.floating,
+                                            ),
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444), foregroundColor: Colors.white),
+                                        child: const Text('Cabut Sesi ➔', style: TextStyle(fontWeight: FontWeight.w800)),
+                                      ),
+                                    ],
                                   ),
                                 );
                               },

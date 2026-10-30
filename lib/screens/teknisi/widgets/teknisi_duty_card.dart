@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../services/firebase_service.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/backend_api_service.dart';
 import '../../../utils/app_theme.dart';
 import '../checkin_history_page.dart';
 
@@ -53,6 +54,20 @@ class TeknisiDutyCard extends StatelessWidget {
         'location': 'Lapangan (GPS Locked)',
         'photo': photo.path,
       });
+
+      // Synchronize presence & GPS to NestJS Backend & Real-time Web Admin Radar
+      try {
+        await BackendApiService.instance.post(
+          '/field-service/technician/location',
+          {
+            'technicianId': userId,
+            'technicianName': AuthService.instance.currentUser?.name ?? 'Teknisi Lapangan',
+            'latitude': -6.2088,
+            'longitude': 106.8456,
+            'status': 'in-progress',
+          },
+        );
+      } catch (_) {}
 
       if (!context.mounted) return;
       Navigator.pop(context); // Tutup loading

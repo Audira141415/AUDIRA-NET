@@ -314,7 +314,7 @@ class _MikroTikManagerPageState extends State<MikroTikManagerPage> {
             status.toUpperCase(),
             style: TextStyle(fontSize: 10, color: statusColor),
           ),
-          backgroundColor: statusColor.withOpacity(0.1),
+          backgroundColor: statusColor.withValues(alpha: 0.1),
           avatar: Icon(statusIcon, size: 16, color: statusColor),
         ),
         children: [

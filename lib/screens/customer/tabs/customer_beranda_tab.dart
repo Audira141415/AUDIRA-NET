@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../services/firebase_service.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/backend_api_service.dart';
@@ -11,14 +12,12 @@ import '../widgets/customer_hero_service_card.dart';
 import '../widgets/customer_quick_actions.dart';
 import '../widgets/customer_maintenance_card.dart';
 import '../widgets/customer_network_doctor_dialog.dart';
+import '../widgets/trustpositif_shield_card.dart';
 
 class CustomerBerandaTab extends StatefulWidget {
   final Function(int) onNavigateToTab;
 
-  const CustomerBerandaTab({
-    super.key,
-    required this.onNavigateToTab,
-  });
+  const CustomerBerandaTab({super.key, required this.onNavigateToTab});
 
   @override
   State<CustomerBerandaTab> createState() => _CustomerBerandaTabState();
@@ -62,11 +61,15 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
 
       // Fetch Real-time Telemetry from NestJS Backend API
       try {
-        final telemetryRes = await BackendApiService.instance.getCustomerTelemetry(
-          customerId: customer['id']?.toString() ?? customer['customerId']?.toString(),
-        );
+        final telemetryRes = await BackendApiService.instance
+            .getCustomerTelemetry(
+              customerId:
+                  customer['id']?.toString() ??
+                  customer['customerId']?.toString(),
+            );
 
-        if (telemetryRes['connectionStatus'] != null || telemetryRes['optical'] != null) {
+        if (telemetryRes['connectionStatus'] != null ||
+            telemetryRes['optical'] != null) {
           _telemetryData = telemetryRes;
         } else if (telemetryRes['data'] is Map<String, dynamic>) {
           _telemetryData = telemetryRes['data'] as Map<String, dynamic>;
@@ -77,8 +80,9 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
 
       // If backend was offline or unreachable, synthesize real model attributes
       _telemetryData ??= {
-        'connectionStatus':
-            (customer['status'] ?? 'active') == 'active' ? 'CONNECTED' : 'SUSPENDED',
+        'connectionStatus': (customer['status'] ?? 'active') == 'active'
+            ? 'CONNECTED'
+            : 'SUSPENDED',
         'latencyMs': 11,
         'publicIp': customer['ipAddress'] ?? '103.147.220.88',
         'localIp': '192.168.1.1',
@@ -102,7 +106,8 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
           'remainingDays': 14,
         },
         'service': {
-          'packageName': customer['packageName'] ?? 'AUDIRA Fiber Ultra 50 Mbps',
+          'packageName':
+              customer['packageName'] ?? 'AUDIRA Fiber Ultra 50 Mbps',
           'speedMbps': 50,
           'downloadLive': '49.0M',
           'uploadLive': '15.8M',
@@ -120,6 +125,38 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
           'impact': 'Koneksi 100% stabil.',
         },
       };
+
+      // Check for active broadcast/incident in Firestore
+      try {
+        final broadcastSnap = await FirebaseFirestore.instance
+            .collection('broadcasts')
+            .where('category', whereIn: ['emergency', 'maintenance'])
+            .orderBy('scheduledAt', descending: true)
+            .limit(1)
+            .get();
+
+        if (broadcastSnap.docs.isNotEmpty) {
+          final bData = broadcastSnap.docs.first.data();
+          final sentAt = (bData['scheduledAt'] as Timestamp?)?.toDate();
+          if (sentAt != null &&
+              DateTime.now().difference(sentAt).inHours < 24) {
+            final isEmergency = bData['category'] == 'emergency';
+            _telemetryData?['maintenance'] = {
+              'hasActiveMaintenance': true,
+              'title': bData['title'] ??
+                  (isEmergency
+                      ? 'Pemberitahuan Insiden Jaringan'
+                      : 'Pemeliharaan Jaringan'),
+              'description': bData['message'] ??
+                  'Sedang berlangsung penanganan teknis di area terkait.',
+              'affectedArea': bData['targetZone'] ?? 'Wilayah Layanan',
+              'impact': isEmergency
+                  ? 'Potensi penurunan kecepatan / RTO sementara'
+                  : 'Optimasi terjadwal',
+            };
+          }
+        }
+      } catch (_) {}
 
       if (mounted) {
         setState(() => _isLoading = false);
@@ -141,12 +178,18 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final userName = _userData?['name']?.toString() ?? 'Pelanggan';
     final customerId = _customerData?['customerId'] ?? 'ADN-FIBER';
-    final textPrimary = isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A);
-    final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final textPrimary = isDark
+        ? const Color(0xFFF8FAFC)
+        : const Color(0xFF0F172A);
+    final textSecondary = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     // Dynamic Telemetry Data Extractors
     final connectionStatus =
-        (_telemetryData?['connectionStatus'] ?? 'CONNECTED').toString().toUpperCase();
+        (_telemetryData?['connectionStatus'] ?? 'CONNECTED')
+            .toString()
+            .toUpperCase();
     final isConnected = connectionStatus == 'CONNECTED';
     final opticalRxStr = _telemetryData?['optical']?['rxPower'] != null
         ? '${(_telemetryData!['optical']['rxPower'] as num).toStringAsFixed(1)} dBm'
@@ -155,7 +198,9 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
     final popName = _telemetryData?['popName']?.toString() ?? 'BTM-CORE-01';
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF030712) : const Color(0xFFF1F5F9),
+      backgroundColor: isDark
+          ? const Color(0xFF030712)
+          : const Color(0xFFF1F5F9),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadCustomerData,
@@ -168,7 +213,10 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
               children: [
                 // Cyber Command HUD Header
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
                     borderRadius: BorderRadius.circular(16),
@@ -203,14 +251,13 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
-                              ),
+                              border: Border.all(color: Colors.white, width: 2),
                             ),
                             child: Center(
                               child: Text(
-                                userName.isNotEmpty ? userName[0].toUpperCase() : 'A',
+                                userName.isNotEmpty
+                                    ? userName[0].toUpperCase()
+                                    : 'A',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
@@ -231,15 +278,18 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                                     ? const Color(0xFF00FF9D)
                                     : const Color(0xFFFFB800),
                                 border: Border.all(
-                                  color: isDark ? const Color(0xFF0A0E1A) : Colors.white,
+                                  color: isDark
+                                      ? const Color(0xFF0A0E1A)
+                                      : Colors.white,
                                   width: 2,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: (isConnected
-                                            ? const Color(0xFF00FF9D)
-                                            : const Color(0xFFFFB800))
-                                        .withValues(alpha: 0.8),
+                                    color:
+                                        (isConnected
+                                                ? const Color(0xFF00FF9D)
+                                                : const Color(0xFFFFB800))
+                                            .withValues(alpha: 0.8),
                                     blurRadius: 6,
                                   ),
                                 ],
@@ -272,12 +322,16 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                                 ),
                                 const SizedBox(width: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                    vertical: 1.5,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: (isConnected
-                                            ? const Color(0xFF00FF9D)
-                                            : const Color(0xFFFFB800))
-                                        .withValues(alpha: 0.15),
+                                    color:
+                                        (isConnected
+                                                ? const Color(0xFF00FF9D)
+                                                : const Color(0xFFFFB800))
+                                            .withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(4),
                                     border: Border.all(
                                       color: isConnected
@@ -323,14 +377,18 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                           Stack(
                             children: [
                               IconButton(
-                                icon: const Icon(LucideIcons.messageSquare, size: 20),
+                                icon: const Icon(
+                                  LucideIcons.messageSquare,
+                                  size: 20,
+                                ),
                                 color: textPrimary,
                                 tooltip: 'Live Chat Siaga 24/7',
                                 onPressed: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const LiveChatListPage(),
+                                      builder: (context) =>
+                                          const LiveChatListPage(),
                                     ),
                                   );
                                 },
@@ -346,7 +404,9 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                                     color: const Color(0xFF00FF9D),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF00FF9D).withValues(alpha: 0.8),
+                                        color: const Color(
+                                          0xFF00FF9D,
+                                        ).withValues(alpha: 0.8),
                                         blurRadius: 4,
                                       ),
                                     ],
@@ -365,7 +425,8 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const NotificationsPage(),
+                                      builder: (context) =>
+                                          const NotificationsPage(),
                                     ),
                                   );
                                 },
@@ -381,7 +442,9 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                                     color: const Color(0xFF00F0FF),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: const Color(0xFF00F0FF).withValues(alpha: 0.8),
+                                        color: const Color(
+                                          0xFF00F0FF,
+                                        ).withValues(alpha: 0.8),
                                         blurRadius: 4,
                                       ),
                                     ],
@@ -407,9 +470,14 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                     },
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF05070D) : const Color(0xFFF1F5F9),
+                        color: isDark
+                            ? const Color(0xFF05070D)
+                            : const Color(0xFFF1F5F9),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: isDark
@@ -430,10 +498,11 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                                   : const Color(0xFFFFB800),
                               boxShadow: [
                                 BoxShadow(
-                                  color: (isConnected
-                                          ? const Color(0xFF00F0FF)
-                                          : const Color(0xFFFFB800))
-                                      .withValues(alpha: 0.8),
+                                  color:
+                                      (isConnected
+                                              ? const Color(0xFF00F0FF)
+                                              : const Color(0xFFFFB800))
+                                          .withValues(alpha: 0.8),
                                   blurRadius: 5,
                                 ),
                               ],
@@ -445,7 +514,9 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                             style: GoogleFonts.jetBrainsMono(
                               fontSize: 10,
                               fontWeight: FontWeight.w900,
-                              color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                              color: isDark
+                                  ? const Color(0xFF00F0FF)
+                                  : const Color(0xFF0284C7),
                               letterSpacing: 0.6,
                             ),
                           ),
@@ -466,7 +537,9 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                             style: GoogleFonts.jetBrainsMono(
                               fontSize: 9,
                               fontWeight: FontWeight.w800,
-                              color: isDark ? const Color(0xFF00F0FF) : const Color(0xFF0284C7),
+                              color: isDark
+                                  ? const Color(0xFF00F0FF)
+                                  : const Color(0xFF0284C7),
                             ),
                           ),
                         ],
@@ -474,6 +547,11 @@ class _CustomerBerandaTabState extends State<CustomerBerandaTab> {
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 12),
+
+                // Kominfo TrustPositif & Anti-DDoS Clean Pipe Shield Card
+                const TrustpositifShieldCard(),
 
                 const SizedBox(height: 16),
 

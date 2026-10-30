@@ -49,39 +49,40 @@ class _PackageUpgradePageState extends State<PackageUpgradePage> {
       if (userData == null) return;
 
       // Get customer data
-      final customer = await FirebaseService.instance.getCustomerByUserId(
+      var customer = await FirebaseService.instance.getCustomerByUserId(
         userData['id'].toString(),
       );
+      customer ??= FirebaseService.getDefaultCustomerData(
+        userId: userData['id'].toString(),
+        email: userData['email']?.toString() ?? 'budi@audira.my.id',
+        name: userData['name']?.toString() ?? 'Budi Pelanggan',
+      );
 
-      if (customer != null) {
-        final parsedSpeed = _parseSpeed(customer['speed']);
-        final fee = (customer['monthlyFee'] is num)
-            ? (customer['monthlyFee'] as num).toInt()
-            : int.tryParse(customer['monthlyFee']?.toString() ?? '0') ?? 0;
+      final safeCustomer = customer;
+      final cId = safeCustomer['id']?.toString() ?? safeCustomer['customerId']?.toString() ?? 'usr-customer-01';
+      final parsedSpeed = _parseSpeed(safeCustomer['speed']);
+      final fee = (safeCustomer['monthlyFee'] is num)
+          ? (safeCustomer['monthlyFee'] as num).toInt()
+          : int.tryParse(safeCustomer['monthlyFee']?.toString() ?? '0') ?? 0;
 
-        setState(() {
-          _customerData = customer;
-          _currentPackage = {
-            'name': customer['packageName'] ?? '',
-            'speed': parsedSpeed,
-            'speedRaw': customer['speed']?.toString() ?? '$parsedSpeed Mbps',
-            'price': fee,
-          };
-        });
+      setState(() {
+        _customerData = safeCustomer;
+        _currentPackage = {
+          'name': safeCustomer['packageName'] ?? 'AUDIRA Fiber Ultra 50 Mbps',
+          'speed': parsedSpeed > 0 ? parsedSpeed : 50,
+          'speedRaw': safeCustomer['speed']?.toString() ?? '$parsedSpeed Mbps',
+          'price': fee > 0 ? fee : 250000,
+        };
+      });
 
-        // Get request history
-        final requests = await _upgradeService.getCustomerRequests(
-          customer['id'],
-        );
-        final hasPending = await _upgradeService.hasPendingRequest(
-          customer['id'],
-        );
+      // Get request history
+      final requests = await _upgradeService.getCustomerRequests(cId);
+      final hasPending = await _upgradeService.hasPendingRequest(cId);
 
         setState(() {
           _requestHistory = requests;
           _hasPendingRequest = hasPending;
         });
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(

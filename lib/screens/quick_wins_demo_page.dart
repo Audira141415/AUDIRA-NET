@@ -298,7 +298,15 @@ class _QuickWinsDemoPageState extends State<QuickWinsDemoPage> {
             QuickActionChip(
               label: 'Details',
               icon: Icons.info_outline,
-              onTap: () {},
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Detail gestur: Geser ke kiri untuk edit, geser ke kanan untuk hapus.',
+                    ),
+                  ),
+                );
+              },
             ),
           ],
           leading: const Icon(Icons.info_outline),
@@ -345,6 +353,8 @@ class _QuickWinsDemoPageState extends State<QuickWinsDemoPage> {
             icon: Icons.delete,
             color: Colors.red,
             onTap: () async {
+              final nav = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
               final confirm = await showBatchConfirmDialog(
                 context: context,
                 title: 'Delete Items',
@@ -357,12 +367,10 @@ class _QuickWinsDemoPageState extends State<QuickWinsDemoPage> {
                   demoItems.removeWhere((item) => selectedItems.contains(item));
                   selectedItems.clear();
                 });
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Items deleted')),
-                  );
-                }
+                nav.pop();
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Items deleted')),
+                );
               }
             },
           ),

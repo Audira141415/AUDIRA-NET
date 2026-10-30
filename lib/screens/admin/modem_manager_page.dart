@@ -195,7 +195,7 @@ class _ModemManagerPageState extends State<ModemManagerPage> {
                       Text(
                         '${_devices.where((d) => d['status'] == 'online').length} online • ${_devices.where((d) => d['status'] == 'warning').length} warning • ${_devices.where((d) => d['status'] == 'offline').length} offline',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 14,
                         ),
                       ),
@@ -291,7 +291,7 @@ class _ModemManagerPageState extends State<ModemManagerPage> {
       margin: const EdgeInsets.only(bottom: 12),
       child: ExpansionTile(
         leading: CircleAvatar(
-          backgroundColor: statusColor.withOpacity(0.2),
+          backgroundColor: statusColor.withValues(alpha: 0.2),
           child: Icon(Icons.router, color: statusColor),
         ),
         title: Text(
@@ -317,7 +317,7 @@ class _ModemManagerPageState extends State<ModemManagerPage> {
                 status.toUpperCase(),
                 style: TextStyle(fontSize: 9, color: statusColor),
               ),
-              backgroundColor: statusColor.withOpacity(0.1),
+              backgroundColor: statusColor.withValues(alpha: 0.1),
               padding: EdgeInsets.zero,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),

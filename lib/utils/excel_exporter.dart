@@ -135,7 +135,7 @@ class ExcelExporter {
 
       return await _saveAndShare(excel, 'Tickets_Report');
     } catch (e) {
-      print('Error exporting tickets: $e');
+      developer.log('Error exporting tickets: $e');
       return null;
     }
   }
@@ -197,7 +197,94 @@ class ExcelExporter {
 
       return await _saveAndShare(excel, 'Payments_Report');
     } catch (e) {
-      print('Error exporting payments: $e');
+      developer.log('Error exporting payments: $e', name: 'ExcelExporter');
+      return null;
+    }
+  }
+
+  /// Export payroll records to Excel
+  static Future<String?> exportPayroll(
+    List<Map<String, dynamic>> records,
+    String periodTitle,
+  ) async {
+    try {
+      final excel = Excel.createExcel();
+      final sheet = excel['Payroll'];
+
+      // Header row
+      sheet.appendRow([
+        TextCellValue('ID Karyawan'),
+        TextCellValue('Nama Karyawan'),
+        TextCellValue('Periode'),
+        TextCellValue('Gaji Pokok'),
+        TextCellValue('Total Tunjangan'),
+        TextCellValue('Total Potongan'),
+        TextCellValue('Gaji Bersih (Net)'),
+        TextCellValue('Status'),
+      ]);
+
+      // Style header
+      for (int i = 0; i < 8; i++) {
+        final cell = sheet.cell(
+          CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0),
+        );
+        cell.cellStyle = CellStyle(
+          bold: true,
+          backgroundColorHex: ExcelColor.blue,
+          fontColorHex: ExcelColor.white,
+        );
+      }
+
+      double totalGross = 0;
+      double totalAllow = 0;
+      double totalDeduct = 0;
+      double totalNet = 0;
+
+      // Data rows
+      for (var record in records) {
+        final base = (record['baseSalary'] as num?)?.toDouble() ?? 0;
+        final allow = (record['totalAllowances'] as num?)?.toDouble() ?? 0;
+        final deduct = (record['totalDeductions'] as num?)?.toDouble() ?? 0;
+        final net = (record['netSalary'] as num?)?.toDouble() ?? 0;
+
+        totalGross += base;
+        totalAllow += allow;
+        totalDeduct += deduct;
+        totalNet += net;
+
+        sheet.appendRow([
+          TextCellValue(record['employeeId']?.toString() ?? '-'),
+          TextCellValue(record['employeeName']?.toString() ?? '-'),
+          TextCellValue(record['month']?.toString() ?? periodTitle),
+          TextCellValue('Rp ${_formatCurrency(base)}'),
+          TextCellValue('Rp ${_formatCurrency(allow)}'),
+          TextCellValue('Rp ${_formatCurrency(deduct)}'),
+          TextCellValue('Rp ${_formatCurrency(net)}'),
+          TextCellValue((record['status']?.toString() ?? 'pending').toUpperCase()),
+        ]);
+      }
+
+      // Summary row
+      sheet.appendRow([
+        TextCellValue('TOTAL'),
+        TextCellValue('${records.length} Karyawan'),
+        TextCellValue(''),
+        TextCellValue('Rp ${_formatCurrency(totalGross)}'),
+        TextCellValue('Rp ${_formatCurrency(totalAllow)}'),
+        TextCellValue('Rp ${_formatCurrency(totalDeduct)}'),
+        TextCellValue('Rp ${_formatCurrency(totalNet)}'),
+        TextCellValue(''),
+      ]);
+
+      // Set column width
+      for (int i = 0; i < 8; i++) {
+        sheet.setColumnWidth(i, 20);
+      }
+
+      final safePeriod = periodTitle.replaceAll(' ', '_');
+      return await _saveAndShare(excel, 'Payroll_$safePeriod');
+    } catch (e) {
+      developer.log('Error exporting payroll: $e', name: 'ExcelExporter');
       return null;
     }
   }
@@ -225,7 +312,7 @@ class ExcelExporter {
       }
       return null;
     } catch (e) {
-      print('Error saving Excel: $e');
+      developer.log('Error saving Excel: $e');
       return null;
     }
   }
